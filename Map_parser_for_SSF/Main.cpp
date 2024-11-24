@@ -1,195 +1,176 @@
-﻿#include <iostream> 
-#include <fstream>
-#include <vector> 
-#include <sstream>
-#include <Windows.h>
+﻿
+#include "stdafx.h"
 
-#include "Main.h"
+#include "Converter.h"
+#include "Parser.h"
 #include "Displayinfo.h"
 
 #include <gzip/decompress.hpp>
 #pragma comment(lib, "zlibstatic.lib")
 
-//------------------------------------------------------------------------------
-void openFileMapForPasser()
+enum class Action
 {
-	std::string rawData;
-	//std::cout << "Specify the file name or path to it: ";
-	std::cout << "Введите название файла или путь к нему (не забываем про расширение *.ssm *.smm *.ssc): ";
-	std::getline(std::cin >> std::ws, rawData);
-	std::ifstream inputFile(rawData, std::ios::ate | std::ios::in | std::ios::binary);
+	Parse,
+	Convert
+};
+
+void openFileAndProcess(const Action action, const std::string_view& file_arg = "")
+{
+	std::string filename;
+
+	if (file_arg == "")
+	{
+		std::println("\nВведите название файла или путь к нему (не забываем про расширение *.ssm *.smm *.ssc): ");
+		std::getline(std::cin >> std::ws, filename);
+	}
+	else
+	{
+		filename = file_arg;
+	}
+
+	std::ifstream inputFile(filename, std::ios::ate | std::ios::in | std::ios::binary);
 	if (!inputFile)
 	{
-		eroropenfile();
+		errorOpenFile();
 		return;
 	}
-	std::vector<char> mapData(inputFile.tellg());
-
-	inputFile.seekg(std::ios::beg);
-	inputFile.read(mapData.data(), mapData.size());
-	inputFile.close();
-
-	std::string zipData = gzip::decompress(mapData.data(), mapData.size());
-	std::stringstream zipData2;
-	zipData2.write(zipData.data(), zipData.size());
-
-
-	char mapType[5];
-	zipData2.read(mapType, sizeof(mapType));
-	mapType[4] = '\0';
-
-	if (memcmp(mapType, "SSSM", 4) == 0)
-	{
-		//std::cout << "\nThis is a single player map" << "\n" << std::endl;
-		std::cout << "\nЭто одиночная карта" << "\n" << std::endl;
-
-		parserMapFileSSM(zipData2);
-		return;
-	}
-	else
-	if (memcmp(mapType, "SSMM", 4) == 0)
-	{
-		//std::cout << "\nThis is multiplayer map" << "\n" << std::endl;
-		std::cout << "\nЭто карта мультиплеера" << "\n" << std::endl;
-		parserMapFileSMM(zipData2);
-		return;
-	}
-	else
-	if (memcmp(mapType, "CAMP", 4) == 0)
-	{
-		//std::cout << "\nThis is part of the company's map, responsible for the landscape and objects" << "\n" << std::endl;
-		std::cout << "\nЭто часть карты компании, данный файл отвечает за локацию" << "\n" << std::endl;
-		parserMapFileSSC_map(zipData2);
-		return;
-	}
-	else
-	if (memcmp(mapType, "CAMS", 4) == 0)
-	{
-		//std::cout << "\nThis is part of the company's map, responsible for the mission" << "\n" << std::endl;
-		std::cout << "\nЭто часть карты компании, данный файл отвечает за миссию" << "\n" << std::endl;
-		parserMapFileSCC_mission(zipData2);
-		return;
-	}
-	else
-	{
-		//std::cout << "This is not map file" << "\n" << std::endl;
-		std::cout << "Выбранный файл не является картой" << "\n" << std::endl;
-		return;
-	}
-}
-//------------------------------------------------------------------------------
-void openFileMapForConvert()
-{
-	std::string rawData;
-	//std::cout << "Specify the file name or path to it: ";
-	std::cout << "Введите название файла или путь к нему (не забываем про расширение *.ssm *.smm *.ssc): ";
-	//std::cin >> rawData;
-	std::getline(std::cin >> std::ws, rawData);
-	std::ifstream inputFile(rawData, std::ios::ate | std::ios::in | std::ios::binary);
-	if (!inputFile)
-	{
-		eroropenfile();
-		return;
-	}
-	std::vector<char> mapData(inputFile.tellg());
-
-	inputFile.seekg(std::ios::beg);
-	inputFile.read(mapData.data(), mapData.size());
-	inputFile.close();
-
-	std::string zipData = gzip::decompress(mapData.data(), mapData.size());
-	std::stringstream zipData2;
-	zipData2.write(zipData.data(), zipData.size());
 	
+	std::vector<char> zipData(inputFile.tellg());
 
-	char mapType[5];
-	zipData2.read(mapType, sizeof(mapType));
-	mapType[4] = '\0';
+	inputFile.seekg(std::ios::beg);
+	inputFile.read(zipData.data(), zipData.size());
+	inputFile.close();
 
-	const std::string convertMapName = rawData.substr(0, rawData.find_last_of(".ssm") - 3);
+	const std::string rawData = gzip::decompress(zipData.data(), zipData.size());
+	const std::string_view convertMapName{ std::string_view(filename).substr(0, filename.find_last_of(".")) };
 
-	if (memcmp(mapType, "SSSM", 4) == 0)
-	{
-		//std::cout << "\nThis is a single player map" << "\n" << std::endl;
-		std::cout << "\nЭто одиночная карта" << "\n" << std::endl;
+	const auto start = std::chrono::high_resolution_clock::now();
 
-		convertMapFileSSM(zipData2, convertMapName);
-		return;
-	}
-	else
-	if (memcmp(mapType, "SSMM", 4) == 0)
+	const uint32_t mapType = *(uint32_t*)rawData.data();
+	switch (mapType)
 	{
-		//std::cout << "\nThis is multiplayer map" << "\n" << std::endl;
-		std::cout << "\nЭто карта мультиплеера" << "\n" << std::endl;
-		convertMapFileSMM(zipData2, convertMapName);
-		return;
-	}
-	else
-	if (memcmp(mapType, "CAMP", 4) == 0)
+	case (0x4d535353):	// SSSM
 	{
-		//std::cout << "\nThis is part of the company's map, responsible for the landscape and objects" << "\n" << std::endl;
-		std::cout << "\nЭто часть карты компании, данный файл отвечает за локацию" << "\n" << std::endl;
-		convertMapFileSSC_map(zipData2, convertMapName);
-		return;
+		std::println("\nЭто одиночная карта\n");
+		if (action == Action::Parse)
+			parserMapFileSSM(rawData);
+		else
+			convertMapFileSSM(rawData, convertMapName);
+		break;
 	}
-	else
-	if (memcmp(mapType, "CAMS", 4) == 0)
+	case (0x4d4d5353):	// SSMM
 	{
-		//std::cout << "\nThis is part of the company's map, responsible for the mission" << "\n" << std::endl;
-		std::cout << "\nЭто часть карты компании, данный файл отвечает за миссию" << "\n" << std::endl;
-		convertMapFileSCC_mission(zipData2);
-		return;
+		std::println("\nЭто карта мультиплеера\n");
+		if (action == Action::Parse)
+			parserMapFileSMM(rawData);
+		else
+			convertMapFileSMM(rawData, convertMapName);
+		break;
 	}
-	else
+	case (0x504d4143):	// CAMP
 	{
-		//std::cout << "This is not map file" << "\n" << std::endl;
-		std::cout << "Этот файл не является картой" << "\n" << std::endl;
-		return;
+		std::println("\nЭто часть карты компании, данный файл отвечает за локацию\n");
+		if (action == Action::Parse)
+			parserMapFileSSC_map(rawData);
+		else
+			convertMapFileSSC_map(rawData, convertMapName);
+		break;
 	}
+	case (0x534d4143):	// CAMS
+	{
+		std::println("\nЭто часть карты компании, данный файл отвечает за миссию\n");
+		if (action == Action::Parse)
+			parserMapFileSCC_mission(rawData);
+		else
+			convertMapFileSCC_mission(rawData);
+		break;
+	}
+	default:
+	{
+		std::println("\033[31m[Error]\033[0m Выбранный файл не является картой\n");
+	}
+	};
+
+	const auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	std::println("Map processed in {}ms\n", duration.count());
 }
-//------------------------------------------------------------------------------
-void command()
+
+void manualInput()
 {
-	std::string commandData;
-	std::cout << "SSF Map parser for SS1 & SSF, v.0.6 by NASHRIPPER\n";
-	//std::cout << "Program command:\n"
-	//	<< "C - command for converter map;\n"
-	//	<< "P - command for paser map.\n"
-	//	<< "Enter the command: ";
-	std::cout << "Команды для управления программой:\n"
-		<< "C - команда для конвертирования карты;\n"
-		<< "P - команда для разборки карты на составляющие (для разработчика).\n"
-		<< "Команды вводятся на английском языке!\n"
-		<< "Введите команду: ";
-	std::cin >> commandData;
-	if (commandData == "p" || commandData == "P")
+	char commandData;
+
+	std::println("\nКоманды для управления программой:\n"
+		"(C)onvert - команда для конвертирования карты;\n"
+		"(P)arse - команда для разборки карты на составляющие (для разработчика).\n"
+		"Введите команду (C/P): ");
+
+	commandData = getchar();
+	switch (commandData)
 	{
-		openFileMapForPasser();
-		return;
-	}
-	else
-	if (commandData == "c" || commandData == "C")
-	{
-		//cout << "This is map converter" << "\n" << endl;
-		openFileMapForConvert();
-		return;
-	}
-	else
-	{
-		//std::cout << "The wrong command" << "\n" << std::endl;
-		std::cout << "Неверная команда" << "\n" << std::endl;
-		return;
-	}
+	case 'p':
+	case 'P':
+		openFileAndProcess(Action::Parse);
+		break;
+	case 'c':
+	case 'C':
+		openFileAndProcess(Action::Convert);
+		break;
+	default:
+		std::println("\033[31m[Error]\033[0m Неизвестная команда. Завершение приложения.\n");
+		break;
+	};
+
+	system("pause");
 }
-//___________________________________________________________________________________________________
-uint32_t main()
+
+void printUsage(const std::string_view& appName)
 {
-	//std::system("chcp 1251");
+	std::println("Usage: {} -<chp> <filename>", appName);
+}
+
+int main(int argc, char** argv)
+{
+	// This is for color output
+	const HANDLE hs = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD consoleMode;
+	if (GetConsoleMode(hs, &consoleMode))
+	{
+		if ((consoleMode & (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) != (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+		{
+			if (SetConsoleMode(hs, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NULL)
+			{
+				std::println("[Error] Couldn't set color output mode. Output will be with \"\033[32m\" symbols. Last error: {}", GetLastError());
+			}
+		}
+	}
+
+	std::println("SSF Map parser for SS1 & SSF, \033[32mv.0.6.1\033[0m by NASHRIPPER");
+
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	setlocale(LC_ALL, "rus");
-	command();
-	std::cin.ignore(10, '\n');
-	std::cin.get();
+
+	if (argc == 3)
+	{
+		using namespace std::literals;
+		if (argv[1] == "-c"sv)
+			openFileAndProcess(Action::Convert, argv[2]);
+		else if (argv[1] == "-p"sv)
+			openFileAndProcess(Action::Parse, argv[2]);
+		else
+		{
+			printUsage(argv[0]);
+			return 0;
+		}
+	}
+	if (argc == 2)\
+	{
+		printUsage(argv[0]);
+		return 0;
+	}
+	else
+		manualInput();
+
 	return 0;
 }

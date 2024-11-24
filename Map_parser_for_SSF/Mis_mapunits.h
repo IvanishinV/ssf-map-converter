@@ -1,3 +1,3 @@
+#pragma once
 
-
-void covertMisUnits(std::stringstream& mis_unitnames, std::stringstream& mis_mapunits, std::stringstream& mis_support);
+void covertMisUnits(const std::vector<uint8_t>& mis_unitnames, const std::vector<uint8_t>& mis_mapunits, const std::vector<uint8_t>& mis_support);

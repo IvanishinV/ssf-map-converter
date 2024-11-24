@@ -1,7 +1,5 @@
-#include <iostream>
-#include <sstream>
-#include <fstream> 
-#include <array>
+
+#include "stdafx.h"
 
 #include "Mis_groups.h"
 #include "General.h"
@@ -132,15 +130,15 @@ void aiFlagsConvert(std::ofstream& outputFileMisGroups, uint8_t aitype1, uint8_t
 	return;
 }
 
-void convertMisGroups(std::stringstream& mis_groups)
+void convertMisGroups(const std::vector<uint8_t>& mis_groups)
 {
 	std::ofstream outputFileMisGroups("map.000/mis.000/groups", std::ios::binary);
 	if (!outputFileMisGroups)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
-	std::array <std::string, 11> AI_type_array =
+	std::array <std::string_view, 11> AI_type_array =
 	{
 		"\"ai_none\"",
 		"\"ai_recon\"",
@@ -155,11 +153,11 @@ void convertMisGroups(std::stringstream& mis_groups)
 		"\"ai_katya_move\""
 	};
 	//------------------------------------------------------------------------------
-	uint32_t accumulator = 0;
-	//------------------------------------------------------------------------------
-	char buffer[27];
-	while (mis_groups.read(buffer, sizeof(buffer)))
+	const size_t maxTries = mis_groups.size() / 27;
+	uint32_t accumulator{ 0 };
+	while (accumulator < maxTries)
 	{
+		const uint8_t* buffer = mis_groups.data();
 		uint8_t aitype1 = *(uint8_t*)(buffer + 0);
 		uint8_t aitype2 = *(uint8_t*)(buffer + 1);
 		uint8_t aitype3 = *(uint8_t*)(buffer + 2);
@@ -287,29 +285,8 @@ void convertMisGroups(std::stringstream& mis_groups)
 			outputFileMisGroups << " flag=" << (uint16_t)flag << " zone=" << (uint16_t)zone << " hp=" << (uint16_t)hp << " ammo=" << (uint16_t)ammo << " expa=" << (uint16_t)expa << '\n';
 		}
 		//------------------------------------------------------------------------------
-		accumulator++;
+		++accumulator;
 	}
 	outputFileMisGroups.close();
 	return;
 }
-
-
-
-
-//int main()
-//{
-//	int mask;
-//	std::cin >> mask;
-//
-//	std::string aif_array[] = { "aif_rndmove", "aif_zonehaveown", "aif_zonenoenemy", };
-//	for (int i = 0; i < 3; ++i)
-//	{
-//		if (mask & (i << i))
-//
-//		{
-//			std::cout << aif_array[i] << " ";
-//		}
-//
-//
-//	}
-//}

@@ -1,3 +1,3 @@
 #pragma once
 
-void covertMapMini(std::stringstream& map_mini);
+void covertMapMini(const std::vector<uint8_t>& map_mini);

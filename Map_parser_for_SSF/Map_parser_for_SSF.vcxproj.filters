@@ -12,10 +12,6 @@
     <Filter Include="Parser">
       <UniqueIdentifier>{e839dee5-e260-45bd-9a00-6d49730fe594}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Main">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="MAP">
       <UniqueIdentifier>{22f1a1b6-44c2-4d07-8ba3-75a2c8bf4419}</UniqueIdentifier>
     </Filter>
@@ -88,11 +84,11 @@
     <Filter Include="MAP\Map_landname">
       <UniqueIdentifier>{c6fd576a-c6cd-4c6f-a69c-75997a358c59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{b2139a79-242e-4e5c-a813-7489e6e3f153}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
     <ClCompile Include="Parser.cpp">
       <Filter>Parser</Filter>
     </ClCompile>
@@ -174,11 +170,17 @@
     <ClCompile Include="Displayinfo.cpp">
       <Filter>Displayinfo</Filter>
     </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Main.h">
-      <Filter>Main</Filter>
-    </ClInclude>
     <ClInclude Include="Parser.h">
       <Filter>Parser</Filter>
     </ClInclude>
@@ -262,6 +264,12 @@
     </ClInclude>
     <ClInclude Include="Displayinfo.h">
       <Filter>Displayinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

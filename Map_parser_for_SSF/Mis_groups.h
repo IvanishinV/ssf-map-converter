@@ -1,3 +1,3 @@
 #pragma once
 
-void convertMisGroups(std::stringstream& mis_groups);
+void convertMisGroups(const std::vector<uint8_t>& mis_groups);

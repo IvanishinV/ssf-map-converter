@@ -1,48 +1,28 @@
-#include <iostream>
-#include <sstream>
-#include <fstream> 
-#include <windows.h>
+
+#include "stdafx.h"
 
 #include "Mis_mines.h"
 #include "General.h"
 #include "Displayinfo.h"
 
-void convertMisMines(std::stringstream& map_mines, uint32_t mapSizeU)
+void convertMisMines(const std::vector<uint8_t>& map_mines, const uint32_t mapSizeU)
 {
 	std::ofstream outputFileMisMines("map.000/mis.000/mines", std::ios::binary);
 	if (!outputFileMisMines)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
-	//------------------------------------------------------------------------------
-	std::stringstream MisMines;
-	//------------------------------------------------------------------------------
-	char* buffer = new char[mapSizeU];
-	while (map_mines.read(buffer, mapSizeU))
+
+	std::vector<uint8_t> mapMines(LOCATIONSSIZE, 0);
+
+	const size_t maxTries = map_mines.size() / mapSizeU;
+	size_t i{ 0 };
+	while (i < maxTries)
 	{
-		for (uint32_t i = 0; i < mapSizeU; i++)
-		{
-			uint8_t mines = *(uint8_t*)(buffer + i);
-			MisMines << mines;
-		}
-		uint32_t dummyarray1 = 512 - mapSizeU;
-		for (uint32_t n = 0; n < dummyarray1; n++)
-		{
-			MisMines << GLOBALNULL;
-		}
+		std::copy(map_mines.cbegin() + i * mapSizeU, map_mines.cbegin() + i * mapSizeU + mapSizeU, mapMines.begin() + 512 * i);
 	}
-	delete[] buffer;
-	//------------------------------------------------------------------------------
-	uint32_t dummyarray2 = LOCATIONSSIZE - 512 * mapSizeU;
-	for (uint32_t n = 0; n < dummyarray2; n++)
-	{
-		MisMines << GLOBALNULL;
-	}
-	//------------------------------------------------------------------------------
-	outputFileMisMines << MisMines.str();
-	MisMines.str("");
+
+	outputFileMisMines.write((char*)mapMines.data(), mapMines.size());
 	outputFileMisMines.close();
-	//------------------------------------------------------------------------------
-	return;
 }

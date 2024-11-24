@@ -21,7 +21,7 @@
 #include "Mis_groups.h"
 #include "Mis_players.h"
 
-uint32_t convertMapFileSMM(std::stringstream& inputFile,const std::string& convertMapName);
-uint32_t convertMapFileSSM(std::stringstream& inputFile, const std::string& convertMapName);
-uint32_t convertMapFileSSC_map(std::stringstream& inputFile, const std::string& convertMapName);
-uint32_t convertMapFileSCC_mission(std::stringstream& inputFile);
+uint32_t convertMapFileSMM(const std::string_view& inputFile,const std::string_view& convertMapName);
+uint32_t convertMapFileSSM(const std::string_view& inputFile, const std::string_view& convertMapName);
+uint32_t convertMapFileSSC_map(const std::string_view& inputFile, const std::string_view& convertMapName);
+uint32_t convertMapFileSCC_mission(const std::string_view& inputFile);

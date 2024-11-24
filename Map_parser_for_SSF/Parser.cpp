@@ -1,16 +1,14 @@
-#include <iostream> 
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <filesystem>
 
+#include "stdafx.h"
+
+#include "Helper.h"
 #include "Parser.h"
 #include "General.h"
 #include "Displayinfo.h"
 
-uint32_t minimapsize(uint32_t  mapSizeU, uint32_t mapSizeV)
+uint32_t minimapsize(uint32_t mapSizeU, uint32_t mapSizeV)
 {
-	if (mapSizeU <= 128 && mapSizeV <= 128)
+	if (mapSizeU <= 128 && mapSizeV <= 128 && mapSizeU == mapSizeV)
 	{
 		uint32_t MiniSize = mapSizeU * mapSizeV * 2;
 		return MiniSize;
@@ -22,26 +20,6 @@ uint32_t minimapsize(uint32_t  mapSizeU, uint32_t mapSizeV)
 	}
 }
 //___________________________________________________________________________________________________
-uint32_t position(std::stringstream& inputFile, std::ofstream& outputFile, const uint32_t startPosition, const uint32_t size)
-{
-	inputFile.seekg(startPosition);
-	char* buffer = new char[size];
-	inputFile.read(buffer, size);
-	outputFile.write(buffer, size);
-	delete[] buffer;
-	outputFile.close();
-	uint32_t position = startPosition + size;
-	return position;
-}
-//___________________________________________________________________________________________________
-uint32_t readFileUint32(std::stringstream& inputFile, const uint32_t fileOffset)
-{
-	uint32_t result;
-	inputFile.seekg(fileOffset, std::ios::beg);
-	inputFile.read(reinterpret_cast<char*>(&result), sizeof(result));
-	return result;
-}
-//___________________________________________________________________________________________________
 uint32_t tileArray(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_t number)
 {
 	uint32_t result;
@@ -49,7 +27,7 @@ uint32_t tileArray(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint3
 	return result;
 }
 //___________________________________________________________________________________________________
-uint32_t misScripts(std::stringstream& inputFile, uint32_t scripts_number, const uint32_t scripts_position)
+uint32_t misScripts(const std::string_view& inputFile, uint32_t scripts_number, const uint32_t scripts_position)
 {
 	if (scripts_number <= 0)
 	{
@@ -68,7 +46,7 @@ uint32_t misScripts(std::stringstream& inputFile, uint32_t scripts_number, const
 	}
 }
 //___________________________________________________________________________________________________
-uint32_t parserMapFileSMM(std::stringstream& inputFile)
+uint32_t parserMapFileSMM(const std::string_view& inputFile)
 {
 	// ќтрываем новый текстовый документ дл€ записи
 	std::filesystem::create_directories("parser_map");
@@ -125,14 +103,12 @@ uint32_t parserMapFileSMM(std::stringstream& inputFile)
 	uint32_t startPositionMisMapUnits = position(inputFile, outputMisPhrases, startPositionMisPhrases, sizeMisPhrases + 4);
 	uint32_t sizeMisMapUnits = readFileUint32(inputFile, startPositionMisMapUnits);
 	uint32_t mapEndPosition = position(inputFile, outputMisMapUnits, startPositionMisMapUnits + 4, sizeMisMapUnits);
-	//------------------------------------------------------------------------------
-	inputFile.str("");
-	//------------------------------------------------------------------------------
+
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 //___________________________________________________________________________________________________
-uint32_t parserMapFileSSM(std::stringstream& inputFile)
+uint32_t parserMapFileSSM(const std::string_view& inputFile)
 {
 	std::filesystem::create_directories("parser_map");
 	std::ofstream outputMapInfo("parser_map/map_info", std::ios::binary);
@@ -192,13 +168,12 @@ uint32_t parserMapFileSSM(std::stringstream& inputFile)
 	uint32_t sizeMisPhrases = readFileUint32(inputFile, startPositionMisPhrases);
 	uint32_t startPositionMisObjects = position(inputFile, outputMisPhrases, startPositionMisPhrases, sizeMisPhrases + 4);
 	uint32_t mapEndPosition = position(inputFile, outputMisObjects, startPositionMisObjects, MISOBJECTS);
-	inputFile.str("");
-	//------------------------------------------------------------------------------
+
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 //___________________________________________________________________________________________________
-uint32_t parserMapFileSSC_map(std::stringstream& inputFile)
+uint32_t parserMapFileSSC_map(const std::string_view& inputFile)
 {
 	// ќтрываем новый текстовый документ дл€ записи
 	std::filesystem::create_directories("parser_map");
@@ -228,13 +203,12 @@ uint32_t parserMapFileSSC_map(std::stringstream& inputFile)
 	uint32_t startPositionObjects = position(inputFile, outputMiniMap2, startPositionMapMini2, rhombsSize / 4);
 	uint32_t mapSizeObjects = readFileUint32(inputFile, startPositionObjects);
 	uint32_t mapEndPosition = position(inputFile, outputMapObjects, startPositionObjects + 4, mapSizeObjects * 8);
-	inputFile.str("");
 	//------------------------------------------------------------------------------
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 //___________________________________________________________________________________________________
-uint32_t parserMapFileSCC_mission(std::stringstream& inputFile)
+uint32_t parserMapFileSCC_mission(const std::string_view& inputFile)
 {
 	// ќтрываем новый текстовый документ дл€ записи
 	std::filesystem::create_directories("parser_map");
@@ -276,7 +250,6 @@ uint32_t parserMapFileSCC_mission(std::stringstream& inputFile)
 	uint32_t sizeMisPhrases = readFileUint32(inputFile, startPositionMisPhrases);
 	uint32_t startPositionMisObjects = position(inputFile, outputMisPhrases, startPositionMisPhrases, sizeMisPhrases + 4);
 	uint32_t mapEndPosition = position(inputFile, outputMisObjects, startPositionMisObjects, MISOBJECTS);
-	inputFile.str("");
 	//------------------------------------------------------------------------------
 	displayinfo(mapSizeU, mapSizeV, 40, mapEndPosition);
 	return 0;

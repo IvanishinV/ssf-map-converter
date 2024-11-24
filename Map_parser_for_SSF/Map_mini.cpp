@@ -1,24 +1,11 @@
-#include <iostream>
-#include <sstream>
-#include <math.h>
-#include <fstream> 
-#include <string>
+
+#include "stdafx.h"
 
 #include "Map_mini.h"
 #include "General.h"
 #include "Displayinfo.h"
 
-#pragma pack(push, 1)
-struct BITMAPFILEHEADER
-{
-	uint16_t bfType;
-	uint32_t bfSize;
-	uint16_t bfReserved1;
-	uint16_t bfReserved2;
-	uint32_t bfOffBits;
-};
-#pragma pack (pop)
-struct BITMAPINFOHEADER
+struct BITMAPINFOHEADER_
 {
 	uint32_t biSize;
 	uint32_t biWidth;
@@ -32,7 +19,8 @@ struct BITMAPINFOHEADER
 	uint32_t biClrUsed;
 	uint32_t biClrImportant;
 };
-struct RGBQUAD
+
+struct RGBQUAD_
 {
 	uint32_t rgbBlue;
 	uint32_t rgbGreen;
@@ -40,26 +28,27 @@ struct RGBQUAD
 	//uint32_t rgbReserved;
 };
 
-void covertMapMini(std::stringstream& map_mini)
+void covertMapMini(const std::vector<uint8_t>& map_mini)
 {
 	std::ofstream outputFileMapMiniBMP("map_mini.bmp", std::ios::binary);
 	if (!outputFileMapMiniBMP)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
-	map_mini.seekg(GLOBALNULL, std::ios::end);
-	uint32_t size = map_mini.tellg();
+
+	const size_t size = map_mini.size();
+	BITMAPFILEHEADER part1{};
+	BITMAPINFOHEADER part2{};
+	RGBQUAD_ part3{};
 	//------------------------------------------------------------------------------
-	BITMAPFILEHEADER part1;
 	part1.bfType = 19778;
-	part1.bfSize = size + (sizeof(BITMAPFILEHEADER)) + (sizeof(BITMAPINFOHEADER)) + (sizeof(RGBQUAD));
+	part1.bfSize = static_cast<DWORD>(size) + (sizeof(part1)) + (sizeof(part2)) + (sizeof(part3));
 	part1.bfReserved1 = GLOBALNULL;
 	part1.bfReserved2 = GLOBALNULL;
-	part1.bfOffBits = (sizeof(BITMAPFILEHEADER)) + (sizeof(BITMAPINFOHEADER)) + (sizeof(RGBQUAD));
+	part1.bfOffBits = (sizeof(part1)) + (sizeof(part2)) + (sizeof(part3));
 	//------------------------------------------------------------------------------
-	BITMAPINFOHEADER part2;
-	part2.biSize = sizeof(BITMAPINFOHEADER);
+	part2.biSize = sizeof(part2);
 	part2.biWidth = sqrt(size / 2);
 	part2.biHeight = sqrt(size / 2);
 	part2.biPlanes = 1;
@@ -71,7 +60,6 @@ void covertMapMini(std::stringstream& map_mini)
 	part2.biClrUsed = GLOBALNULL;
 	part2.biClrImportant = GLOBALNULL;
 	//------------------------------------------------------------------------------
-	RGBQUAD part3;
 	part3.rgbBlue = 63488;
 	part3.rgbGreen = 2016;
 	part3.rgbRed = 31;
@@ -79,12 +67,9 @@ void covertMapMini(std::stringstream& map_mini)
 	outputFileMapMiniBMP.write((char*)&part1, 14);
 	outputFileMapMiniBMP.write((char*)&part2, 40);
 	outputFileMapMiniBMP.write((char*)&part3, 12);
-	map_mini.seekg(GLOBALNULL);
-	char* buffer = new char[size];
-	map_mini.read(buffer, size);
-	outputFileMapMiniBMP.write(buffer, size);
-	//------------------------------------------------------------------------------
-	delete[] buffer;
+
+	outputFileMapMiniBMP.write((char*)map_mini.data(), size);
 	outputFileMapMiniBMP.close();
+
 	return;
 }

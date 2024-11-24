@@ -1,19 +1,26 @@
-#include <iostream> 
-#include <sstream>
-#include <fstream> 
+
+#include "stdafx.h"
+
 #include "Winter.h"
 #include "General.h"
 
-void winterrhombs(std::stringstream& map_rhombs, std::ofstream& outputFile)
+void winterrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile)
 {
-	char buffer[2];
-	while (map_rhombs.read(buffer, sizeof(buffer)))
+	const size_t length = map_rhombs.size();
+	size_t offset{ 0 };
+	size_t vOffset{ 0 };
+
+	std::vector<uint8_t> v(length * 2, 0);
+
+	while (offset < length)
 	{
-		uint8_t num1 = *(uint8_t*)(buffer + 0);
-		uint8_t num2 = *(uint8_t*)(buffer + 1);
+		const uint8_t num1 = map_rhombs[offset];
+		const uint8_t num2 = map_rhombs[offset + 1];
 
 		// Tile_col это байт €ркости
 		uint8_t Tile_col = num2 / 8;
+
+		uint8_t Tile_num{}, Tile_type{};
 		if (num2 % 2 == 0)
 		{
 			if (num1 >= 0 && num1 <= 255)
@@ -22,480 +29,480 @@ void winterrhombs(std::stringstream& map_rhombs, std::ofstream& outputFile)
 				//---------------------------------------------------------------------------------------------------------
 				if (num1 >= 0 && num1 <= 14)
 				{
-					uint8_t Tile_num = 0x00;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x00;
+					Tile_type = 0x00;
+					
 				}
 				//GRASS2
 				//---------------------------------------------------------------------------------------------------------
 				else
 				if (num1 >= 27 && num1 <= 35)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x00;
+					
 				}
 				else
 				if (num1 == 16)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x01;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x01;
+					
 				}
 				else
 				if (num1 == 23)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 18)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x03;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x03;
+					
 				}
 				else
 				if (num1 == 24)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 17)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x05;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x05;
+					
 				}
 				else
 				if (num1 == 26)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 15)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x07;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x07;
+					
 				}
 				else
 				if (num1 == 25)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 21)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 19)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 20)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 22)
 				{
-					uint8_t Tile_num = 0x14;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x14;
+					Tile_type = 0x0C;
+					
 				}
 				//FIELD
 				//---------------------------------------------------------------------------------------------------------
 				else
 				if (num1 == 36 || num1 == 37 || num1 == 38 || num1 >= 51 && num1 <= 57)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x00;
+					
 				}
 				else
 				if (num1 == 40 || num1 == 59 || num1 == 71 || num1 == 83)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x01;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x01;
+					
 				}
 				else
 				if (num1 == 47 || num1 == 66 || num1 == 78 || num1 == 90)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 39 || num1 == 58 || num1 == 70 || num1 == 82)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x03;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x03;
+					
 				}
 				else
 				if (num1 == 49 || num1 == 68 || num1 == 80 || num1 == 92)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 41 || num1 == 60 || num1 == 72 || num1 == 84)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x05;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x05;
+					
 				}
 				else
 				if (num1 == 48 || num1 == 67 || num1 == 79 || num1 == 91)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 42 || num1 == 61 || num1 == 73 || num1 == 85)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x07;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x07;
+					
 				}
 				else
 				if (num1 == 50 || num1 == 69 || num1 == 81 || num1 == 93)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 46 || num1 == 65 || num1 == 77 || num1 == 89)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 43 || num1 == 62 || num1 == 74 || num1 == 86)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 45 || num1 == 64 || num1 == 76 || num1 == 88)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 44 || num1 == 63 || num1 == 75 || num1 == 87)
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x0C;
+					
 				}
 				//SWAMP
 				//---------------------------------------------------------------------------------------------------------
 				else
 				if (num1 >= 154 && num1 <= 173)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x00;
+					
 				}
 				else
 				if (num1 == 95 || num1 == 107 || num1 == 119 || num1 == 131 || num1 == 143)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x01;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x01;
+					
 				}
 				else
 				if (num1 == 102 || num1 == 114 || num1 == 126 || num1 == 138 || num1 == 150)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 94 || num1 == 106 || num1 == 118 || num1 == 130 || num1 == 142)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x03;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x03;
+					
 				}
 				else
 				if (num1 == 104 || num1 == 116 || num1 == 118 || num1 == 140 || num1 == 152)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 96 || num1 == 108 || num1 == 120 || num1 == 132 || num1 == 144)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x05;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x05;
+					
 				}
 				else
 				if (num1 == 103 || num1 == 115 || num1 == 127 || num1 == 139 || num1 == 151)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 97 || num1 == 109 || num1 == 121 || num1 == 133 || num1 == 145)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x07;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x07;
+					
 				}
 				else
 				if (num1 == 105 || num1 == 117 || num1 == 129 || num1 == 141 || num1 == 153)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 101 || num1 == 113 || num1 == 125 || num1 == 137 || num1 == 149)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 98 || num1 == 110 || num1 == 122 || num1 == 134 || num1 == 146)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 100 || num1 == 112 || num1 == 124 || num1 == 136 || num1 == 148)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 99 || num1 == 111 || num1 == 123 || num1 == 135 || num1 == 147)
 				{
-					uint8_t Tile_num = 0x37;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x37;
+					Tile_type = 0x0C;
+					
 				}
 				//GROUND1
 				//---------------------------------------------------------------------------------------------------------
 				else
 				if (num1 >= 187 && num1 <= 194)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x00;
+					
 				}
 				else
 				if (num1 == 174)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x01;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x01;
+					
 				}
 				else
 				if (num1 == 184)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 175)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x03;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x03;
+					
 				}
 				else
 				if (num1 == 186)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 176)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x05;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x05;
+					
 				}
 				else
 				if (num1 == 185)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 177)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x07;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x07;
+					
 				}
 				else
 				if (num1 == 180)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 181 || num1 == 183)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 178)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 182)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 179)
 				{
-					uint8_t Tile_num = 0x46;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x46;
+					Tile_type = 0x0C;
+					
 				}
 				//GROUND2
 				//---------------------------------------------------------------------------------------------------------
 				else
 				if (num1 >= 195 && num1 <= 203)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x00;
+					
 				}
 				else
 				if (num1 == 205 || num1 == 217 || num1 == 229 || num1 == 241)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x01;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x01;
+					
 				}
 				else
 				if (num1 == 212 || num1 == 224 || num1 == 236 || num1 == 248)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 204 || num1 == 216 || num1 == 228 || num1 == 240)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x03;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x03;
+					
 				}
 				else
 				if (num1 == 214 || num1 == 226 || num1 == 238 || num1 == 250)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 206 || num1 == 218 || num1 == 230 || num1 == 242)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x05;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x05;
+					
 				}
 				else
 				if (num1 == 213 || num1 == 225 || num1 == 237 || num1 == 249)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 207 || num1 == 219 || num1 == 231 || num1 == 243)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x07;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x07;
+					
 				}
 				else
 				if (num1 == 215 || num1 == 227 || num1 == 239 || num1 == 251)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 211 || num1 == 223 || num1 == 235 || num1 == 247)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 208 || num1 == 220 || num1 == 232 || num1 == 244)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 210 || num1 == 222 || num1 == 234 || num1 == 246)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 209 || num1 == 221 || num1 == 233 || num1 == 245)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x0C;
+					
 				}
 				else
 				{
-					uint8_t Tile_num = 0x28;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x28;
+					Tile_type = 0x00;
+					
 				}
 			}
 		}
@@ -507,58 +514,58 @@ void winterrhombs(std::stringstream& map_rhombs, std::ofstream& outputFile)
 				//---------------------------------------------------------------------------------------------------------	
 				if (num1 == 4)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 6)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 5)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 7)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 3)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 0)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 2)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 1)
 				{
-					uint8_t Tile_num = 0x55;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x55;
+					Tile_type = 0x0C;
+					
 				}
 
 				//WATER
@@ -566,194 +573,202 @@ void winterrhombs(std::stringstream& map_rhombs, std::ofstream& outputFile)
 				else
 				if (num1 >= 44 && num1 <= 50)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x00;
+					
 				}
 				else
 				if (num1 == 9 || num1 == 21 || num1 == 33 || num1 == 52)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x01;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x01;
+					
 				}
 				else
 				if (num1 == 16 || num1 == 28 || num1 == 40 || num1 == 59)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 8|| num1 == 20 || num1 == 32 || num1 == 51)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x03;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x03;
+					
 				}
 				else
 				if (num1 == 18 || num1 == 30 || num1 == 42 || num1 == 61)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 10 || num1 == 22 || num1 == 34 || num1 == 53)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x05;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x05;
+					
 				}
 				else
 				if (num1 == 17 || num1 == 29 || num1 == 41 || num1 == 60)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 11 || num1 == 23 || num1 == 35 || num1 == 54)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x07;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x07;
+					
 				}
 				else
 				if (num1 == 19 || num1 == 31 || num1 == 43 || num1 == 62)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 15 || num1 == 27 || num1 == 39 || num1 == 58)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 12 || num1 == 24 || num1 == 36 || num1 == 55)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 14 || num1 == 26 || num1 == 38 || num1 == 57)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 13 || num1 == 25 || num1 == 37 || num1 == 56)
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x0C;
+					
 				}
 				//SAND
 				//---------------------------------------------------------------------------------------------------------
 				else
 				if (num1 >= 112 && num1 <= 123 || num1 == 172)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x00;
+					
 				}
 				else
 				if (num1 == 125 || num1 == 137 || num1 == 149 || num1 == 161)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x01;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x01;
+					
 				}
 				else
 				if (num1 == 132 || num1 == 144 || num1 == 156 || num1 == 168)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x02;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x02;
+					
 				}
 				else
 				if (num1 == 124 || num1 == 136 || num1 == 148 || num1 == 160)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x03;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x03;
+					
 				}
 				else
 				if (num1 == 134 || num1 == 146 || num1 == 158 || num1 == 170)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x04;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x04;
+					
 				}
 				else
 				if (num1 == 126 || num1 == 138 || num1 == 150 || num1 == 162)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x05;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x05;
+					
 				}
 				else
 				if (num1 == 133 || num1 == 145 || num1 == 157 || num1 == 169)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x06;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x06;
+					
 				}
 				else
 				if (num1 == 127 || num1 == 139 || num1 == 151 || num1 == 163)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x07;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x07;
+					
 				}
 				else
 				if (num1 == 135 || num1 == 147 || num1 == 159 || num1 == 171)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x08;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x08;
+					
 				}
 				else
 				if (num1 == 131 || num1 == 143 || num1 == 155 || num1 == 167)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x09;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x09;
+					
 				}
 				else
 				if (num1 == 128 || num1 == 140 || num1 == 152 || num1 == 164)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x0A;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x0A;
+					
 				}
 				else
 				if (num1 == 130 || num1 == 142 || num1 == 154 || num1 == 166)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x0B;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x0B;
+					
 				}
 				else
 				if (num1 == 129 || num1 == 141 || num1 == 153 || num1 == 165)
 				{
-					uint8_t Tile_num = 0x78;
-					uint8_t Tile_type = 0x0C;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x78;
+					Tile_type = 0x0C;
+					
 				}
 				else
 				{
-					uint8_t Tile_num = 0x66;
-					uint8_t Tile_type = 0x00;
-					outputFile << Tile_num << Tile_type << Tile_col << GLOBALNULL;
+					Tile_num = 0x66;
+					Tile_type = 0x00;
+					
 				}
 			}
 		}
+
+		v[vOffset] = Tile_num;
+		v[vOffset + 1] = Tile_type;
+		v[vOffset + 2] = Tile_col;
+		// v[vOffset + 3] = 0;	// not needed since all elements are 0's already
+		vOffset += 4;
+
+		offset += 2;
 	}
 }

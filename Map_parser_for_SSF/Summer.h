@@ -1,3 +1,3 @@
 #pragma once
 
-void summerrhombs (std::stringstream& map_rhombs, std::ofstream& outputFile);
+void summerrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile);

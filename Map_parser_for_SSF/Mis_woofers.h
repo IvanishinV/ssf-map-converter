@@ -1,2 +1,3 @@
 #pragma once
-void covertMisWoofers(std::stringstream& mis_woofers);
+
+void covertMisWoofers(const std::vector<uint8_t>& mis_woofers);

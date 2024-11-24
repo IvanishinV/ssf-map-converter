@@ -1,45 +1,33 @@
-#include <iostream> 
-#include <fstream>
-#include <string>
+
+#include "stdafx.h"
+
+#include "Helper.h"
 #include "Converter.h"
 #include "Parser.h"
 #include "General.h"
-#include <sstream>
-#include <filesystem>
 #include "Displayinfo.h"
 
-uint32_t position(std::stringstream& inputFile, std::stringstream& outputFile, const uint32_t startPosition, const uint32_t size)
-{
-	inputFile.seekg(startPosition);
-	char* buffer = new char[size];
-	inputFile.read(buffer, size);
-	outputFile.write(buffer, size);
-	delete[] buffer;
-	//outputFile.close();
-	uint32_t position = startPosition + size;
-	return position;
-}
 //___________________________________________________________________________________________________
-uint32_t convertMapFileSMM(std::stringstream& inputFile, const std::string& convertMapName)
+uint32_t convertMapFileSMM(const std::string_view& inputFile, const std::string_view& convertMapName)
 {
 	//MAP
-	std::stringstream map_info;
-	std::stringstream map_mini;
-	std::stringstream map_rhombs;
-	std::stringstream map_flags;
-	std::stringstream map_landname;
-	std::stringstream map_objects;
-	std::stringstream map_mines;
+	std::vector<uint8_t> map_info;
+	std::vector<uint8_t> map_mini;
+	std::vector<uint8_t> map_rhombs;
+	std::vector<uint8_t> map_flags;
+	std::vector<uint8_t> map_landname;
+	std::vector<uint8_t> map_objects;
+	std::vector<uint8_t> map_mines;
 	//MIS
-	std::stringstream mis_desc;
-	std::stringstream mis_unitnames;
-	std::stringstream mis_woofers;
-	std::stringstream mis_scripts;
-	std::stringstream mis_zones;
-	std::stringstream mis_support;
-	std::stringstream mis_players;
-	std::stringstream mis_phrases;
-	std::stringstream mis_mapunits;
+	std::vector<uint8_t> mis_desc;
+	std::vector<uint8_t> mis_unitnames;
+	std::vector<uint8_t> mis_woofers;
+	std::vector<uint8_t> mis_scripts;
+	std::vector<uint8_t> mis_zones;
+	std::vector<uint8_t> mis_support;
+	std::vector<uint8_t> mis_players;
+	std::vector<uint8_t> mis_phrases;
+	std::vector<uint8_t> mis_mapunits;
 	//------------------------------------------------------------------------------
 	// Определите начальную позицию и количество байт для извлечения
 	uint32_t mapIdentifier = readFileUint32(inputFile, 136);
@@ -77,17 +65,15 @@ uint32_t convertMapFileSMM(std::stringstream& inputFile, const std::string& conv
 	uint32_t sizeMisMapUnits = readFileUint32(inputFile, startPositionMisMapUnits);
 	uint32_t mapEndPosition = position(inputFile, mis_mapunits, startPositionMisMapUnits + 4, sizeMisMapUnits);
 	//------------------------------------------------------------------------------
-	inputFile.str("");
-	//------------------------------------------------------------------------------
 	std::filesystem::create_directories("map.000/mis.000");
 	//------------------------------------------------------------------------------
 	//MAP
+	const auto resMapRhombs = std::async(std::launch::async, covertMapRhombs, map_rhombs, mapIdentifier);
 	covertMapDesc(convertMapName);
 	covertMisMult(map_info, 1);
 	covertMapInfo(mapIdentifier, mapSizeU, mapSizeV);
 	covertMapMini(map_mini);
 	covertMapLandname(map_landname);
-	covertMapRhombs(map_rhombs, mapIdentifier);
 	covertMapCflags(map_flags);
 	covertMapObjects(map_objects);
 	//MIS
@@ -102,32 +88,33 @@ uint32_t convertMapFileSMM(std::stringstream& inputFile, const std::string& conv
 	covertMisPhrases(mis_phrases, sizeMisPhrases);
 	covertMisUnits(mis_unitnames, mis_mapunits, mis_support);
 	//------------------------------------------------------------------------------
+	resMapRhombs.wait();
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 //___________________________________________________________________________________________________
-uint32_t convertMapFileSSM(std::stringstream& inputFile, const std::string& convertMapName)
+uint32_t convertMapFileSSM(const std::string_view& inputFile, const std::string_view& convertMapName)
 {
 	//MAP
-	std::stringstream map_info;
-	std::stringstream map_mini;
-	std::stringstream map_rhombs;
-	std::stringstream map_flags;
-	std::stringstream map_landname;
-	std::stringstream map_objects;
-	std::stringstream map_mines;
+	std::vector<uint8_t> map_info;
+	std::vector<uint8_t> map_mini;
+	std::vector<uint8_t> map_rhombs;
+	std::vector<uint8_t> map_flags;
+	std::vector<uint8_t> map_landname;
+	std::vector<uint8_t> map_objects;
+	std::vector<uint8_t> map_mines;
 	//MIS
-	std::stringstream mis_desc;
-	std::stringstream mis_unitnames;
-	std::stringstream mis_groups;
-	std::stringstream mis_mapunits;
-	std::stringstream mis_players;
-	std::stringstream mis_woofers;
-	std::stringstream mis_zones;
-	std::stringstream mis_scripts;
-	std::stringstream mis_support;
-	std::stringstream mis_phrases;
-	std::stringstream mis_objects;
+	std::vector<uint8_t> mis_desc;
+	std::vector<uint8_t> mis_unitnames;
+	std::vector<uint8_t> mis_groups;
+	std::vector<uint8_t> mis_mapunits;
+	std::vector<uint8_t> mis_players;
+	std::vector<uint8_t> mis_woofers;
+	std::vector<uint8_t> mis_zones;
+	std::vector<uint8_t> mis_scripts;
+	std::vector<uint8_t> mis_support;
+	std::vector<uint8_t> mis_phrases;
+	std::vector<uint8_t> mis_objects;
 	//------------------------------------------------------------------------------
 	// Определите начальную позицию и количество байт для извлечения
 	uint32_t mapIdentifier = readFileUint32(inputFile, 40);
@@ -166,16 +153,15 @@ uint32_t convertMapFileSSM(std::stringstream& inputFile, const std::string& conv
 	uint32_t sizeMisPhrases = readFileUint32(inputFile, startPositionMisPhrases);
 	uint32_t startPositionMisObjects = position(inputFile, mis_phrases, startPositionMisPhrases + 4, sizeMisPhrases);
 	uint32_t mapEndPosition = position(inputFile, mis_objects, startPositionMisObjects, MISOBJECTS);
-	inputFile.str("");
 	//------------------------------------------------------------------------------
 	std::filesystem::create_directories("map.000/mis.000");
 	//------------------------------------------------------------------------------
 	//MAP
+	const auto resMapRhombs = std::async(std::launch::async, covertMapRhombs, map_rhombs, mapIdentifier);
 	covertMapDesc(convertMapName);
 	covertMisMult(map_info, 0);
 	covertMapInfo(mapIdentifier, mapSizeU, mapSizeV);
 	covertMapMini(map_mini);
-	covertMapRhombs(map_rhombs, mapIdentifier);
 	covertMapObjects(map_objects);
 	covertMapLandname(map_landname);
 	covertMapCflags(map_flags);
@@ -193,19 +179,20 @@ uint32_t convertMapFileSSM(std::stringstream& inputFile, const std::string& conv
 	convertMisGroups(mis_groups);
 	convertMisPlayers(mis_players);
 	//------------------------------------------------------------------------------
+	resMapRhombs.wait();
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 //___________________________________________________________________________________________________
-uint32_t convertMapFileSSC_map(std::stringstream& inputFile, const std::string& convertMapName)
+uint32_t convertMapFileSSC_map(const std::string_view& inputFile, const std::string_view& convertMapName)
 {
-	std::stringstream map_info;
-	std::stringstream map_landname;
-	std::stringstream map_mini;
-	std::stringstream map_mini2;
-	std::stringstream map_rhombs;
-	std::stringstream map_flags;
-	std::stringstream map_objects;
+	std::vector<uint8_t> map_info;
+	std::vector<uint8_t> map_landname;
+	std::vector<uint8_t> map_mini;
+	std::vector<uint8_t> map_mini2;
+	std::vector<uint8_t> map_rhombs;
+	std::vector<uint8_t> map_flags;
+	std::vector<uint8_t> map_objects;
 	//------------------------------------------------------------------------------
 	// Определите начальную позицию и количество байт для извлечения
 	// Начальная позиция нужных байтов
@@ -224,38 +211,39 @@ uint32_t convertMapFileSSC_map(std::stringstream& inputFile, const std::string& 
 	uint32_t startPositionObjects = position(inputFile, map_mini2, startPositionMapMini2, rhombsSize / 4);
 	uint32_t mapSizeObjects = readFileUint32(inputFile, startPositionObjects);
 	uint32_t mapEndPosition = position(inputFile, map_objects, startPositionObjects + 4, mapSizeObjects * 8);
-	inputFile.str("");
+	
 	//------------------------------------------------------------------------------
 	std::filesystem::create_directories("map.000/mis.000");
 	//------------------------------------------------------------------------------
+	const auto resMapRhombs = std::async(std::launch::async, covertMapRhombs, map_rhombs, mapIdentifier);
 	covertMapInfo(mapIdentifier, mapSizeU, mapSizeV);
 	covertMapMini(map_mini);
 	covertMapLandname(map_landname);
 	covertMapCflags(map_flags);
-	covertMapRhombs(map_rhombs, mapIdentifier);
 	covertMapObjects(map_objects);
 	covertMapDesc(convertMapName);
 	//------------------------------------------------------------------------------
+	resMapRhombs.wait();
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 //___________________________________________________________________________________________________
-uint32_t convertMapFileSCC_mission(std::stringstream& inputFile)
+uint32_t convertMapFileSCC_mission(const std::string_view& inputFile)
 {
-	std::stringstream mis_info;
-	std::stringstream map_mines;
-	std::stringstream mis_desc;
-	std::stringstream mis_unitnames;
-	std::stringstream mis_groups;
-	std::stringstream mis_mapunits;
-	std::stringstream mis_players;
-	std::stringstream mis_maunits;
-	std::stringstream mis_woofers;
-	std::stringstream mis_zones;
-	std::stringstream mis_scripts;
-	std::stringstream mis_support;
-	std::stringstream mis_phrases;
-	std::stringstream mis_objects;
+	std::vector<uint8_t> mis_info;
+	std::vector<uint8_t> map_mines;
+	std::vector<uint8_t> mis_desc;
+	std::vector<uint8_t> mis_unitnames;
+	std::vector<uint8_t> mis_groups;
+	std::vector<uint8_t> mis_mapunits;
+	std::vector<uint8_t> mis_players;
+	std::vector<uint8_t> mis_maunits;
+	std::vector<uint8_t> mis_woofers;
+	std::vector<uint8_t> mis_zones;
+	std::vector<uint8_t> mis_scripts;
+	std::vector<uint8_t> mis_support;
+	std::vector<uint8_t> mis_phrases;
+	std::vector<uint8_t> mis_objects;
 	//------------------------------------------------------------------------------
 	uint32_t mapSizeU = readFileUint32(inputFile, 16);
 	uint32_t mapSizeV = readFileUint32(inputFile, 20);
@@ -282,7 +270,6 @@ uint32_t convertMapFileSCC_mission(std::stringstream& inputFile)
 	uint32_t sizeMisPhrases = readFileUint32(inputFile, startPositionMisPhrases);
 	uint32_t startPositionMisObjects = position(inputFile, mis_phrases, startPositionMisPhrases + 4, sizeMisPhrases);
 	uint32_t mapEndPosition = position(inputFile, mis_objects, startPositionMisObjects, MISOBJECTS);
-	inputFile.str("");
 	//------------------------------------------------------------------------------
 	std::filesystem::create_directories("map.000/mis.000");
 	//------------------------------------------------------------------------------

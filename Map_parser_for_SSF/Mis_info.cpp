@@ -1,6 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
+
+#include "stdafx.h"
 
 #include "Mis_info.h"
 #include "General.h"
@@ -32,7 +31,7 @@ void covertMisInfo(uint32_t mapSizeU, uint32_t mapSizeV)
 	std::ofstream outputMisInfo("map.000/mis.000/info", std::ios::binary);
 	if (!outputMisInfo)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
 

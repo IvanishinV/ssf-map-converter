@@ -1,18 +1,18 @@
-#include <iostream>
-#include <sstream>
-#include <fstream> 
+
+#include "stdafx.h"
 
 #include "Mis_tree.h"
 #include "Displayinfo.h"
 
-void covertMisTree(std::stringstream& mis_desc)
+void covertMisTree(const std::vector<uint8_t>& mis_desc)
 {
 		std::ofstream outputFileMisTree("map.000/mis.000/misdesc", std::ios::binary);
 		if (!outputFileMisTree)
 		{
-			erorbuildfile();
+			errorBuildFile();
 			return;
 		}
-		outputFileMisTree << mis_desc.str();
+
+		outputFileMisTree.write((char*)mis_desc.data(), mis_desc.size());
 		outputFileMisTree.close();
 }

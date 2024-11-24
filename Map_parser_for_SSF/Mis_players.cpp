@@ -1,26 +1,25 @@
-#include <iostream>
-#include <sstream>
-#include <fstream> 
+
+#include "stdafx.h"
 
 #include "Mis_players.h"
 #include "Displayinfo.h"
 
-void convertMisPlayers(std::stringstream& mis_players)
+void convertMisPlayers(const std::vector<uint8_t>& mis_players)
 {
 	std::ofstream outputMisPlayers("map.000/mis.000/players", std::ios::binary);
 	if (!outputMisPlayers)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
 	//------------------------------------------------------------------------------
-	uint32_t accumulator = 0;
-	//------------------------------------------------------------------------------
-	char buffer[353];
-	while (mis_players.read(buffer, sizeof(buffer)))
+	const size_t maxTries = mis_players.size() / 353;
+	size_t curTry{ 0 };
+	while (curTry < maxTries)
 	{
-		outputMisPlayers << "Player " << accumulator << '\n';
-		std::string name = (buffer);
+		const uint8_t* buffer = mis_players.data() + curTry * 353;
+		outputMisPlayers << "Player " << curTry << '\n';
+		std::string_view name{ (const char*)buffer };
 		outputMisPlayers << " name=" << '\"' << name << '\"' << '\n';
 		uint8_t team = *(uint8_t*)(buffer + 32);
 		outputMisPlayers << " team=" << (uint16_t)team << '\n';
@@ -36,7 +35,7 @@ void convertMisPlayers(std::stringstream& mis_players)
 		}
 		//------------------------------------------------------------------------------
 		outputMisPlayers << " bomb" << '\n';
-		std::string namebomb = (buffer + 37);
+		std::string_view namebomb{ (const char*)buffer + 37 };
 		outputMisPlayers << "  ID=" << namebomb << '\n';
 		uint32_t Numberbomb = *(uint32_t*)(buffer + 69);
 		uint32_t Bombsbomb = *(uint32_t*)(buffer + 73);
@@ -44,7 +43,7 @@ void convertMisPlayers(std::stringstream& mis_players)
 		outputMisPlayers << "  Number=" << Numberbomb << '\n' << "  Bombs=" << Bombsbomb << '\n' << "  Reload=" << Numberbomb << '\n';
 		//------------------------------------------------------------------------------
 		outputMisPlayers << " spy" << '\n';
-		std::string namespy = (buffer + 81);
+		std::string_view namespy{ (const char*)buffer + 81 };
 		outputMisPlayers << "  ID=" << namespy << '\n';
 		uint32_t Numberspy = *(uint32_t*)(buffer + 113);
 		uint32_t Bombsspy = *(uint32_t*)(buffer + 117);
@@ -52,7 +51,7 @@ void convertMisPlayers(std::stringstream& mis_players)
 		outputMisPlayers << "  Number=" << Numberspy << '\n' << "  Bombs=" << Bombsspy << '\n' << "  Reload=" << Reloadspy << '\n';
 		//------------------------------------------------------------------------------
 		outputMisPlayers << " transport" << '\n';
-		std::string nametransport = (buffer + 125);
+		std::string_view nametransport{ (const char*)buffer + 125 };
 		outputMisPlayers << "  ID=" << nametransport << '\n';
 		uint32_t Numbertransport = *(uint32_t*)(buffer + 157);
 		uint32_t Bombstransport = *(uint32_t*)(buffer + 161);
@@ -60,7 +59,7 @@ void convertMisPlayers(std::stringstream& mis_players)
 		outputMisPlayers << "  Number=" << Numbertransport << '\n' << "  Bombs=" << Bombstransport << '\n' << "  Reload=" << Reloadtransport << '\n';
 		//------------------------------------------------------------------------------
 		outputMisPlayers << " boxer" << '\n';
-		std::string nameboxer = (buffer + 169);
+		std::string_view nameboxer{ (const char*)buffer + 169 };
 		outputMisPlayers << "  ID=" << nameboxer << '\n';
 		uint32_t Numberboxer = *(uint32_t*)(buffer + 201);
 		uint32_t Bombsboxer = *(uint32_t*)(buffer + 205);
@@ -71,10 +70,10 @@ void convertMisPlayers(std::stringstream& mis_players)
 		uint8_t group1 = *(uint8_t*)(buffer + 213);
 		uint8_t expa1 = *(uint8_t*)(buffer + 214);
 		outputMisPlayers << "  group=" << (uint16_t)group1 << '\n' << "  expa=" << (uint16_t)expa1 << '\n';
-		std::string ID11 = (buffer + 215);
-		std::string ID12 = (buffer + 231);
-		std::string ID13 = (buffer + 247);
-		std::string ID14 = (buffer + 263);
+		std::string_view ID11{ (const char*)buffer + 215 };
+		std::string_view ID12{ (const char*)buffer + 231 };
+		std::string_view ID13{ (const char*)buffer + 247 };
+		std::string_view ID14{ (const char*)buffer + 263 };
 		uint8_t number11 = *(uint8_t*)(buffer + 279);
 		uint8_t number12 = *(uint8_t*)(buffer + 280);
 		uint8_t number13 = *(uint8_t*)(buffer + 281);
@@ -88,11 +87,11 @@ void convertMisPlayers(std::stringstream& mis_players)
 		uint8_t group2 = *(uint8_t*)(buffer + 283);
 		uint8_t expa2 = *(uint8_t*)(buffer + 284);
 		outputMisPlayers << "  group=" << (uint16_t)group2 << '\n' << "  expa=" << (uint16_t)expa2 << '\n';
-		std::string ID21 = (buffer + 285);
-		std::string ID22 = (buffer + 301);
-		std::string ID23 = (buffer + 317);
-		std::string ID24 = (buffer + 333);
-		uint8_t number21 = *(uint8_t*)(buffer + 349);
+		std::string_view ID21{ (const char*)buffer + 285 };
+		std::string_view ID22{ (const char*)buffer + 301 };
+		std::string_view ID23{ (const char*)buffer + 317 };
+		std::string_view ID24{ (const char*)buffer + 333 };
+		uint8_t number21 = *(uint8_t*)(buffer + 349);	 
 		uint8_t number22 = *(uint8_t*)(buffer + 350);
 		uint8_t number23 = *(uint8_t*)(buffer + 351);
 		uint8_t number24 = *(uint8_t*)(buffer + 352);
@@ -103,7 +102,7 @@ void convertMisPlayers(std::stringstream& mis_players)
 		//------------------------------------------------------------------------------
 		outputMisPlayers << " planesdir=" << (uint16_t)planesdir << '\n';
 
-		accumulator++;
+		++curTry;
 	}
 	outputMisPlayers.close();
 }

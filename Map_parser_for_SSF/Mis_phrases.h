@@ -1,3 +1,3 @@
 #pragma once
 
-void covertMisPhrases(std::stringstream& mis_phrases, uint32_t sizeMisPhrases);
+void covertMisPhrases(const std::vector<uint8_t>& mis_phrases, const uint32_t sizeMisPhrases);

@@ -1,3 +1,3 @@
 #pragma once
 
-void winterrhombs(std::stringstream& map_rhombs, std::ofstream& outputFile);
+void winterrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile);

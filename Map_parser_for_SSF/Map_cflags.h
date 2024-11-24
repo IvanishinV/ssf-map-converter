@@ -1,3 +1,3 @@
+#pragma once
 
-
-void covertMapCflags(std::stringstream& map_flags);
+bool covertMapCflags(const std::vector<uint8_t>& map_flags);

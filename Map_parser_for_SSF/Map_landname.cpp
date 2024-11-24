@@ -1,17 +1,18 @@
-#include <sstream>
-#include <fstream> 
+
+#include "stdafx.h"
 
 #include "Map_landname.h"
 #include "Displayinfo.h"
 
-void covertMapLandname(std::stringstream& map_landname)
+void covertMapLandname(const std::vector<uint8_t>& map_landname)
 {
 	std::ofstream outputMapLandname("map.000/landname", std::ios::binary);
 	if (!outputMapLandname)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
-	outputMapLandname << map_landname.str();
+
+	outputMapLandname.write((char*)map_landname.data(), map_landname.size());
 	outputMapLandname.close();
 }

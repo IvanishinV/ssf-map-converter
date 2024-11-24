@@ -1,3 +1,3 @@
 #pragma once
 
-void convertMisPlayers(std::stringstream& mis_players);
+void convertMisPlayers(const std::vector<uint8_t>& mis_players);

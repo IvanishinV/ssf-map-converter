@@ -4,4 +4,4 @@
 #include "Winter.h"
 #include "Desert.h"
 
-void covertMapRhombs(std::stringstream& map_rhombs, uint32_t mapIdentifier);
+void covertMapRhombs(const std::vector<uint8_t>& map_rhombs, const uint32_t mapIdentifier);

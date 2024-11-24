@@ -1,3 +1,3 @@
 #pragma once
 
-void covertMisTree(std::stringstream& mis_desc);
+void covertMisTree(const std::vector<uint8_t>& mis_desc);

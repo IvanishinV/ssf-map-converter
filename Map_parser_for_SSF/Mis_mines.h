@@ -1,3 +1,3 @@
 #pragma once
 
-void convertMisMines(std::stringstream& map_mines, uint32_t mapSizeU);
+void convertMisMines(const std::vector<uint8_t>& map_mines, const uint32_t mapSizeU);

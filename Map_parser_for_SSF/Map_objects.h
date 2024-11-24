@@ -1,3 +1,3 @@
 #pragma once
 
-void covertMapObjects(std::stringstream& map_objects);
+void covertMapObjects(const std::vector<uint8_t>& map_objects);

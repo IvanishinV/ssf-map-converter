@@ -1,3 +1,3 @@
 #pragma once
 
-void desertrhombs(std::stringstream& map_rhombs, std::ofstream& outputFile);
+void desertrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile);

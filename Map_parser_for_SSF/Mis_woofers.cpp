@@ -1,29 +1,28 @@
-#include <iostream>
-#include <sstream>
-#include <fstream> 
 
+#include "stdafx.h"
+
+#include "Helper.h"
 #include "Mis_woofers.h"
 #include "Mis_scripts.h"
 #include "Displayinfo.h"
 
-void covertMisWoofers(std::stringstream& mis_woofers)
+void covertMisWoofers(const std::vector<uint8_t>& mis_woofers)
 {
 	std::ofstream outputFileMisWoofers("map.000/mis.000/sounds", std::ios::binary);
 	if (!outputFileMisWoofers)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
 	//------------------------------------------------------------------------------
 	uint32_t startposition = readFileUint32(mis_woofers, 0);
+	size_t curOffset{ 0 };
 	while (startposition--)
 	{
-		char buffername[64];
-		mis_woofers.read(reinterpret_cast<char*>(&buffername), sizeof(buffername));
-		buffername[63] = '\0';
-		//------------------------------------------------------------------------------
-		char buffer[14];
-		(mis_woofers.read(buffer, sizeof(buffer)));
+		const uint8_t* buffername = mis_woofers.data() + curOffset;
+		curOffset += 64;
+		const uint8_t* buffer = mis_woofers.data() + curOffset;
+		curOffset += 14;
 		//------------------------------------------------------------------------------
 		uint16_t U = *(uint16_t*)(buffer + 0);
 		uint16_t V = *(uint16_t*)(buffer + 2);
@@ -32,8 +31,10 @@ void covertMisWoofers(std::stringstream& mis_woofers)
 		uint16_t MinWait = *(uint16_t*)(buffer + 10);
 		uint16_t MaxWait = *(uint16_t*)(buffer + 12);
 		//------------------------------------------------------------------------------
-		outputFileMisWoofers << "Name=" << "\"" << buffername << "\"" << "\n" << "U=" << U << "\n" << "V=" << V
-			<< "\n" << "Radius=" << Radius << "\n" << "Worse=" << Worse << "\n" << "MinWait=" << MinWait << "\n" << "MaxWait=" << MaxWait << "\n\n";
+		outputFileMisWoofers << "Name=\"";
+		outputFileMisWoofers.write((const char*)buffername, 64);
+		outputFileMisWoofers << "\"\nU=" << U << "\nV=" << V
+			<< "\nRadius=" << Radius << "\nWorse=" << Worse << "\nMinWait=" << MinWait << "\nMaxWait=" << MaxWait << "\n\n";
 	}
 	outputFileMisWoofers.close();
 }

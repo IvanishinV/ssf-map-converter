@@ -1,3 +1,3 @@
 
 
-void covertMisZones(std::stringstream& mis_zones, uint32_t mapSizeU);
+void covertMisZones(const std::vector<uint8_t>& mis_zones, const uint32_t mapSizeU);

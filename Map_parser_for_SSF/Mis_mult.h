@@ -1,3 +1,3 @@
 #pragma once
 
-void covertMisMult(std::stringstream& map_info, uint32_t maptypeheader);
+void covertMisMult(const std::vector<uint8_t>& map_info, const uint32_t maptypeheader);

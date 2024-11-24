@@ -1,3 +1,3 @@
 #pragma once
 
-void covertMapLandname(std::stringstream& map_landname);
+void covertMapLandname(const std::vector<uint8_t>& map_landname);

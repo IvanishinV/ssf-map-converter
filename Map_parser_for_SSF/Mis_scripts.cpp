@@ -1,9 +1,7 @@
-#include <iostream>
-#include <sstream>
-#include <fstream> 
-#include <map>
-#include <string>
 
+#include "stdafx.h"
+
+#include "Helper.h"
 #include "Mis_scripts.h"
 #include "General.h"
 #include "Displayinfo.h"
@@ -40,11 +38,10 @@ void convertOPN(std::stringstream& bufferScripts_OPN1, uint32_t logicOperator, u
 	return;
 }
 //---------------------------------------------------------------------------------------------
-uint16_t reverse_num(uint16_t num1, std::string& str)
+void reverse_num(uint16_t num1, std::string& str)
 {
 	str = std::to_string(num1);
 	reverse(str.begin(), str.end());
-	return 1;
 }
 //---------------------------------------------------------------------------------------------
 void getScriptSize(std::stringstream& outputfilebuffer, std::stringstream& bufferScripts, uint32_t accumulatorNumberScripts)
@@ -52,32 +49,25 @@ void getScriptSize(std::stringstream& outputfilebuffer, std::stringstream& buffe
 	//для получения размера данных есть метод .size() надо изучить
 	// переписать функцию на size_t getScriptSize(const char* begin)
 	bufferScripts.seekg(0, std::ios::end);
-	uint32_t size = bufferScripts.tellg();
-	outputfilebuffer << "script " << '\"' << accumulatorNumberScripts << '\"' << " size" << " " << size - 2 << '\n';
+	size_t size = bufferScripts.tellg();
+	outputfilebuffer << "script \"" << accumulatorNumberScripts << "\" size " << size - 2 << '\n';
 	outputfilebuffer << bufferScripts.str();
 	/*cout << "Размер скрипта: " << size << '\n' << endl;*/
 	return;
 }
 //---------------------------------------------------------------------------------------------
-//uint32_t readFileUint32(std::stringstream& mis_scripts, const uint32_t fileOffset)
-//{
-//	uint32_t result;
-//	mis_scripts.seekg(fileOffset, std::ios::beg);
-//	mis_scripts.read(reinterpret_cast<char*>(&result), sizeof(result));
-//	return result;
-//}
-//---------------------------------------------------------------------------------------------
-void covertMisScripts(std::stringstream& mis_scripts)
+
+void covertMisScripts(const std::vector<uint8_t>& mis_scripts)
 {
 	//------------------------------------------------------------------------------
 	std::ofstream outputFile("map.000/mis.000/scripts2", std::ios::binary);
 	if (!outputFile)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
 	//------------------------------------------------------------------------------
-	uint32_t numberofscripts = readFileUint32(mis_scripts, 0);
+	uint32_t numberofscripts = *(uint32_t*)mis_scripts.data();
 	//------------------------------------------------------------------------------
 	//Скрипты1
 	uint8_t bufferAND[4] = { 1, 0, 0, 0 };
@@ -152,10 +142,11 @@ void covertMisScripts(std::stringstream& mis_scripts)
 	uint32_t accumulatorNumberScripts = 1;
 	//------------------------------------------------------------------------------
 	
+	size_t curOffset{ 0 };
 	while(numberofscripts--)
 	{
-		uint8_t buffer[8];
-		mis_scripts.read((char*)buffer, sizeof(buffer));
+		const uint8_t* buffer = mis_scripts.data() + curOffset;
+		curOffset += 8;
 		uint8_t sizescripts1 = *(uint8_t*)(buffer + 0);
 		uint8_t sizescripts2 = *(uint8_t*)(buffer + 1);
 		uint8_t sizescripts3 = *(uint8_t*)(buffer + 2);
@@ -176,8 +167,10 @@ void covertMisScripts(std::stringstream& mis_scripts)
 			while (numberoflines--)
 			{
 				uint8_t logicOperator = 0; //Логический оператор И ИЛИ
-				uint8_t buffer[4];
-				mis_scripts.read((char*)buffer, sizeof(buffer));
+
+				const uint8_t* buffer = mis_scripts.data() + curOffset;
+				curOffset += 4;
+
 				uint8_t num1 = *(uint8_t*)(buffer + 0);
 				uint8_t num2 = *(uint8_t*)(buffer + 1);
 				uint8_t num3 = *(uint8_t*)(buffer + 2);

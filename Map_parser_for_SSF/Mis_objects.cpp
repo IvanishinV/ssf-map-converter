@@ -1,27 +1,28 @@
-#include <iostream>
-#include <sstream>
-#include <fstream> 
+
+#include "stdafx.h"
 
 #include "Mis_objects.h"
 #include "General.h"
 #include "Displayinfo.h"
 
 
-void covertMisObjects(std::stringstream& mis_objects)
+void covertMisObjects(const std::vector<uint8_t>& mis_objects)
 {
 	//------------------------------------------------------------------------------
 	std::ofstream outputFileMisObjects("map.000/mis.000/objs", std::ios::binary);
 	if (!outputFileMisObjects)
 	{
-		erorbuildfile();
+		errorBuildFile();
 		return;
 	}
 	//------------------------------------------------------------------------------
-	char buffer[2];
-	while (mis_objects.read(buffer, sizeof(buffer)))
+	const size_t maxTries = mis_objects.size() / 2;
+	size_t curTry{ 0 };
+
+	while (curTry < maxTries)
 	{
-		uint8_t num1 = *(uint8_t*)(buffer + 0);
-		uint8_t num2 = *(uint8_t*)(buffer + 1);
+		uint8_t num1 = mis_objects[curTry * 2];
+		uint8_t num2 = mis_objects[curTry * 2 + 1];
 		outputFileMisObjects << num1 << num2 << GLOBALNULL << GLOBALNULL;
 	}
 	outputFileMisObjects.close();
