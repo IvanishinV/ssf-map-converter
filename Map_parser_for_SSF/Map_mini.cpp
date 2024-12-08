@@ -49,8 +49,8 @@ void covertMapMini(const std::vector<uint8_t>& map_mini)
 	part1.bfOffBits = (sizeof(part1)) + (sizeof(part2)) + (sizeof(part3));
 	//------------------------------------------------------------------------------
 	part2.biSize = sizeof(part2);
-	part2.biWidth = sqrt(size / 2);
-	part2.biHeight = sqrt(size / 2);
+	part2.biWidth = static_cast<LONG>(sqrt(size / 2));
+	part2.biHeight = static_cast<LONG>(sqrt(size / 2));
 	part2.biPlanes = 1;
 	part2.biBitCount = 16;
 	part2.biCompression = 3;
