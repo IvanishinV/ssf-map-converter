@@ -142,7 +142,7 @@ void covertMisScripts(const std::vector<uint8_t>& mis_scripts)
 	uint32_t accumulatorNumberScripts = 1;
 	//------------------------------------------------------------------------------
 	
-	size_t curOffset{ 0 };
+	size_t curOffset{ sizeof(numberofscripts) };
 	while(numberofscripts--)
 	{
 		const uint8_t* buffer = mis_scripts.data() + curOffset;

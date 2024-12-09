@@ -15,9 +15,8 @@ void covertMisWoofers(const std::vector<uint8_t>& mis_woofers)
 		return;
 	}
 	//------------------------------------------------------------------------------
-	uint32_t startposition = readFileUint32(mis_woofers, 0);
-	size_t curOffset{ 0 };
-	while (startposition--)
+	const uint32_t numOfSounds = readFileUint32(mis_woofers, 0);
+	for (uint32_t i = 0, curOffset = sizeof(numOfSounds); i < numOfSounds; ++i)
 	{
 		const uint8_t* buffername = mis_woofers.data() + curOffset;
 		curOffset += 64;
@@ -31,8 +30,8 @@ void covertMisWoofers(const std::vector<uint8_t>& mis_woofers)
 		uint16_t MinWait = *(uint16_t*)(buffer + 10);
 		uint16_t MaxWait = *(uint16_t*)(buffer + 12);
 		//------------------------------------------------------------------------------
-		outputFileMisWoofers << "Name=\"";
-		outputFileMisWoofers.write((const char*)buffername, 64);
+		outputFileMisWoofers << "Name=\"" << (const char*)buffername;
+		//outputFileMisWoofers.write((const char*)buffername, 64);
 		outputFileMisWoofers << "\"\nU=" << U << "\nV=" << V
 			<< "\nRadius=" << Radius << "\nWorse=" << Worse << "\nMinWait=" << MinWait << "\nMaxWait=" << MaxWait << "\n\n";
 	}

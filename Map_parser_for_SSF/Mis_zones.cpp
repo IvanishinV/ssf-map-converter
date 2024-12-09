@@ -17,8 +17,7 @@ void covertMisZones(const std::vector<uint8_t>& mis_zones, const uint32_t mapSiz
 	std::vector<uint8_t> misZones(LOCATIONSSIZE, 0);
 
 	const size_t maxTries = mis_zones.size() / mapSizeU;
-	size_t i{ 0 };
-	while (i < maxTries)
+	for (size_t i = 0; i < maxTries; ++i)
 	{
 		std::copy(mis_zones.cbegin() + i * mapSizeU, mis_zones.cbegin() + i * mapSizeU + mapSizeU, misZones.begin() + 512 * i);
 	}

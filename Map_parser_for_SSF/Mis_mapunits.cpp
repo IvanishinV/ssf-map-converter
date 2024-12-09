@@ -20,13 +20,14 @@ void covertMisUnits(const std::vector<uint8_t>& mis_unitnames, const std::vector
 	while (numOfNames * 16 < mis_unitnames.size())
 	{
 		nameunit.emplace(numOfNames, (const char*)(mis_unitnames.data() + numOfNames * 16));
+		++numOfNames;
 	}
 
 	//------------------------------------------------------------------------------
 	uint32_t numberofunit = *(uint32_t*)(mis_mapunits.data());
 	//------------------------------------------------------------------------------
-	size_t curOffset = 0;
-	while (curOffset + 13 < mis_mapunits.size())
+	size_t curOffset = sizeof(numberofunit);
+	while (curOffset + 13 <= mis_mapunits.size())
 	{
 		const uint8_t* buffer = mis_mapunits.data() + curOffset;
 		curOffset += 13;
@@ -69,11 +70,11 @@ void covertMisUnits(const std::vector<uint8_t>& mis_unitnames, const std::vector
 		}
 	}
 	//------------------------------------------------------------------------------
-	const uint32_t SupportSize = *(uint32_t*)(mis_support.data());	// not used
+	const uint32_t supportSize = *(uint32_t*)(mis_support.data());	// not used
 
 	uint32_t flag_num = 16;
 	uint32_t script_num = 64;
-	curOffset = 0;
+	curOffset = sizeof(supportSize);
 	while (flag_num--)
 	{
 		const uint8_t* buffer = mis_support.data() + curOffset;
@@ -101,7 +102,7 @@ void covertMisUnits(const std::vector<uint8_t>& mis_unitnames, const std::vector
 			//cout << "support " << "\"" << buffername << "\"" << '\n';
 			outputFileSupport << "support \"";
 			outputFileSupport.write((const char*)buffername, NameSize);
-			outputFileSupport << "\0\"\n";
+			outputFileSupport << "\"\n";
 		}
 		else
 		{
@@ -110,10 +111,10 @@ void covertMisUnits(const std::vector<uint8_t>& mis_unitnames, const std::vector
 		}
 		//------------------------------------------------------------------------------
 		uint32_t UnitScriptSize = *(uint32_t*)(mis_support.data() + 324 + 1 + accumulator + NameSize);
+		curOffset = 324 + 1 + accumulator + NameSize + sizeof(UnitScriptSize);
 		accumulator += 5 + NameSize;
 		if (UnitScriptSize > 0)
 		{
-			curOffset = 324 + 1 + accumulator + NameSize + 4;
 			while (UnitScriptSize--)
 			{
 				const uint8_t* bufferunit = mis_support.data() + curOffset;

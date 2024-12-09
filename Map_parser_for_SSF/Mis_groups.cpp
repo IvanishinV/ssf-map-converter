@@ -154,10 +154,9 @@ void convertMisGroups(const std::vector<uint8_t>& mis_groups)
 	};
 	//------------------------------------------------------------------------------
 	const size_t maxTries = mis_groups.size() / 27;
-	uint32_t accumulator{ 0 };
-	while (accumulator < maxTries)
+	for (size_t accumulator = 0; accumulator < maxTries; ++accumulator)
 	{
-		const uint8_t* buffer = mis_groups.data();
+		const uint8_t* buffer = mis_groups.data() + accumulator * 27;
 		uint8_t aitype1 = *(uint8_t*)(buffer + 0);
 		uint8_t aitype2 = *(uint8_t*)(buffer + 1);
 		uint8_t aitype3 = *(uint8_t*)(buffer + 2);
@@ -285,7 +284,6 @@ void convertMisGroups(const std::vector<uint8_t>& mis_groups)
 			outputFileMisGroups << " flag=" << (uint16_t)flag << " zone=" << (uint16_t)zone << " hp=" << (uint16_t)hp << " ammo=" << (uint16_t)ammo << " expa=" << (uint16_t)expa << '\n';
 		}
 		//------------------------------------------------------------------------------
-		++accumulator;
 	}
 	outputFileMisGroups.close();
 	return;

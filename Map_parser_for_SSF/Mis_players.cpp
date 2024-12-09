@@ -14,8 +14,7 @@ void convertMisPlayers(const std::vector<uint8_t>& mis_players)
 	}
 	//------------------------------------------------------------------------------
 	const size_t maxTries = mis_players.size() / 353;
-	size_t curTry{ 0 };
-	while (curTry < maxTries)
+	for (size_t curTry = 0; curTry < maxTries; ++curTry)
 	{
 		const uint8_t* buffer = mis_players.data() + curTry * 353;
 		outputMisPlayers << "Player " << curTry << '\n';
@@ -101,8 +100,6 @@ void convertMisPlayers(const std::vector<uint8_t>& mis_players)
 			<< "  ID 3=" << ID24 << '\n' << "  number 3=" << (uint16_t)number24 << '\n';
 		//------------------------------------------------------------------------------
 		outputMisPlayers << " planesdir=" << (uint16_t)planesdir << '\n';
-
-		++curTry;
 	}
 	outputMisPlayers.close();
 }

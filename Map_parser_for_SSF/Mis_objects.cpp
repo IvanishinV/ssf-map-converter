@@ -17,12 +17,10 @@ void covertMisObjects(const std::vector<uint8_t>& mis_objects)
 	}
 	//------------------------------------------------------------------------------
 	const size_t maxTries = mis_objects.size() / 2;
-	size_t curTry{ 0 };
-
-	while (curTry < maxTries)
+	for (size_t i = 0; i < maxTries; ++i)
 	{
-		uint8_t num1 = mis_objects[curTry * 2];
-		uint8_t num2 = mis_objects[curTry * 2 + 1];
+		uint8_t num1 = mis_objects[i * 2];
+		uint8_t num2 = mis_objects[i * 2 + 1];
 		outputFileMisObjects << num1 << num2 << GLOBALNULL << GLOBALNULL;
 	}
 	outputFileMisObjects.close();

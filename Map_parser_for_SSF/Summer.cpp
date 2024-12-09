@@ -7,12 +7,9 @@
 void summerrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile)
 {
 	const size_t length = map_rhombs.size();
-	size_t offset{ 0 };
-	size_t vOffset{ 0 };
-
 	std::vector<uint8_t> v(length * 2, 0);
-	
-	while (offset < length)
+
+	for (size_t offset = 0, vOffset = 0; offset < length; offset += 2, vOffset += 4)
 	{
 		const uint8_t num1 = map_rhombs[offset];
 		const uint8_t num2 = map_rhombs[offset + 1];
@@ -796,8 +793,5 @@ void summerrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputF
 		v[vOffset + 1] = Tile_type;
 		v[vOffset + 2] = Tile_col;
 		// v[vOffset + 3] = 0;	// not needed since all elements are 0's already
-		vOffset += 4;
-
-		offset += 2;
 	}
 }
