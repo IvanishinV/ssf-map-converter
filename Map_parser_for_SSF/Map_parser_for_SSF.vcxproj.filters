@@ -9,9 +9,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Parser">
-      <UniqueIdentifier>{e839dee5-e260-45bd-9a00-6d49730fe594}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MAP">
       <UniqueIdentifier>{22f1a1b6-44c2-4d07-8ba3-75a2c8bf4419}</UniqueIdentifier>
     </Filter>
@@ -29,9 +26,6 @@
     </Filter>
     <Filter Include="MIS\Mis_mapunits">
       <UniqueIdentifier>{c3e67161-e980-4e19-916a-2a19c449ca48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Converter">
-      <UniqueIdentifier>{bdcff24f-205d-400f-8153-621c1f05ecfc}</UniqueIdentifier>
     </Filter>
     <Filter Include="MIS\Mis_scripts">
       <UniqueIdentifier>{0e42a677-c887-423e-957d-7ffe061b90b8}</UniqueIdentifier>
@@ -78,9 +72,6 @@
     <Filter Include="MAP\Map_mini">
       <UniqueIdentifier>{b0e597f6-947e-4ced-8007-c3426c69349d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Displayinfo">
-      <UniqueIdentifier>{da1ec0ee-031c-4677-9f81-5bc1b5b20bbd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MAP\Map_landname">
       <UniqueIdentifier>{c6fd576a-c6cd-4c6f-a69c-75997a358c59}</UniqueIdentifier>
     </Filter>
@@ -89,9 +80,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Parser.cpp">
-      <Filter>Parser</Filter>
-    </ClCompile>
     <ClCompile Include="Mis_zones.cpp">
       <Filter>MIS\Mis_zones</Filter>
     </ClCompile>
@@ -103,9 +91,6 @@
     </ClCompile>
     <ClCompile Include="Map_objects.cpp">
       <Filter>MAP\Map_objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Converter.cpp">
-      <Filter>Converter</Filter>
     </ClCompile>
     <ClCompile Include="Mis_scripts.cpp">
       <Filter>MIS\Mis_scripts</Filter>
@@ -167,9 +152,6 @@
     <ClCompile Include="Map_mini.cpp">
       <Filter>MAP\Map_mini</Filter>
     </ClCompile>
-    <ClCompile Include="Displayinfo.cpp">
-      <Filter>Displayinfo</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -179,11 +161,20 @@
     <ClCompile Include="Helper.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Parser.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Converter.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Displayinfo.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Lang.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Parser.h">
-      <Filter>Parser</Filter>
-    </ClInclude>
     <ClInclude Include="Mis_zones.h">
       <Filter>MIS\Mis_zones</Filter>
     </ClInclude>
@@ -195,9 +186,6 @@
     </ClInclude>
     <ClInclude Include="Map_objects.h">
       <Filter>MAP\Map_objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Converter.h">
-      <Filter>Converter</Filter>
     </ClInclude>
     <ClInclude Include="Mis_scripts.h">
       <Filter>MIS\Mis_scripts</Filter>
@@ -262,13 +250,22 @@
     <ClInclude Include="Map_mini.h">
       <Filter>MAP\Map_mini</Filter>
     </ClInclude>
-    <ClInclude Include="Displayinfo.h">
-      <Filter>Displayinfo</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Helper.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Converter.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Displayinfo.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Lang.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

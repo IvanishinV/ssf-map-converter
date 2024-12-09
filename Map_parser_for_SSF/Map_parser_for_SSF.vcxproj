@@ -110,10 +110,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\Lammer\source\Libraries\gzip-hpp-master\include;C:\Program Files (x86)\zlib\include</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\zlib\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,6 +146,7 @@
     <ClCompile Include="Beach.cpp" />
     <ClCompile Include="Displayinfo.cpp" />
     <ClCompile Include="Helper.cpp" />
+    <ClCompile Include="Lang.cpp" />
     <ClCompile Include="Map_mini.cpp" />
     <ClCompile Include="Desert.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -176,6 +181,7 @@
     <ClInclude Include="Beach.h" />
     <ClInclude Include="Displayinfo.h" />
     <ClInclude Include="Helper.h" />
+    <ClInclude Include="Lang.h" />
     <ClInclude Include="Map_mini.h" />
     <ClInclude Include="Converter.h" />
     <ClInclude Include="Desert.h" />

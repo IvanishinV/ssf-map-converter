@@ -8,35 +8,40 @@ void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_
 	switch (mapIdentifier)
 	{
 	case (0):
-		std::print("Это летняя карта");
+		own::print(Dictionary::getValue(STRINGS::MAP_SUMMER));
+		//std::print("Это летняя карта");
 		break;
 	case (1):
-		std::print("Это зимняя карта");
+		own::print(Dictionary::getValue(STRINGS::MAP_WINTER));
+		//std::print("Это зимняя карта");
 		break;
 	case (2):
-		std::print("Это морская карта");
+		own::print(Dictionary::getValue(STRINGS::MAP_SEA));
+		//std::print("Это морская карта");
 		break;
 	case (3):
-		std::print("Это пустынная карта");
+		own::print(Dictionary::getValue(STRINGS::MAP_DESERT));
+		//std::print("Это пустынная карта");
 		break;
 	default:
-		std::print("Неизвестный тип карты");
+		own::print(Dictionary::getValue(STRINGS::MAP_UNKNOWN));
+		//std::print("Неизвестный тип карты");
 		break;
 	};
 
-	std::println(" размером: {} x {}\nРазмер файла: {} байт", mapSizeU, mapSizeV, mapEndPosition);
+
+	own::println(Dictionary::getValue(STRINGS::MAP_SIZE), mapSizeU, mapSizeV, mapEndPosition);
+	//std::println(" размером: {} x {}\nРазмер файла: {} байт", mapSizeU, mapSizeV, mapEndPosition);
 }
 
 void errorOpenFile()
 {
-	std::println("Ошибка открытия файла!");
-	//std::cout << "Ошибка открытия файла!" << std::endl;
-	//std::cout << "File opening error!" << std::endl;
+	own::printlnError(Dictionary::getValue(STRINGS::ERROR_OPEN));
+	//std::println("\033[31m[Error]\033[0m Ошибка открытия файла!");
 }
 
 void errorWriteFile()
 {
-	std::println("Ошибка создания файла для записи!");
-	//std::cout << "Ошибка создания файла для записи!" << std::endl;
-	//std::cout << "File opening error!" << std::endl;
+	own::printlnError(Dictionary::getValue(STRINGS::ERROR_WRITE));
+	//std::println("\033[31m[Error]\033[0m Ошибка создания файла для записи!");
 }
