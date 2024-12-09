@@ -12,6 +12,5 @@ void covertMisDesc()
 		errorWriteFile();
 		return;
 	}
-	outputFileMisDesc << "good convert mission";
 	outputFileMisDesc.close();
 }

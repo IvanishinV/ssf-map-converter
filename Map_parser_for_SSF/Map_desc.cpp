@@ -12,7 +12,5 @@ void covertMapDesc(const std::string_view& convertMapName)
 		errorWriteFile();
 		return;
 	}
-	outputFileMapDesc.write(convertMapName.data(), convertMapName.length());
-	//outputFileMapDesc << convertMapName;
 	outputFileMapDesc.close();
 }
