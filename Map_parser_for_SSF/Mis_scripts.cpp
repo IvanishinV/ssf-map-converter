@@ -63,7 +63,7 @@ void covertMisScripts(const std::vector<uint8_t>& mis_scripts)
 	std::ofstream outputFile("map.000/mis.000/scripts2", std::ios::binary);
 	if (!outputFile)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	//------------------------------------------------------------------------------

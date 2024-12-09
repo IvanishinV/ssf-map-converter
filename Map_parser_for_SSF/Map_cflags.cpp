@@ -10,7 +10,7 @@ bool covertMapCflags(const std::vector<uint8_t>& map_flags)
 	std::ofstream outputMapCflags("map.000/cflags", std::ios::binary);
 	if (!outputMapCflags)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return false;
 	}
 

@@ -11,7 +11,7 @@ void covertMisUnits(const std::vector<uint8_t>& mis_unitnames, const std::vector
 	std::ofstream outputFileSupport("map.000/mis.000/support", std::ios::binary);
 	if (!outputFileMapUnits || !outputFileSupport)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	//------------------------------------------------------------------------------

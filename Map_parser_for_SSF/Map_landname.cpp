@@ -9,7 +9,7 @@ void covertMapLandname(const std::vector<uint8_t>& map_landname)
 	std::ofstream outputMapLandname("map.000/landname", std::ios::binary);
 	if (!outputMapLandname)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 

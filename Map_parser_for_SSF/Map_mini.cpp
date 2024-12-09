@@ -33,7 +33,7 @@ void covertMapMini(const std::vector<uint8_t>& map_mini)
 	std::ofstream outputFileMapMiniBMP("map_mini.bmp", std::ios::binary);
 	if (!outputFileMapMiniBMP)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 

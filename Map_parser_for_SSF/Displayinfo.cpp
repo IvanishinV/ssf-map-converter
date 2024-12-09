@@ -34,7 +34,7 @@ void errorOpenFile()
 	//std::cout << "File opening error!" << std::endl;
 }
 
-void errorBuildFile()
+void errorWriteFile()
 {
 	std::println("Ошибка создания файла для записи!");
 	//std::cout << "Ошибка создания файла для записи!" << std::endl;

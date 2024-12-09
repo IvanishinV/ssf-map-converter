@@ -30,7 +30,7 @@ void covertMisPhrases(const std::vector<uint8_t>& mis_phrases, const uint32_t si
 	std::ofstream outputFileMisPharses("map.000/mis.000/phrases", std::ios::binary);
 	if (!outputFileMisPharses)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	//------------------------------------------------------------------------------

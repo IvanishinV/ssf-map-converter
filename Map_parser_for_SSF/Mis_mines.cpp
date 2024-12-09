@@ -10,7 +10,7 @@ void convertMisMines(const std::vector<uint8_t>& map_mines, const uint32_t mapSi
 	std::ofstream outputFileMisMines("map.000/mis.000/mines", std::ios::binary);
 	if (!outputFileMisMines)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 

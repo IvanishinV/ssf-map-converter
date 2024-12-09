@@ -33,7 +33,7 @@ void covertMapInfo(uint32_t mapIdentifier, uint32_t mapSizeU, uint32_t mapSizeV)
 	std::ofstream outputMapInfo("map.000/info", std::ios::binary);
 	if (!outputMapInfo)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	MAP_INFO_HEADER part1(mapIdentifier, mapSizeU, mapSizeV);

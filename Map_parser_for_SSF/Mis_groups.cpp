@@ -135,7 +135,7 @@ void convertMisGroups(const std::vector<uint8_t>& mis_groups)
 	std::ofstream outputFileMisGroups("map.000/mis.000/groups", std::ios::binary);
 	if (!outputFileMisGroups)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	std::array <std::string_view, 11> AI_type_array =

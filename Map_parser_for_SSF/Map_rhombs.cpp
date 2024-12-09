@@ -9,7 +9,7 @@ void covertMapRhombs(const std::vector<uint8_t>& map_rhombs, const uint32_t mapI
 	std::ofstream outputFile("map.000/rhombs", std::ios::binary);
 	if (!outputFile)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	//---------------------------------------------------------------------------------------------------------

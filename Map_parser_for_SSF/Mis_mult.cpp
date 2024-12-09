@@ -10,7 +10,7 @@ void covertMisMult(const std::vector<uint8_t>& map_info, const uint32_t maptypeh
 	std::ofstream outputMapMisMult("map.000/mis.000/mismult", std::ios::binary);
 	if (!outputMapMisMult)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 

@@ -10,7 +10,7 @@ void covertMisZones(const std::vector<uint8_t>& mis_zones, const uint32_t mapSiz
 	std::ofstream outputFileMisZones("map.000/mis.000/locations", std::ios::binary);
 	if (!outputFileMisZones)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 

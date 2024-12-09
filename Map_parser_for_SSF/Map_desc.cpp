@@ -9,7 +9,7 @@ void covertMapDesc(const std::string_view& convertMapName)
 	std::ofstream outputFileMapDesc("map.000/desc", std::ios::binary);
 	if (!outputFileMapDesc)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	outputFileMapDesc.write(convertMapName.data(), convertMapName.length());

@@ -12,7 +12,7 @@ void covertMisObjects(const std::vector<uint8_t>& mis_objects)
 	std::ofstream outputFileMisObjects("map.000/mis.000/objs", std::ios::binary);
 	if (!outputFileMisObjects)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	//------------------------------------------------------------------------------

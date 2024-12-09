@@ -9,7 +9,7 @@ void convertMisPlayers(const std::vector<uint8_t>& mis_players)
 	std::ofstream outputMisPlayers("map.000/mis.000/players", std::ios::binary);
 	if (!outputMisPlayers)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	//------------------------------------------------------------------------------

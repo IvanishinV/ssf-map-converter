@@ -4,4 +4,4 @@ void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_
 
 void errorOpenFile();
 
-void errorBuildFile();
+void errorWriteFile();

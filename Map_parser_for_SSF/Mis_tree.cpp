@@ -9,7 +9,7 @@ void covertMisTree(const std::vector<uint8_t>& mis_desc)
 		std::ofstream outputFileMisTree("map.000/mis.000/misdesc", std::ios::binary);
 		if (!outputFileMisTree)
 		{
-			errorBuildFile();
+			errorWriteFile();
 			return;
 		}
 

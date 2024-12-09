@@ -11,7 +11,7 @@ void covertMisWoofers(const std::vector<uint8_t>& mis_woofers)
 	std::ofstream outputFileMisWoofers("map.000/mis.000/sounds", std::ios::binary);
 	if (!outputFileMisWoofers)
 	{
-		errorBuildFile();
+		errorWriteFile();
 		return;
 	}
 	//------------------------------------------------------------------------------
