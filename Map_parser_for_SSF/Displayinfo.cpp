@@ -34,6 +34,11 @@ void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_
 	//std::println(" נאחלונמל: {} x {}\n׀אחלונ פאיכא: {} באיע", mapSizeU, mapSizeV, mapEndPosition);
 }
 
+void errorExistsFile()
+{
+	own::printlnError(Dictionary::getValue(STRINGS::ERROR_FILE_NOT_EXIST));
+}
+
 void errorOpenFile()
 {
 	own::printlnError(Dictionary::getValue(STRINGS::ERROR_OPEN));

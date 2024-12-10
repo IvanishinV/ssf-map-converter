@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #include "Mis_mult.h"
-#include "General.h"
+#include "util.h"
 #include "Displayinfo.h"
 
 void covertMisMult(const std::vector<uint8_t>& map_info, const uint32_t maptypeheader)

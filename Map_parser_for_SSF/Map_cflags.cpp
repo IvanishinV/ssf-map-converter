@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #include "Map_cflags.h"
-#include "General.h"
+#include "util.h"
 #include "Displayinfo.h"
 
 bool covertMapCflags(const std::vector<uint8_t>& map_flags)

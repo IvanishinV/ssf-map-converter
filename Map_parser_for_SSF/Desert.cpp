@@ -2,9 +2,9 @@
 #include "stdafx.h"
 
 #include "Desert.h"
-#include "General.h"
+#include "util.h"
 
-void desertrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile)
+void desertrhombs(const std::string_view& map_rhombs, std::ofstream& outputFile)
 {
 	const size_t length = map_rhombs.size();
 	std::vector<uint8_t> v(length * 2, 0);
@@ -436,4 +436,5 @@ void desertrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputF
 		// v[vOffset + 3] = 0;	// not needed since all elements are 0's already
 	}
 
+	outputFile.write((char*)v.data(), v.size());
 }

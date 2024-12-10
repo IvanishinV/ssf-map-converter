@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #include "Map_mini.h"
-#include "General.h"
+#include "util.h"
 #include "Displayinfo.h"
 
 struct BITMAPINFOHEADER_
@@ -70,6 +70,4 @@ void covertMapMini(const std::vector<uint8_t>& map_mini)
 
 	outputFileMapMiniBMP.write((char*)map_mini.data(), size);
 	outputFileMapMiniBMP.close();
-
-	return;
 }

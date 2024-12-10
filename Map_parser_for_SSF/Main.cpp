@@ -4,18 +4,19 @@
 #include "Converter.h"
 #include "Parser.h"
 #include "Displayinfo.h"
+#include "util.h"
 
 #include <gzip/decompress.hpp>
 #pragma comment(lib, "zlibstatic.lib")
 
-enum class Action
-{
-	Parse,
-	Convert
-};
-
 void openFileAndProcess(const Action action, const std::string_view& filename)
 {
+	if (!std::filesystem::exists(filename))
+	{
+		errorExistsFile();
+		return;
+	}
+
 	std::ifstream inputFile(filename.data(), std::ios::ate | std::ios::in | std::ios::binary);
 	if (!inputFile)
 	{
@@ -30,63 +31,24 @@ void openFileAndProcess(const Action action, const std::string_view& filename)
 	inputFile.close();
 
 	const std::string rawData = gzip::decompress(zipData.data(), zipData.size());
-	const std::string_view convertMapName{ std::string_view(filename).substr(0, filename.find_last_of(".")) };
 
-	//const auto start = std::chrono::high_resolution_clock::now();
+	const auto start = std::chrono::high_resolution_clock::now();
 
-	const uint32_t mapType = *(uint32_t*)rawData.data();
-	switch (mapType)
+	if (action == Action::Convert)
 	{
-	case (0x4d535353):	// SSSM
-	{
-		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE));
-		//std::println("\nЭто одиночная карта\n");
-		if (action == Action::Convert)
-			convertMapFileSSM(rawData, convertMapName);
-		else
-			parserMapFileSSM(rawData);
-		break;
+		Converter conv;
+		for (size_t i = 0; i < 1000; ++i)
+		conv.convertMap(rawData, filename);
 	}
-	case (0x4d4d5353):	// SSMM
+	else
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_MULTI));
-		//std::println("\nЭто карта мультиплеера\n");
-		if (action == Action::Convert)
-			convertMapFileSMM(rawData, convertMapName);
-		else
-			parserMapFileSMM(rawData);
-		break;
+		Parser parser;
+		parser.parseMap(rawData, filename);
 	}
-	case (0x504d4143):	// CAMP
-	{
-		own::println(Dictionary::getValue(STRINGS::CAMP_MAP));
-		//std::println("\nЭто часть карты компании, данный файл отвечает за локацию\n");
-		if (action == Action::Convert)
-			convertMapFileSSC_map(rawData, convertMapName);
-		else
-			parserMapFileSSC_map(rawData);
-		break;
-	}
-	case (0x534d4143):	// CAMS
-	{
-		own::println(Dictionary::getValue(STRINGS::CAMP_MIS));
-		//std::println("\nЭто часть карты компании, данный файл отвечает за миссию\n");
-		if (action == Action::Convert)
-			convertMapFileSCC_mission(rawData);
-		else
-			parserMapFileSCC_mission(rawData);
-		break;
-	}
-	default:
-	{
-		own::println(Dictionary::getValue(STRINGS::ERROR_FILE));
-		//std::println("\033[31m[Error]\033[0m Выбранный файл не является картой\n");
-	}
-	};
 
-	//const auto end = std::chrono::high_resolution_clock::now();
-	//auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	//std::println("Map processed in {}ms\n", duration.count());
+	const auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	std::println("Map processed in {}ms\n", duration.count());
 }
 
 void manualInput()
@@ -156,7 +118,7 @@ int main(int argc, char** argv)
 		break;
 	};
 
-	std::println("SSF Map parser for SS1 & SSF, \033[32mv.0.6.1\033[0m by NASHRIPPER");
+	std::println("SSF Map parser for SS1 & SSF, \033[32mv.0.6.2\033[0m by NASHRIPPER and ");
 
 	if (argc == 3)
 	{
@@ -171,7 +133,7 @@ int main(int argc, char** argv)
 			return 0;
 		}
 	}
-	if (argc == 2)
+	else if (argc == 2)
 	{
 		openFileAndProcess(Action::Convert, argv[1]);
 		return 0;

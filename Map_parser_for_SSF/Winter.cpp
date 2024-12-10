@@ -2,9 +2,9 @@
 #include "stdafx.h"
 
 #include "Winter.h"
-#include "General.h"
+#include "util.h"
 
-void winterrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile)
+void winterrhombs(const std::string_view& map_rhombs, std::ofstream& outputFile)
 {
 	const size_t length = map_rhombs.size();
 	std::vector<uint8_t> v(length * 2, 0);
@@ -765,4 +765,6 @@ void winterrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputF
 		v[vOffset + 2] = Tile_col;
 		// v[vOffset + 3] = 0;	// not needed since all elements are 0's already
 	}
+
+	outputFile.write((char*)v.data(), v.size());
 }

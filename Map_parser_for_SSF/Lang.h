@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <array>
 #include <string>
 
 namespace own
@@ -8,19 +8,25 @@ namespace own
 	template<typename... Args>
 	inline void println(const std::string_view& fmt, Args&&... args)
 	{
-		std::println("{}", std::vformat(fmt, std::make_format_args(args...)));
+		//std::println("{}", std::vformat(fmt, std::make_format_args(args...)));
 	}
 
 	template<typename... Args>
 	inline void print(const std::string_view& fmt, Args&&... args)
 	{
-		std::print("{}", std::vformat(fmt, std::make_format_args(args...)));
+		//std::print("{}", std::vformat(fmt, std::make_format_args(args...)));
 	}
 
 	template<typename... Args>
 	inline void printlnError(const std::string_view& fmt, Args&&... args)
 	{
-		std::println("\033[31m[Error]\033[0m {}", std::vformat(fmt, std::make_format_args(args...)));
+		//std::println("\033[31m[Error]\033[0m {}", std::vformat(fmt, std::make_format_args(args...)));
+	}
+
+	template<typename... Args>
+	inline void printlnSuccess(const std::string_view& fmt, Args&&... args)
+	{
+		//std::println("\033[32m[Success]\033[0m {}", std::vformat(fmt, std::make_format_args(args...)));
 	}
 }
 
@@ -28,6 +34,7 @@ enum class STRINGS
 {
 	ENTER_FILENAME,
 	ENTER_PARSE_FILENAME,
+	ERROR_FILE_NOT_EXIST,
 	ERROR_OPEN,
 	ERROR_WRITE,
 	ERROR_FILE,
@@ -35,6 +42,7 @@ enum class STRINGS
 	CAMP_MIS,
 	MAP_SINGLE,
 	MAP_MULTI,
+	SUCCESS_CONVERTED,
 
 	MAP_SUMMER,
 	MAP_WINTER,

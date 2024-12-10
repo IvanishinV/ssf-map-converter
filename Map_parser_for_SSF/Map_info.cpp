@@ -2,20 +2,12 @@
 #include "stdafx.h"
 
 #include "Map_info.h"
-#include "General.h"
+#include "util.h"
 #include "Displayinfo.h"
 
 #pragma pack(push, 1)
 struct MAP_INFO_HEADER
 {
-	private:
-	uint32_t mapIdentifier;
-	uint32_t mapSizeU;
-	uint32_t mapSizeV;
-	uint8_t unknown_1;
-	uint8_t unknown_2;
-	uint8_t unknown_3;
-	public:
 	MAP_INFO_HEADER(uint32_t mapIdentifier, uint32_t mapSizeU, uint32_t mapSizeV)
 	{
 		this->mapIdentifier = mapIdentifier;
@@ -25,6 +17,14 @@ struct MAP_INFO_HEADER
 		unknown_2 = GLOBALNULL;
 		unknown_3 = GLOBALNULL;
 	}
+
+private:
+	uint32_t mapIdentifier;
+	uint32_t mapSizeU;
+	uint32_t mapSizeV;
+	uint8_t unknown_1;
+	uint8_t unknown_2;
+	uint8_t unknown_3;
 };
 #pragma pack (pop)
 

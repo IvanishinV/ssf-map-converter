@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 const uint32_t FILE_TYPE_OFFSET = 0x0;
 const uint32_t MapHeaderSMM = 548;
 const uint32_t MapHeaderSSM = 52;
@@ -23,6 +25,17 @@ const uint32_t LOCATIONSSIZE = 262144;
 const uint32_t NUMMEMORY = 3847412;
 
 const uint32_t timeconvertnum = 25;
+
+constexpr uint32_t HEADER_SINGLE = 0x4d535353;	// SSSM
+constexpr uint32_t HEADER_MULTI = 0x4d4d5353;	// SSMM
+constexpr uint32_t HEADER_CAMP_MAP = 0x504d4143;	// CAMP
+constexpr uint32_t HEADER_CAMP_MIS = 0x534d4143;	// CAMS
+
+enum class Action
+{
+	Parse,
+	Convert
+};
 
 struct MapHeaderSSM
 {

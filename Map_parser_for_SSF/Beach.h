@@ -1,3 +1,3 @@
 #pragma once
 
-void beachrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile);
+void beachrhombs(const std::string_view& map_rhombs, std::ofstream& outputFile);

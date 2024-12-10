@@ -2,9 +2,9 @@
 #include "stdafx.h"
 
 #include "Beach.h"
-#include "General.h"
+#include "util.h"
 
-void beachrhombs(const std::vector<uint8_t>& map_rhombs, std::ofstream& outputFile)
+void beachrhombs(const std::string_view& map_rhombs, std::ofstream& outputFile)
 {
 	const size_t length = map_rhombs.size();
 	std::vector<uint8_t> v(length * 2, 0);

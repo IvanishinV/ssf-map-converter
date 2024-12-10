@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #include "Mis_zones.h"
-#include "General.h"
+#include "util.h"
 #include "Displayinfo.h"
 
 void covertMisZones(const std::vector<uint8_t>& mis_zones, const uint32_t mapSizeU)

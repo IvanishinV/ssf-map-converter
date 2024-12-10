@@ -122,7 +122,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -147,28 +147,8 @@
     <ClCompile Include="Displayinfo.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="Lang.cpp" />
-    <ClCompile Include="Map_mini.cpp" />
     <ClCompile Include="Desert.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Map_cflags.cpp" />
-    <ClCompile Include="Map_desc.cpp" />
-    <ClCompile Include="Map_info.cpp" />
-    <ClCompile Include="Map_landname.cpp" />
-    <ClCompile Include="Mis_groups.cpp" />
-    <ClCompile Include="Mis_mines.cpp" />
-    <ClCompile Include="Mis_mult.cpp" />
-    <ClCompile Include="Map_objects.cpp" />
-    <ClCompile Include="Map_rhombs.cpp" />
-    <ClCompile Include="Mis_desc.cpp" />
-    <ClCompile Include="Mis_info.cpp" />
-    <ClCompile Include="Mis_mapunits.cpp" />
-    <ClCompile Include="Mis_objects.cpp" />
-    <ClCompile Include="Mis_phrases.cpp" />
-    <ClCompile Include="Mis_players.cpp" />
-    <ClCompile Include="Mis_scripts.cpp" />
-    <ClCompile Include="Mis_tree.cpp" />
-    <ClCompile Include="Mis_woofers.cpp" />
-    <ClCompile Include="Mis_zones.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Converter.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -182,29 +162,9 @@
     <ClInclude Include="Displayinfo.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Lang.h" />
-    <ClInclude Include="Map_mini.h" />
     <ClInclude Include="Converter.h" />
     <ClInclude Include="Desert.h" />
-    <ClInclude Include="General.h" />
-    <ClInclude Include="Map_cflags.h" />
-    <ClInclude Include="Map_desc.h" />
-    <ClInclude Include="Map_info.h" />
-    <ClInclude Include="Map_landname.h" />
-    <ClInclude Include="Mis_groups.h" />
-    <ClInclude Include="Mis_mines.h" />
-    <ClInclude Include="Mis_mult.h" />
-    <ClInclude Include="Map_objects.h" />
-    <ClInclude Include="Map_rhombs.h" />
-    <ClInclude Include="Mis_desc.h" />
-    <ClInclude Include="Mis_info.h" />
-    <ClInclude Include="Mis_mapunits.h" />
-    <ClInclude Include="Mis_objects.h" />
-    <ClInclude Include="Mis_phrases.h" />
-    <ClInclude Include="Mis_players.h" />
-    <ClInclude Include="Mis_scripts.h" />
-    <ClInclude Include="Mis_tree.h" />
-    <ClInclude Include="Mis_woofers.h" />
-    <ClInclude Include="Mis_zones.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Summer.h" />

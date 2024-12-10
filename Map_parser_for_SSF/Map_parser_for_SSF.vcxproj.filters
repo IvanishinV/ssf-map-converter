@@ -9,149 +9,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="MAP">
-      <UniqueIdentifier>{22f1a1b6-44c2-4d07-8ba3-75a2c8bf4419}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MAP\Map_objects">
-      <UniqueIdentifier>{8bb2eb95-e8c2-498b-b595-1b99904206a7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MAP\Map_rhombs">
-      <UniqueIdentifier>{fda5332f-1b31-4af4-bae7-31b58b48a754}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS">
-      <UniqueIdentifier>{385c89f0-7128-4de2-bfa2-12ea85661853}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_zones">
-      <UniqueIdentifier>{de0bde5f-815b-4a48-be9c-1b4e13925e3a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_mapunits">
-      <UniqueIdentifier>{c3e67161-e980-4e19-916a-2a19c449ca48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_scripts">
-      <UniqueIdentifier>{0e42a677-c887-423e-957d-7ffe061b90b8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MAP\Map_info">
-      <UniqueIdentifier>{2e73a979-83b7-4a2f-938c-ae7a15320879}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MAP\Map_cflags">
-      <UniqueIdentifier>{f03ba06e-0a79-4fec-89d0-245ec0585075}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_woofers">
-      <UniqueIdentifier>{f1aef5c0-bd05-4c74-9a7a-84804e088b9c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MAP\Map_desc">
-      <UniqueIdentifier>{3c6030ee-2958-45be-a067-863eb5c6ffd9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_info">
-      <UniqueIdentifier>{a7f30839-d672-4536-84da-cfb663a36d51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_desc">
-      <UniqueIdentifier>{2c5a729a-7177-48f6-a6ea-9e3378249174}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_objects">
-      <UniqueIdentifier>{44de7e87-5caf-41b0-87d4-8b13705b6849}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_phrases">
-      <UniqueIdentifier>{c3673edf-30a2-442e-a7f2-4d2ba99524f4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_tree">
-      <UniqueIdentifier>{d51dda71-dff4-467f-a3ef-ed8b09040181}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_mult">
-      <UniqueIdentifier>{6e745a65-edb4-48db-9bc5-3b95e9b1d4ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_mines">
-      <UniqueIdentifier>{88569201-c652-4a7e-8045-7edba3eeedf9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_groups">
-      <UniqueIdentifier>{4a28ea2d-7be1-494e-959b-f80bc906d0d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MIS\Mis_players">
-      <UniqueIdentifier>{2a6b11c8-0da9-4805-8bbe-50628d87e99a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MAP\Map_mini">
-      <UniqueIdentifier>{b0e597f6-947e-4ced-8007-c3426c69349d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MAP\Map_landname">
-      <UniqueIdentifier>{c6fd576a-c6cd-4c6f-a69c-75997a358c59}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Исходные файлы">
       <UniqueIdentifier>{b2139a79-242e-4e5c-a813-7489e6e3f153}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\Map_rhombs">
+      <UniqueIdentifier>{fda5332f-1b31-4af4-bae7-31b58b48a754}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Map_rhombs">
+      <UniqueIdentifier>{0f4a114c-e79b-4aab-8417-3e1153e43355}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Mis_zones.cpp">
-      <Filter>MIS\Mis_zones</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_mapunits.cpp">
-      <Filter>MIS\Mis_mapunits</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_rhombs.cpp">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_objects.cpp">
-      <Filter>MAP\Map_objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_scripts.cpp">
-      <Filter>MIS\Mis_scripts</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_landname.cpp">
-      <Filter>MAP\Map_landname</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_info.cpp">
-      <Filter>MAP\Map_info</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_cflags.cpp">
-      <Filter>MAP\Map_cflags</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_woofers.cpp">
-      <Filter>MIS\Mis_woofers</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_desc.cpp">
-      <Filter>MAP\Map_desc</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_info.cpp">
-      <Filter>MIS\Mis_info</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_desc.cpp">
-      <Filter>MIS\Mis_desc</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_objects.cpp">
-      <Filter>MIS\Mis_objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_phrases.cpp">
-      <Filter>MIS\Mis_phrases</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_tree.cpp">
-      <Filter>MIS\Mis_tree</Filter>
-    </ClCompile>
-    <ClCompile Include="Summer.cpp">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Beach.cpp">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Winter.cpp">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Desert.cpp">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_mult.cpp">
-      <Filter>MIS\Mis_mult</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_mines.cpp">
-      <Filter>MIS\Mis_mines</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_groups.cpp">
-      <Filter>MIS\Mis_groups</Filter>
-    </ClCompile>
-    <ClCompile Include="Mis_players.cpp">
-      <Filter>MIS\Mis_players</Filter>
-    </ClCompile>
-    <ClCompile Include="Map_mini.cpp">
-      <Filter>MAP\Map_mini</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -173,82 +41,22 @@
     <ClCompile Include="Lang.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Beach.cpp">
+      <Filter>Исходные файлы\Map_rhombs</Filter>
+    </ClCompile>
+    <ClCompile Include="Desert.cpp">
+      <Filter>Исходные файлы\Map_rhombs</Filter>
+    </ClCompile>
+    <ClCompile Include="Summer.cpp">
+      <Filter>Исходные файлы\Map_rhombs</Filter>
+    </ClCompile>
+    <ClCompile Include="Winter.cpp">
+      <Filter>Исходные файлы\Map_rhombs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mis_zones.h">
-      <Filter>MIS\Mis_zones</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_mapunits.h">
-      <Filter>MIS\Mis_mapunits</Filter>
-    </ClInclude>
-    <ClInclude Include="Map_rhombs.h">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Map_objects.h">
-      <Filter>MAP\Map_objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_scripts.h">
-      <Filter>MIS\Mis_scripts</Filter>
-    </ClInclude>
-    <ClInclude Include="General.h">
+    <ClInclude Include="util.h">
       <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Map_landname.h">
-      <Filter>MAP\Map_landname</Filter>
-    </ClInclude>
-    <ClInclude Include="Map_info.h">
-      <Filter>MAP\Map_info</Filter>
-    </ClInclude>
-    <ClInclude Include="Map_cflags.h">
-      <Filter>MAP\Map_cflags</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_woofers.h">
-      <Filter>MIS\Mis_woofers</Filter>
-    </ClInclude>
-    <ClInclude Include="Map_desc.h">
-      <Filter>MAP\Map_desc</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_info.h">
-      <Filter>MIS\Mis_info</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_desc.h">
-      <Filter>MIS\Mis_desc</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_objects.h">
-      <Filter>MIS\Mis_objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_phrases.h">
-      <Filter>MIS\Mis_phrases</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_tree.h">
-      <Filter>MIS\Mis_tree</Filter>
-    </ClInclude>
-    <ClInclude Include="Summer.h">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Beach.h">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Winter.h">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Desert.h">
-      <Filter>MAP\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_mult.h">
-      <Filter>MIS\Mis_mult</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_mines.h">
-      <Filter>MIS\Mis_mines</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_groups.h">
-      <Filter>MIS\Mis_groups</Filter>
-    </ClInclude>
-    <ClInclude Include="Mis_players.h">
-      <Filter>MIS\Mis_players</Filter>
-    </ClInclude>
-    <ClInclude Include="Map_mini.h">
-      <Filter>MAP\Map_mini</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Файлы заголовков</Filter>
@@ -267,6 +75,18 @@
     </ClInclude>
     <ClInclude Include="Lang.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Beach.h">
+      <Filter>Файлы заголовков\Map_rhombs</Filter>
+    </ClInclude>
+    <ClInclude Include="Desert.h">
+      <Filter>Файлы заголовков\Map_rhombs</Filter>
+    </ClInclude>
+    <ClInclude Include="Summer.h">
+      <Filter>Файлы заголовков\Map_rhombs</Filter>
+    </ClInclude>
+    <ClInclude Include="Winter.h">
+      <Filter>Файлы заголовков\Map_rhombs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

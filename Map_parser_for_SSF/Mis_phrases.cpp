@@ -4,26 +4,10 @@
 //Project header
 #include "Helper.h"
 #include "Mis_phrases.h"
-#include "General.h"
+#include "util.h"
 #include "Displayinfo.h"
 
 //ДОПИЛИТЬ убрать лишние функции
-//___________________________________________________________________________________________________
-/*uint32_t positionPhrases(const std::vector<uint8_t>& mis_phrases, std::ofstream& outputFile, const uint32_t startPosition, const uint32_t size)
-{
-	mis_phrases.seekg(startPosition);
-	char* buffer = new char[size];
-	mis_phrases.read(buffer, size);
-	outputFile.write(buffer, size);
-	delete[] buffer;
-	uint32_t position = startPosition + size;
-	return position;
-}*/
-//___________________________________________________________________________________________________
-char readFileInt8(const std::vector<uint8_t>& mis_phrases, const uint32_t fileOffset)
-{
-	return *reinterpret_cast<const char*>(mis_phrases.data() + fileOffset);
-}
 //___________________________________________________________________________________________________
 void covertMisPhrases(const std::vector<uint8_t>& mis_phrases, const uint32_t sizeMisPhrases)
 {
