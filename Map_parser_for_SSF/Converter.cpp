@@ -1,6 +1,9 @@
 
 #include "stdafx.h"
 
+#include <gzip/decompress.hpp>
+#pragma comment(lib, "zlibstatic.lib")
+
 #include "Helper.h"
 #include "Converter.h"
 #include "Displayinfo.h"
