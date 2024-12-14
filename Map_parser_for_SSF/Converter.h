@@ -10,6 +10,8 @@ public:
 private:
 	std::filesystem::path m_mapFolder;
 	std::filesystem::path m_misFolder;
+	std::string m_stemFileName;
+	uint32_t m_mapType;
 
 	uint32_t convertMapFileSMM(const std::string_view& inputData);
 	uint32_t convertMapFileSSM(const std::string_view& inputData);

@@ -152,12 +152,12 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 
 	const std::filesystem::path fileFolder = filepath.parent_path();
 	const std::string fileName = filepath.filename().string();
-	const std::string stemFileName = filepath.stem().string();
+	m_stemFileName = filepath.stem().string();
 	m_mapFolder = fileFolder / "map.000";		// todo: add check for already converted files to not to 
 	m_misFolder = m_mapFolder / "mis.000";
 
-	const uint32_t mapType = *(uint32_t*)rawData.data();
-	switch (mapType)
+	m_mapType = *(uint32_t*)rawData.data();
+	switch (m_mapType)
 	{
 	case (HEADER_SINGLE):
 	{
@@ -660,6 +660,13 @@ void Converter::convertMapDesc() const
 	{
 		errorWriteFile();
 		return;
+	}
+
+	switch (m_mapType)
+	{
+	case HEADER_SINGLE:
+	case HEADER_MULTI:
+		outputFileMapDesc.write(m_stemFileName.data(), m_stemFileName.length());
 	}
 
 	outputFileMapDesc.close();
