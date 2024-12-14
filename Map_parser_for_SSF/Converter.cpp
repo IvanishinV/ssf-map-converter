@@ -1887,99 +1887,42 @@ void Converter::convertMisPhrases(const std::string_view& mis_phrases, const uin
 		return;
 	}
 
-	uint32_t accumulator = 0;
-	while (accumulator < sizeMisPhrases)
+	std::vector<uint8_t> phrases(32000, 0);
+	size_t phrasesOffset{ 0 };
+	uint32_t accumulator{ 0 };
+	uint32_t sizeline;
+	while (accumulator < sizeMisPhrases && phrasesOffset < 32000)
 	{
 		//uint32_t numtext = readFileInt8(mis_phrases, 0 + accumulator);		// not used
 
-		uint32_t sizeline1 = readFileInt8(mis_phrases, 1 + accumulator);
-		if (sizeline1 > 0)
-		{
-			position(mis_phrases, outputFileMisPharses, 2 + accumulator, sizeline1);
-			accumulator += sizeline1;
-			for (uint32_t i = 0; i < 64 - sizeline1; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		else
-		{
-			for (int i = 0; i < 64; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		uint32_t sizeline2 = readFileInt8(mis_phrases, 2 + accumulator);
-		if (sizeline2 > 0)
-		{
-			position(mis_phrases, outputFileMisPharses, 3 + accumulator, sizeline2);
-			accumulator += sizeline2;
-			for (uint32_t i = 0; i < 64 - sizeline2; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		else
-		{
-			for (int i = 0; i < 64; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		uint32_t sizeline3 = readFileInt8(mis_phrases, 3 + accumulator);
-		if (sizeline3 > 0)
-		{
-			position(mis_phrases, outputFileMisPharses, 4 + accumulator, sizeline3);
-			accumulator += sizeline3;
-			for (uint32_t i = 0; i < 64 - sizeline3; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		else
-		{
-			for (int i = 0; i < 64; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		uint32_t sizeline4 = readFileInt8(mis_phrases, 4 + accumulator);
-		if (sizeline4 > 0)
-		{
-			position(mis_phrases, outputFileMisPharses, 5 + accumulator, sizeline4);
-			accumulator += sizeline4;
-			for (uint32_t i = 0; i < 64 - sizeline4; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		else
-		{
-			for (int i = 0; i < 64; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		uint32_t sizeline5 = readFileInt8(mis_phrases, 5 + accumulator);
-		if (sizeline5 > 0)
-		{
-			position(mis_phrases, outputFileMisPharses, 6 + accumulator, sizeline5);
-			accumulator += sizeline5;
-			for (uint32_t i = 0; i < 64 - sizeline5; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
-		else
-		{
-			for (int i = 0; i < 64; i++)
-			{
-				outputFileMisPharses << GLOBALNULL;
-			}
-		}
+		sizeline = readFileInt8(mis_phrases, 1 + accumulator);
+		position(mis_phrases, phrases, 2 + accumulator, phrasesOffset, sizeline);
+		phrasesOffset += 64;
+		accumulator += sizeline;
+
+		sizeline = readFileInt8(mis_phrases, 2 + accumulator);
+		position(mis_phrases, phrases, 3 + accumulator, phrasesOffset, sizeline);
+		phrasesOffset += 64;
+		accumulator += sizeline;
+
+		sizeline = readFileInt8(mis_phrases, 3 + accumulator);
+		position(mis_phrases, phrases, 4 + accumulator, phrasesOffset, sizeline);
+		phrasesOffset += 64;
+		accumulator += sizeline;
+
+		sizeline = readFileInt8(mis_phrases, 4 + accumulator);
+		position(mis_phrases, phrases, 5 + accumulator, phrasesOffset, sizeline);
+		phrasesOffset += 64;
+		accumulator += sizeline;
+
+		sizeline = readFileInt8(mis_phrases, 5 + accumulator);
+		position(mis_phrases, phrases, 6 + accumulator, phrasesOffset, sizeline);
+		phrasesOffset += 64;
+		accumulator += sizeline;
 		accumulator += 6;
 	}
 
+	outputFileMisPharses.write(reinterpret_cast<const char*>(phrases.data()), phrases.size());
 	outputFileMisPharses.close();
 }
 

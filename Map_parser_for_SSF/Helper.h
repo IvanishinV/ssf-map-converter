@@ -3,9 +3,10 @@
 #include <vector>
 #include <string_view>
 
+uint32_t position(const std::string_view& input, std::vector<uint8_t>& output, const uint32_t srcOffset, const size_t dstOffset, const uint32_t size);
 uint32_t position(const std::string_view& input, std::string_view& output, const uint32_t offset, const uint32_t size);
-uint32_t position(const std::string_view& input, std::ofstream& output, const uint32_t offset, const uint32_t size);
-uint32_t position(const std::vector<uint8_t>& input, std::ofstream& output, const uint32_t offset, const uint32_t size);
+uint32_t position(const std::string_view& input, std::ostream& output, const uint32_t offset, const uint32_t size);
+uint32_t position(const std::vector<uint8_t>& input, std::ostream& output, const uint32_t offset, const uint32_t size);
 
 int8_t readFileInt8(const std::string_view& input, const uint32_t offset);
 int8_t readFileInt8(const std::vector<uint8_t>& input, const uint32_t offset);
