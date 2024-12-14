@@ -11,27 +11,6 @@
 
 void openFileAndProcess(const Action action, const std::string_view& filename)
 {
-	if (!std::filesystem::exists(filename))
-	{
-		errorExistsFile();
-		return;
-	}
-
-	std::ifstream inputFile(filename.data(), std::ios::ate | std::ios::in | std::ios::binary);
-	if (!inputFile)
-	{
-		errorOpenFile();
-		return;
-	}
-	
-	std::vector<char> zipData(inputFile.tellg());
-
-	inputFile.seekg(std::ios::beg);
-	inputFile.read(zipData.data(), zipData.size());
-	inputFile.close();
-
-	const std::string rawData = gzip::decompress(zipData.data(), zipData.size());
-
 	const auto start = std::chrono::high_resolution_clock::now();
 
 	size_t count{ 0 };
