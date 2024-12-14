@@ -54,7 +54,7 @@ void openFileAndProcess(const Action action, const std::string_view& filename)
 
 	const auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	std::println("Processed {} file(s) in {}ms\n", count, duration.count());
+	std::println("Processed {} file(s) in {}ms", count, duration.count());
 }
 
 void manualInput()
@@ -82,7 +82,7 @@ void manualInput()
 
 void printUsage(const std::string_view& appName)
 {
-	std::println("Usage: {} <file|folder>", appName);
+	std::println("Usage: {} <file|campaign folder>", appName);
 }
 
 int main(int argc, char** argv)

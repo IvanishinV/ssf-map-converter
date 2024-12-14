@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 
+#include "Lang.h"
+
 LANGUAGE Dictionary::m_lang{ LANGUAGE::ENGLISH };
 
 // please fill this array in an orderly way for std::find to work correctly
