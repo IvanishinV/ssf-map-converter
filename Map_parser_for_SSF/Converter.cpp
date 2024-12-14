@@ -52,122 +52,61 @@ void aiFlagsConvert(std::ofstream& outputFileMisGroups, const uint8_t aitype1, c
 	uint8_t AItype2;
 	uint8_t AItype3;
 	uint8_t AItype4;
+
 	AItype1 = (uint8_t)(AIflags & 0xF0) >> 4;
-	if (AItype1 >= 8)
-	{
-		outputFileMisGroups << " aif_useobjects";
-		AItype1 -= 8;
-	}
-	if (AItype1 >= 4)
-	{
-		outputFileMisGroups << " aif_zonenoemeny";
-		AItype1 -= 4;
-	}
-	if (AItype1 >= 2)
-	{
-		outputFileMisGroups << " aif_zonehaveown";
-		AItype1 -= 2;
-	}
-	if (AItype1 == 1)
-	{
+	if ((AItype1 & 0x1) == 0x1)
 		outputFileMisGroups << " aif_rndmove";
-	}
+	if ((AItype1 & 0x2) == 0x2)
+		outputFileMisGroups << " aif_zonehaveown";
+	if ((AItype1 & 0x4) == 0x4)
+		outputFileMisGroups << " aif_zonenoemeny";
+	if ((AItype1 & 0x8) == 0x8)
+		outputFileMisGroups << " aif_useobjects";
+
 	AItype2 = (uint8_t)(AIflags >> 8) & 0xFF;
-	if (AItype2 >= 128)
-	{
-		outputFileMisGroups << " aif_atgnotow";
-		AItype2 += 128;
-	}
-	if (AItype2 >= 64)
-	{
-		outputFileMisGroups << " aif_atgnomove";
-		AItype2 -= 64;
-	}
-	if (AItype2 >= 32)
-	{
-		outputFileMisGroups << " aif_atgzonenoenemy";
-		AItype2 -= 32;
-	}
-	if (AItype2 >= 16)
-	{
-		outputFileMisGroups << " aif_atgzonehaveown";
-		AItype2 -= 16;
-	}
-	if (AItype2 >= 8)
-	{
-		outputFileMisGroups << " aif_atgnouse";
-		AItype2 -= 8;
-	}
-	if (AItype2 >= 4)
-	{
-		outputFileMisGroups << " aif_zrestrict";
-		AItype2 -= 4;
-	}
-	if (AItype2 >= 2)
-	{
-		outputFileMisGroups << " aif_grestrict";
-		AItype2 -= 2;
-	}
-	if (AItype2)
-	{
+	if ((AItype2 & 0x1) == 0x1)
 		outputFileMisGroups << " aif_rndtarget";
-	}
+	if ((AItype2 & 0x2) == 0x2)
+		outputFileMisGroups << " aif_grestrict";
+	if ((AItype2 & 0x4) == 0x4)
+		outputFileMisGroups << " aif_zrestrict";
+	if ((AItype2 & 0x8) == 0x8)
+		outputFileMisGroups << " aif_atgnouse";
+	if ((AItype2 & 0x10) == 0x10)
+		outputFileMisGroups << " aif_atgzonehaveown";
+	if ((AItype2 & 0x20) == 0x20)
+		outputFileMisGroups << " aif_atgzonenoenemy";
+	if ((AItype2 & 0x40) == 0x40)
+		outputFileMisGroups << " aif_atgnomove";
+	if ((AItype2 & 0x80) == 0x80)
+		outputFileMisGroups << " aif_atgnotow";
+
 	AItype3 = (uint8_t)(AIflags >> 16) & 0xFF;
-	if (AItype3 >= 128)
-	{
-		outputFileMisGroups << " aif_domnouse";
-		AItype3 += 128;
-	}
-	if (AItype3 >= 64)
-	{
-		outputFileMisGroups << " aif_gaubnodrop";
-		AItype3 -= 64;
-	}
-	if (AItype3 >= 32)
-	{
-		outputFileMisGroups << " aif_gaubnotow";
-		AItype3 -= 32;
-	}
-	if (AItype3 >= 16)
-	{
-		outputFileMisGroups << " aif_gaubnomove";
-		AItype3 -= 16;
-	}
-	if (AItype3 >= 8)
-	{
-		outputFileMisGroups << " aif_gaubzonenoenemy";
-		AItype3 -= 8;
-	}
-	if (AItype3 >= 4)
-	{
-		outputFileMisGroups << " aif_gaubzonehaveown";
-		AItype3 -= 4;
-	}
-	if (AItype3 >= 2)
-	{
-		outputFileMisGroups << " aif_gaubnouse";
-		AItype3 -= 2;
-	}
-	if (AItype3 == 1)
-	{
+	if ((AItype3 & 0x1) == 0x1)
 		outputFileMisGroups << " aif_atgnodrop";
-	}
+	if ((AItype3 & 0x2) == 0x2)
+		outputFileMisGroups << " aif_gaubnouse";
+	if ((AItype3 & 0x4) == 0x4)
+		outputFileMisGroups << " aif_gaubzonehaveown";
+	if ((AItype3 & 0x8) == 0x8)
+		outputFileMisGroups << " aif_gaubzonenoenemy";
+	if ((AItype3 & 0x10) == 0x10)
+		outputFileMisGroups << " aif_gaubnomove";
+	if ((AItype3 & 0x20) == 0x20)
+		outputFileMisGroups << " aif_gaubnotow";
+	if ((AItype3 & 0x40) == 0x40)
+		outputFileMisGroups << " aif_gaubnodrop";
+	if ((AItype3 & 0x80) == 0x80)
+		outputFileMisGroups << " aif_domnouse";
+
 	AItype4 = (uint8_t)(AIflags >> 24) & 0x0F;
-	if (AItype4 >= 4)
-	{
-		outputFileMisGroups << " aif_holdfire";
-		AItype4 -= 4;
-	}
-	if (AItype4 >= 2)
-	{
-		outputFileMisGroups << " aif_domhide";
-		AItype4 -= 2;
-	}
-	if (AItype4 == 1)
-	{
+	if ((AItype4 & 0x1) == 0x1)
 		outputFileMisGroups << " aif_domambush";
+	if ((AItype4 & 0x2) == 0x2)
+		outputFileMisGroups << " aif_domhide";
+	if ((AItype4 & 0x4) == 0x4)
+		outputFileMisGroups << " aif_holdfire";
 	}
-}
 
 void getScriptSize(std::stringstream& outputfilebuffer, std::stringstream& bufferScripts, uint32_t accumulatorNumberScripts)
 {
