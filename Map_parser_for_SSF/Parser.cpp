@@ -6,45 +6,71 @@
 #include "util.h"
 #include "Displayinfo.h"
 
-void Parser::parseMap(const std::string_view& inputData, const std::string_view& filename)
-{
-	m_mapFileName = filename;
-	m_rawMapFileName = filename.substr(0, filename.find_last_of("."));
-	m_mapFolder = "parser_map.000";
-	m_misFolder = "parser_map.000/mis.000";
+#include <gzip/decompress.hpp>
+#pragma comment(lib, "zlibstatic.lib")
 
-	const uint32_t mapType = *(uint32_t*)inputData.data();
+void Parser::parseMap(const std::filesystem::path& filepath)
+{
+	if (!std::filesystem::exists(filepath))
+	{
+		errorExistsFile(filepath.string());
+		return;
+	}
+
+	std::ifstream inputFile(filepath, std::ios::ate | std::ios::in | std::ios::binary);
+	if (!inputFile)
+	{
+		errorOpenFile(filepath.string());
+		return;
+	}
+
+	std::vector<char> zipData(inputFile.tellg());
+
+	inputFile.seekg(std::ios::beg);
+	inputFile.read(zipData.data(), zipData.size());
+	inputFile.close();
+
+	const std::string rawData = gzip::decompress(zipData.data(), zipData.size());
+
+	const std::filesystem::path fileFolder = filepath.parent_path();
+	const std::string fileName = filepath.filename().string();
+	const std::string stemFileName = filepath.stem().string();
+	m_mapFolder = fileFolder / "parser_map.000";		// todo: add check for already converted files to not to 
+	m_misFolder = m_mapFolder / "mis.000";
+
+	const uint32_t mapType = *(uint32_t*)rawData.data();
 	switch (mapType)
 	{
 	case (HEADER_SINGLE):
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE));
-		parseMapFileSMM(inputData);
+		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE), fileName);
+		parseMapFileSMM(rawData);
 		break;
 	}
 	case (HEADER_MULTI):
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_MULTI));
-		parseMapFileSMM(inputData);
+		own::println(Dictionary::getValue(STRINGS::MAP_MULTI), fileName);
+		parseMapFileSMM(rawData);
 		break;
 	}
 	case (HEADER_CAMP_MAP):
 	{
-		m_mapFolder = "parser_map." + m_mapFileName.substr(0, 3);
-		std::println("mapFolder: {}", m_mapFolder.string());
+		if (fileName.length() >= 3)
+			m_mapFolder = fileFolder / ("map." + fileName.substr(0, 3));
 
-		own::println(Dictionary::getValue(STRINGS::CAMP_MAP));
-		parseMapFileSSC_map(inputData);
+		own::println(Dictionary::getValue(STRINGS::CAMP_MAP), fileName);
+		parseMapFileSSC_map(rawData);
 		break;
 	}
 	case (HEADER_CAMP_MIS):
 	{
-		m_mapFolder = "parser_map." + m_mapFileName.substr(0, 3);;
-		m_misFolder = m_mapFolder / ("mis." + m_mapFileName.substr(3, 3));
-		std::println("mapFolder: {}\nmisFolder: {}", m_mapFolder.string(), m_misFolder.string());
+		if (fileName.length() >= 3)
+			m_mapFolder = fileFolder / ("map." + fileName.substr(0, 3));
+		if (fileName.length() >= 3)
+			m_misFolder = m_mapFolder / ("mis." + fileName.substr(3, 3));
 
-		own::println(Dictionary::getValue(STRINGS::CAMP_MIS));
-		parseMapFileSCC_mission(inputData);
+		own::println(Dictionary::getValue(STRINGS::CAMP_MIS), fileName);
+		parseMapFileSCC_mission(rawData);
 		break;
 	}
 	default:

@@ -179,60 +179,91 @@ void getScriptSize(std::stringstream& outputfilebuffer, std::stringstream& buffe
 }
 
 
-void Converter::convertMap(const std::string_view& inputData, const std::string_view& filename)
+void Converter::convertMap(const std::filesystem::path& filepath)
 {
-	m_mapFileName = filename;
-	m_rawMapFileName = filename.substr(0, filename.find_last_of("."));
-	m_mapFolder = "map.000";
-	m_misFolder = "map.000/mis.000";
+	if (!std::filesystem::exists(filepath))
+	{
+		errorExistsFile(filepath.string());
+		return;
+	}
 
-	const uint32_t mapType = *(uint32_t*)inputData.data();
+	std::ifstream inputFile(filepath, std::ios::ate | std::ios::in | std::ios::binary);
+	if (!inputFile)
+	{
+		errorOpenFile(filepath.string());
+		return;
+	}
+
+	std::vector<char> zipData(inputFile.tellg());
+
+	inputFile.seekg(std::ios::beg);
+	inputFile.read(zipData.data(), zipData.size());
+	inputFile.close();
+
+	// check for gzip archive
+	if (zipData.size() < 8 || *(uint16_t*)zipData.data() != 0x8b1f)
+	{
+		own::println(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
+		return;
+	}
+	const std::string rawData = gzip::decompress(zipData.data(), zipData.size());
+
+	const std::filesystem::path fileFolder = filepath.parent_path();
+	const std::string fileName = filepath.filename().string();
+	const std::string stemFileName = filepath.stem().string();
+	m_mapFolder = fileFolder / "map.000";		// todo: add check for already converted files to not to 
+	m_misFolder = m_mapFolder / "mis.000";
+
+	const uint32_t mapType = *(uint32_t*)rawData.data();
 	switch (mapType)
 	{
 	case (HEADER_SINGLE):
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE));
-		convertMapFileSSM(inputData);
+		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE), fileName);
+		convertMapFileSSM(rawData);
 
 		//own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filename, m_misFolder.string());
 		break;
 	}
 	case (HEADER_MULTI):
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_MULTI));
-		convertMapFileSMM(inputData);
+		own::println(Dictionary::getValue(STRINGS::MAP_MULTI), fileName);
+		convertMapFileSMM(rawData);
 
 		//own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filename, m_misFolder.string());
 		break;
 	}
 	case (HEADER_CAMP_MAP):
 	{
-		m_mapFolder = "map." + m_mapFileName.substr(0, 3);
+		if (fileName.length() >= 3)
+			m_mapFolder = fileFolder / ("map." + fileName.substr(0, 3));
 
-		own::println(Dictionary::getValue(STRINGS::CAMP_MAP));
-		convertMapFileSSC_map(inputData);
+		own::println(Dictionary::getValue(STRINGS::CAMP_MAP), fileName);
+		convertMapFileSSC_map(rawData);
 
 		break;
 	}
 	case (HEADER_CAMP_MIS):
 	{
-		m_mapFolder = "map." + m_mapFileName.substr(0, 3);;
-		m_misFolder = m_mapFolder / ("mis." + m_mapFileName.substr(3, 3));
+		if (fileName.length() >= 3)
+			m_mapFolder = fileFolder / ("map." + fileName.substr(0, 3));
+		if (fileName.length() >= 3)
+			m_misFolder = m_mapFolder / ("mis." + fileName.substr(3, 3));
 
-		own::println(Dictionary::getValue(STRINGS::CAMP_MIS));
-		convertMapFileSCC_mission(inputData);
+		own::println(Dictionary::getValue(STRINGS::CAMP_MIS), fileName);
+		convertMapFileSCC_mission(rawData);
 
 		//own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filename, m_misFolder.string());
 		break;
 	}
 	default:
 	{
-		own::println(Dictionary::getValue(STRINGS::ERROR_FILE));
+		own::println(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
 		return;
 	}
 	};
 
-	own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filename, m_mapFolder.string());
+	own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filepath.string(), m_mapFolder.string());
 }
 
 uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
@@ -578,7 +609,7 @@ struct RGBQUAD_
 
 void Converter::convertMapMini(const std::string_view& map_mini) const
 {
-	std::ofstream outputFileMapMiniBMP("map_mini.bmp", std::ios::binary);
+	std::ofstream outputFileMapMiniBMP(m_mapFolder / "map_mini.bmp", std::ios::binary);
 	if (!outputFileMapMiniBMP)
 	{
 		errorWriteFile();

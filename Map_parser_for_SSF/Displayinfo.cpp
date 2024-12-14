@@ -34,14 +34,14 @@ void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_
 	//std::println(" размером: {} x {}\nРазмер файла: {} байт", mapSizeU, mapSizeV, mapEndPosition);
 }
 
-void errorExistsFile()
+void errorExistsFile(const std::string_view& path)
 {
-	own::printlnError(Dictionary::getValue(STRINGS::ERROR_FILE_NOT_EXIST));
+	own::printlnError(Dictionary::getValue(STRINGS::ERROR_FILE_NOT_EXIST), path);
 }
 
-void errorOpenFile()
+void errorOpenFile(const std::string_view& path)
 {
-	own::printlnError(Dictionary::getValue(STRINGS::ERROR_OPEN));
+	own::printlnError(Dictionary::getValue(STRINGS::ERROR_OPEN), path);
 	//std::println("\033[31m[Error]\033[0m Ошибка открытия файла!");
 }
 

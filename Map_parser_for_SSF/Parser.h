@@ -3,11 +3,9 @@
 class Parser
 {
 public:
-	void parseMap(const std::string_view& inputData, const std::string_view& filename);
+	void parseMap(const std::filesystem::path& filepath);
 
 private:
-	std::string m_mapFileName;
-	std::string_view m_rawMapFileName;
 	std::filesystem::path m_mapFolder;
 	std::filesystem::path m_misFolder;
 

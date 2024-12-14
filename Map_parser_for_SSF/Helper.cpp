@@ -10,13 +10,6 @@ uint32_t position(const std::string_view& input, std::string_view& output, const
 	return offset + size;
 }
 
-uint32_t position(const std::string_view& input, std::vector<uint8_t>& output, const uint32_t offset, const uint32_t size)
-{
-	output.insert(output.end(), input.cbegin() + offset, input.cbegin() + offset + size);
-
-	return offset + size;
-}
-
 uint32_t position(const std::string_view& input, std::ofstream& output, const uint32_t offset, const uint32_t size)
 {
 	output.write(input.data() + offset, size);

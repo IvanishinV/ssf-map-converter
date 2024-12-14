@@ -34,21 +34,48 @@ void openFileAndProcess(const Action action, const std::string_view& filename)
 
 	const auto start = std::chrono::high_resolution_clock::now();
 
+	size_t count{ 0 };
+
 	if (action == Action::Convert)
 	{
 		Converter conv;
-		for (size_t i = 0; i < 1000; ++i)
-		conv.convertMap(rawData, filename);
+		if (std::filesystem::is_directory(filename))
+		{
+			for (const auto& file : std::filesystem::directory_iterator(filename))
+				if (file.is_regular_file())
+				{
+					conv.convertMap(file.path());
+					++count;
+				}
+		}
+		else
+		{
+			conv.convertMap(filename);
+			++count;
+		}
 	}
 	else
 	{
 		Parser parser;
-		parser.parseMap(rawData, filename);
+		if (std::filesystem::is_directory(filename))
+		{
+			for (const auto& file : std::filesystem::directory_iterator(filename))
+				if (file.is_regular_file())
+				{
+					parser.parseMap(file.path().string());
+					++count;
+				}
+		}
+		else
+		{
+			parser.parseMap(filename);
+			++count;
+		}
 	}
 
 	const auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	std::println("Map processed in {}ms\n", duration.count());
+	std::println("Processed {} file(s) in {}ms\n", count, duration.count());
 }
 
 void manualInput()
@@ -76,7 +103,7 @@ void manualInput()
 
 void printUsage(const std::string_view& appName)
 {
-	std::println("Usage: {} <ch> <filename>", appName);
+	std::println("Usage: {} <file|folder>", appName);
 }
 
 int main(int argc, char** argv)
@@ -118,7 +145,7 @@ int main(int argc, char** argv)
 		break;
 	};
 
-	std::println("SSF Map parser for SS1 & SSF, \033[32mv.0.6.2\033[0m by NASHRIPPER and ");
+	std::println("SSF Map parser for SS1 & SSF, \033[32mv.0.6.3\033[0m by NASHRIPPER and ");
 
 	if (argc == 3)
 	{
