@@ -106,7 +106,7 @@ void aiFlagsConvert(std::ofstream& outputFileMisGroups, const uint8_t aitype1, c
 		outputFileMisGroups << " aif_domhide";
 	if ((AItype4 & 0x4) == 0x4)
 		outputFileMisGroups << " aif_holdfire";
-	}
+}
 
 void getScriptSize(std::stringstream& outputfilebuffer, std::stringstream& bufferScripts, uint32_t accumulatorNumberScripts)
 {
@@ -803,6 +803,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 
 	uint32_t numberofunit = *(uint32_t*)(mis_mapunits.data());
 	
+	// mapunits file will have a reversed strings comparing to the original editor mapunits file
 	size_t curOffset = sizeof(numberofunit);
 	while (curOffset + 13 <= mis_mapunits.size())
 	{
@@ -821,9 +822,18 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 		uint8_t Dir = *(uint8_t*)(buffer + 11);
 		uint8_t Owner = *(uint8_t*)(buffer + 12);
 		{
-			outputFileMapUnits << "ID=" << nameunit[(uint16_t)ID] << " GRP=" << (uint16_t)GRP << " HP=" << (uint16_t)HP << " Ammo=" << (uint16_t)Ammo
-				<< " Expa=" << (uint16_t)Expa << " Lives=" << (uint16_t)Lives << " U=" << U << " V=" << V << " Dir=" << (uint16_t)Dir
-				<< " In=" << (uint16_t)In << " Owner=" << (uint16_t)Owner << '\n';
+			outputFileMapUnits << std::format("ID={} GRP={} HP={} Ammo={} Expa={} Lives={} U={} V={} Dir={} In={} Owner={}\n"
+				, nameunit[ID]
+				, (uint16_t)GRP
+				, (uint16_t)HP
+				, (uint16_t)Ammo
+				, (uint16_t)Expa
+				, (uint16_t)Lives
+				, (uint16_t)U
+				, (uint16_t)V
+				, (uint16_t)Dir
+				, (uint16_t)In
+				, (uint16_t)Owner);
 		}
 		if (In > 0)
 		{
@@ -839,9 +849,13 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 				uint8_t Livespassenger = *(uint8_t*)(unitBuffer + 4);
 				uint8_t IDpassenger = *(uint8_t*)(unitBuffer + 5);
 				{
-					outputFileMapUnits << " ID=" << nameunit[(uint16_t)IDpassenger] << " GRP=" << (uint16_t)GRPpassenger
-						<< " HP=" << (uint16_t)HPpassenger << " Ammo=" << (uint16_t)Ammopassenger
-						<< " Expa=" << (uint16_t)Expapassenger << " Lives=" << (uint16_t)Livespassenger << '\n';
+					outputFileMapUnits << std::format(" ID={} GRP={} HP={} Ammo={} Expa={} Lives={}\n"
+						, nameunit[IDpassenger]
+						, (uint16_t)GRPpassenger
+						, (uint16_t)HPpassenger
+						, (uint16_t)Ammopassenger
+						, (uint16_t)Expapassenger
+						, (uint16_t)Livespassenger);
 				}
 			}
 		}
@@ -857,13 +871,18 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_support.data()) + curOffset;
 		curOffset += 20;
 
-		INT num1 = *(uint32_t*)(buffer + 0);
-		INT num2 = *(uint32_t*)(buffer + 4);
-		INT num3 = *(uint32_t*)(buffer + 8);
-		INT num4 = *(uint32_t*)(buffer + 12);
-		INT num5 = *(uint32_t*)(buffer + 16);
+		int num1 = *(uint32_t*)(buffer + 0);
+		int num2 = *(uint32_t*)(buffer + 4);
+		int num3 = *(uint32_t*)(buffer + 8);
+		int num4 = *(uint32_t*)(buffer + 12);
+		int num5 = *(uint32_t*)(buffer + 16);
 		//cout << "flag " << num1 << " " << num2 << " " << num5 << " " << num3 << " " << num4 << '\n';
-		outputFileSupport << "flag " << num1 << " " << num2 << " " << num5 << " " << num3 << " " << num4 << '\n';
+		outputFileSupport << std::format("flag {},{},{},{},{}\n"
+			, num1
+			, num2
+			, num5
+			, num3
+			, num4);
 	}
 	//cout << '\n';
 	outputFileSupport << '\n';
@@ -907,9 +926,14 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 				accumulator += 7;
 				{
 					//cout << "ID=" << Id << " GRP=" << GRP << " HP=" << HP << " Ammo=" << Ammo << " Expa=" << Expa << " Lives=" << Lives << " In=" << In << '\n';
-					outputFileSupport << "ID=" << nameunit[(uint16_t)Id] << " GRP=" << (uint16_t)GRP << " HP=" << (uint16_t)HP
-						<< " Ammo=" << (uint16_t)Ammo << " Expa=" << (uint16_t)Expa
-						<< " Lives=" << (uint16_t)Lives << " In=" << (uint16_t)In << '\n';
+					outputFileSupport << std::format(" ID={} Grp={} HP={} Ammo={} Expa={} Lives={} In={}\n"
+						, nameunit[Id]
+						, (uint16_t)GRP
+						, (uint16_t)HP
+						, (uint16_t)Ammo
+						, (uint16_t)Expa
+						, (uint16_t)Lives
+						, (uint16_t)In);
 				}
 				if (In > 0)
 				{
@@ -927,9 +951,13 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 						accumulator += 6;
 						{
 							//cout << "ID=" << Idpasseenger << " GRP=" << GRPpasseenger << " HP=" << HPpasseenger << " Ammo=" << Ammopasseenger << " Expa=" << Expapasseenger << " Lives=" << Livespasseenger << '\n';
-							outputFileSupport << "ID=" << nameunit[(uint16_t)Idpasseenger] << " GRP=" << (uint16_t)GRPpasseenger
-								<< " HP=" << (uint16_t)HPpasseenger << " Ammo=" << (uint16_t)Ammopasseenger
-								<< " Expa=" << (uint16_t)Expapasseenger << " Lives=" << (uint16_t)Livespasseenger << '\n';
+							outputFileSupport << std::format("  ID={} Grp={} HP={} Ammo={} Expa={} Lives={}\n"
+								, nameunit[Idpasseenger]
+								, (uint16_t)GRPpasseenger
+								, (uint16_t)HPpasseenger
+								, (uint16_t)Ammopasseenger
+								, (uint16_t)Expapasseenger
+								, (uint16_t)Livespasseenger);
 						}
 					}
 				}
@@ -951,7 +979,7 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 		errorWriteFile();
 		return;
 	}
-	constexpr std::array <std::string_view, 11> AI_type_array =
+	constexpr std::array <std::string_view, 16> AI_type_array =
 	{
 		"\"ai_none\"",
 		"\"ai_recon\"",
@@ -963,7 +991,12 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 		"\"ai_furg_help\"",
 		"\"ai_furg_move\"",
 		"\"ai_gruz_reload\"",
-		"\"ai_katya_move\""
+		"\"ai_katya_move\"",
+		"\"ai_none\"",
+		"\"ai_none\"",
+		"\"ai_none\"",
+		"\"ai_none\"",
+		"\"ai_none\""
 	};
 	
 	const size_t maxTries = mis_groups.size() / 27;
@@ -1004,23 +1037,19 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 		uint8_t expa = *(uint8_t*)(buffer + 26);
 		
 		{
-			outputFileMisGroups << "Group " << accumulator << '\n';
-			uint8_t AI_type = (uint8_t)(aitype1 & 0x0F);
-			outputFileMisGroups << " ai type=" << AI_type_array[AI_type];
+			const uint8_t AI_type = (uint8_t)(aitype1 & 0x0F);
+			outputFileMisGroups << std::format("Group {}\n ai type={} group1={} group2={} zone1={} zone2={}\n  aiflags="
+				, accumulator
+				, AI_type_array[AI_type]
+				, (uint16_t)group1
+				, (uint16_t)group2
+				, (uint16_t)zone1
+				, (uint16_t)zone2);
 
-			outputFileMisGroups << " group1=" << (uint16_t)group1 << " group2=" << (uint16_t)group2 << " zone1=" << (uint16_t)zone1 << " zone2=" << (uint16_t)zone2 << '\n';
-
-			if (AI_type == 0 || AI_type == 1)
-			{
-				outputFileMisGroups << "  aiflags=" << '\n';
-			}
-			else
-			{
-				outputFileMisGroups << "  aiflags=";
+			if (AI_type != 0 && AI_type != 1)
 				aiFlagsConvert(outputFileMisGroups, aitype1, aitype2, aitype3, aitype4);
-				outputFileMisGroups << '\n';
-			}
 
+			outputFileMisGroups << '\n';
 		}
 
 		
@@ -1113,69 +1142,69 @@ void Converter::convertMisScripts(const std::string_view& mis_scripts) const
 	uint32_t numberofscripts = *(uint32_t*)mis_scripts.data();
 
 	//Скрипты1
-	uint8_t bufferAND[4] = { 1, 0, 0, 0 };
-	uint8_t bufferOR[4] = { 2, 0, 0, 0 };
-	uint8_t bufferUG[4] = { 3, 0, 0, 0 };
-	uint8_t bufferUP[4] = { 4, 0, 0, 0 };
-	uint8_t bufferUGL[4] = { 5, 0, 0, 0 };
-	uint8_t bufferUPL[4] = { 6, 0, 0, 0 };
-	uint8_t bufferPKP[4] = { 9, 0, 0, 0 };
-	uint8_t bufferPKF[4] = { 10, 0, 0, 0 };
-	uint8_t bufferTE[4] = { 27, 0, 0, 0 };
-	uint8_t bufferCD[4] = { 28, 0, 0, 0 };
-	uint8_t bufferTMS[4] = { 29, 0, 0, 0 };
-	uint8_t bufferUGLper[4] = { 30, 0, 0, 0 };
-	uint8_t bufferUPLper[4] = { 31, 0, 0, 0 };
-	uint8_t bufferUGper[4] = { 32, 0, 0, 0 };
-	uint8_t bufferUPper[4] = { 33, 0, 0, 0 };
-	uint8_t bufferAIGB[4] = { 34, 0, 0, 0 };
-	uint8_t bufferAIZ1[4] = { 35, 0, 0, 0 };
-	uint8_t bufferAIZ2[4] = { 36, 0, 0, 0 };
-	uint8_t bufferAIG1[4] = { 37, 0, 0, 0 };
-	uint8_t bufferAIG2[4] = { 38, 0, 0, 0 };
-	uint8_t bufferOID[4] = { 41, 0, 0, 0 };
-	uint8_t bufferGWATA[4] = { 49, 0, 0, 0 };
-	uint8_t bufferVIC[4] = { 50, 0, 0, 0 };
-	uint8_t bufferMIST[4] = { 51, 0, 0, 0 };
+	const uint8_t bufferAND[4] = { 1, 0, 0, 0 };
+	const uint8_t bufferOR[4] = { 2, 0, 0, 0 };
+	const uint8_t bufferUG[4] = { 3, 0, 0, 0 };
+	const uint8_t bufferUP[4] = { 4, 0, 0, 0 };
+	const uint8_t bufferUGL[4] = { 5, 0, 0, 0 };
+	const uint8_t bufferUPL[4] = { 6, 0, 0, 0 };
+	const uint8_t bufferPKP[4] = { 9, 0, 0, 0 };
+	const uint8_t bufferPKF[4] = { 10, 0, 0, 0 };
+	const uint8_t bufferTE[4] = { 27, 0, 0, 0 };
+	const uint8_t bufferCD[4] = { 28, 0, 0, 0 };
+	const uint8_t bufferTMS[4] = { 29, 0, 0, 0 };
+	const uint8_t bufferUGLper[4] = { 30, 0, 0, 0 };
+	const uint8_t bufferUPLper[4] = { 31, 0, 0, 0 };
+	const uint8_t bufferUGper[4] = { 32, 0, 0, 0 };
+	const uint8_t bufferUPper[4] = { 33, 0, 0, 0 };
+	const uint8_t bufferAIGB[4] = { 34, 0, 0, 0 };
+	const uint8_t bufferAIZ1[4] = { 35, 0, 0, 0 };
+	const uint8_t bufferAIZ2[4] = { 36, 0, 0, 0 };
+	const uint8_t bufferAIG1[4] = { 37, 0, 0, 0 };
+	const uint8_t bufferAIG2[4] = { 38, 0, 0, 0 };
+	const uint8_t bufferOID[4] = { 41, 0, 0, 0 };
+	const uint8_t bufferGWATA[4] = { 49, 0, 0, 0 };
+	const uint8_t bufferVIC[4] = { 50, 0, 0, 0 };
+	const uint8_t bufferMIST[4] = { 51, 0, 0, 0 };
 
 	//Скрипты2
-	uint8_t bufferSPPL[4] = { 8, 0, 0, 0 };
-	uint8_t bufferETC[4] = { 11, 0, 0, 0 };
-	uint8_t bufferSTRT[4] = { 12, 0, 0, 0 };
-	uint8_t bufferSTPT[4] = { 13, 0, 0, 0 };
-	uint8_t bufferMSTL[4] = { 14, 0, 0, 0 };
-	uint8_t bufferSP[4] = { 15, 0, 0, 0 };
-	uint8_t bufferSCD[4] = { 16, 0, 0, 0 };
-	uint8_t bufferSNM[4] = { 17, 0, 0, 0 };
-	uint8_t bufferTM[4] = { 18, 0, 0, 0 };
-	uint8_t bufferSGB[4] = { 19, 0, 0, 0 };
-	uint8_t bufferSGL1[4] = { 20, 0, 0, 0 };
-	uint8_t bufferSGL2[4] = { 21, 0, 0, 0 };
-	uint8_t bufferSGG1[4] = { 22, 0, 0, 0 };
-	uint8_t bufferSGG2[4] = { 23, 0, 0, 0 };
-	uint8_t bufferAPP[4] = { 24, 0, 0, 0 };
-	uint8_t bufferAFP[4] = { 25, 0, 0, 0 };
-	uint8_t bufferRU[4] = { 39, 0, 0, 0 };
-	uint8_t bufferSRFS[4] = { 40, 0, 0, 0 };
-	uint8_t bufferSPTO[4] = { 42, 0, 0, 0 };
-	uint8_t bufferSAT[4] = { 43, 0, 0, 0 };
-	uint8_t bufferARPO[4] = { 44, 0, 0, 0 };
-	uint8_t bufferARPO2[4] = { 45, 0, 0, 0 };
-	uint8_t bufferSPPA[4] = { 46, 0, 0, 0 };
-	uint8_t bufferLCCV[4] = { 47, 0, 0, 0 };
-	uint8_t bufferMO[4] = { 48, 0, 0, 0 };
-	uint8_t bufferSRES[4] = { 52, 0, 0, 0 };
-	uint8_t bufferFRES[4] = { 53, 0, 0, 0 };
-	uint8_t bufferPFF[4] = { 54, 0, 0, 0 };
-	uint8_t bufferFPFF[4] = { 55, 0, 0, 0 };
-	uint8_t bufferMFF[4] = { 56, 0, 0, 0 };
-	uint8_t bufferSPPO[4] = { 57, 0, 0, 0 };
-	uint8_t bufferDGP[4] = { 58, 0, 0, 0 };
+	const uint8_t bufferSPPL[4] = { 8, 0, 0, 0 };
+	const uint8_t bufferETC[4] = { 11, 0, 0, 0 };
+	const uint8_t bufferSTRT[4] = { 12, 0, 0, 0 };
+	const uint8_t bufferSTPT[4] = { 13, 0, 0, 0 };
+	const uint8_t bufferMSTL[4] = { 14, 0, 0, 0 };
+	const uint8_t bufferSP[4] = { 15, 0, 0, 0 };
+	const uint8_t bufferSCD[4] = { 16, 0, 0, 0 };
+	const uint8_t bufferSNM[4] = { 17, 0, 0, 0 };
+	const uint8_t bufferTM[4] = { 18, 0, 0, 0 };
+	const uint8_t bufferSGB[4] = { 19, 0, 0, 0 };
+	const uint8_t bufferSGL1[4] = { 20, 0, 0, 0 };
+	const uint8_t bufferSGL2[4] = { 21, 0, 0, 0 };
+	const uint8_t bufferSGG1[4] = { 22, 0, 0, 0 };
+	const uint8_t bufferSGG2[4] = { 23, 0, 0, 0 };
+	const uint8_t bufferAPP[4] = { 24, 0, 0, 0 };
+	const uint8_t bufferAFP[4] = { 25, 0, 0, 0 };
+	const uint8_t bufferRU[4] = { 39, 0, 0, 0 };
+	const uint8_t bufferSRFS[4] = { 40, 0, 0, 0 };
+	const uint8_t bufferSPTO[4] = { 42, 0, 0, 0 };
+	const uint8_t bufferSAT[4] = { 43, 0, 0, 0 };
+	const uint8_t bufferARPO[4] = { 44, 0, 0, 0 };
+	const uint8_t bufferARPO2[4] = { 45, 0, 0, 0 };
+	const uint8_t bufferSPPA[4] = { 46, 0, 0, 0 };
+	const uint8_t bufferLCCV[4] = { 47, 0, 0, 0 };
+	const uint8_t bufferMO[4] = { 48, 0, 0, 0 };
+	const uint8_t bufferSRES[4] = { 52, 0, 0, 0 };
+	const uint8_t bufferFRES[4] = { 53, 0, 0, 0 };
+	const uint8_t bufferPFF[4] = { 54, 0, 0, 0 };
+	const uint8_t bufferFPFF[4] = { 55, 0, 0, 0 };
+	const uint8_t bufferMFF[4] = { 56, 0, 0, 0 };
+	const uint8_t bufferSPPO[4] = { 57, 0, 0, 0 };
+	const uint8_t bufferDGP[4] = { 58, 0, 0, 0 };
 
 	//Старт, конец
-	uint8_t bufferEND[4] = { 7, 0, 0, 0 };
+	const uint8_t bufferEND[4] = { 7, 0, 0, 0 };
 	//uint8_t bufferstart[4] = { 67, 65, 79, 70 };
-	uint8_t bufferEND2[4] = { 255, 255, 255, 127 };
+	const uint8_t bufferEND2[4] = { 255, 255, 255, 127 };
 	
 	std::stringstream bufferScripts;
 	std::stringstream bufferScriptsOPN;

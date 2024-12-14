@@ -56,7 +56,7 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	case (HEADER_CAMP_MAP):
 	{
 		if (fileName.length() >= 3)
-			m_mapFolder = fileFolder / ("map." + fileName.substr(0, 3));
+			m_mapFolder = fileFolder / ("parser_map." + fileName.substr(0, 3));
 
 		own::println(Dictionary::getValue(STRINGS::CAMP_MAP), fileName);
 		parseMapFileSSC_map(rawData);
@@ -65,7 +65,7 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	case (HEADER_CAMP_MIS):
 	{
 		if (fileName.length() >= 3)
-			m_mapFolder = fileFolder / ("map." + fileName.substr(0, 3));
+			m_mapFolder = fileFolder / ("parser_map." + fileName.substr(0, 3));
 		if (fileName.length() >= 3)
 			m_misFolder = m_mapFolder / ("mis." + fileName.substr(3, 3));
 
