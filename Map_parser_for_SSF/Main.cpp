@@ -124,11 +124,11 @@ int main(int argc, char** argv)
 		break;
 	};
 
-	std::println("SSF Map parser for SS1 & SSF, \033[32mv.0.6.3\033[0m by NASHRIPPER and ");
+	std::println("SSF Map parser for SS1 & SSF, \033[32mv.0.6.3\033[0m by NASHRIPPER and IVA");
 
+	using namespace std::literals;
 	if (argc == 3)
 	{
-		using namespace std::literals;
 		if (argv[1] == "-c"sv)
 			openFileAndProcess(Action::Convert, argv[2]);
 		else if (argv[1] == "-p"sv)
@@ -141,7 +141,14 @@ int main(int argc, char** argv)
 	}
 	else if (argc == 2)
 	{
-		openFileAndProcess(Action::Convert, argv[1]);
+		if (argv[1] == "-h"sv)
+		{
+			printUsage(argv[0]);
+		}
+		else
+		{
+			openFileAndProcess(Action::Convert, argv[1]);
+		}
 		return 0;
 	}
 	else
