@@ -12,12 +12,6 @@
     <Filter Include="Исходные файлы">
       <UniqueIdentifier>{b2139a79-242e-4e5c-a813-7489e6e3f153}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Исходные файлы\Map_rhombs">
-      <UniqueIdentifier>{fda5332f-1b31-4af4-bae7-31b58b48a754}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Файлы заголовков\Map_rhombs">
-      <UniqueIdentifier>{0f4a114c-e79b-4aab-8417-3e1153e43355}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -41,17 +35,8 @@
     <ClCompile Include="Lang.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Beach.cpp">
-      <Filter>Исходные файлы\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Desert.cpp">
-      <Filter>Исходные файлы\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Summer.cpp">
-      <Filter>Исходные файлы\Map_rhombs</Filter>
-    </ClCompile>
-    <ClCompile Include="Winter.cpp">
-      <Filter>Исходные файлы\Map_rhombs</Filter>
+    <ClCompile Include="RhombsParser.cpp">
+      <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -76,17 +61,8 @@
     <ClInclude Include="Lang.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Beach.h">
-      <Filter>Файлы заголовков\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Desert.h">
-      <Filter>Файлы заголовков\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Summer.h">
-      <Filter>Файлы заголовков\Map_rhombs</Filter>
-    </ClInclude>
-    <ClInclude Include="Winter.h">
-      <Filter>Файлы заголовков\Map_rhombs</Filter>
+    <ClInclude Include="RhombsParser.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

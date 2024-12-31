@@ -143,32 +143,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Beach.cpp" />
     <ClCompile Include="Displayinfo.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="Lang.cpp" />
-    <ClCompile Include="Desert.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="RhombsParser.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Converter.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Summer.cpp" />
-    <ClCompile Include="Winter.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Beach.h" />
     <ClInclude Include="Displayinfo.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Lang.h" />
     <ClInclude Include="Converter.h" />
-    <ClInclude Include="Desert.h" />
+    <ClInclude Include="RhombsParser.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Summer.h" />
-    <ClInclude Include="Winter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

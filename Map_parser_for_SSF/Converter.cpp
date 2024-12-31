@@ -7,12 +7,8 @@
 #include "Helper.h"
 #include "Converter.h"
 #include "Displayinfo.h"
+#include "RhombsParser.h"
 #include "util.h"
-
-#include "Beach.h"
-#include "Summer.h"
-#include "Winter.h"
-#include "Desert.h"
 
 void convertOPN(std::stringstream& bufferScripts_OPN1, const uint32_t logicOperator, const uint32_t scriptNumber, std::stringstream& bufferScriptsOPN, std::stringstream& bufferScripts)
 {
@@ -685,24 +681,8 @@ void Converter::convertMapRhombs(const std::string_view& map_rhombs, const uint3
 		errorWriteFile();
 		return;
 	}
-	
-	switch (mapIdentifier)
-	{
-	case 0:
-		summerrhombs(map_rhombs, outputFile);
-		break;
-	case 1:
-		winterrhombs(map_rhombs, outputFile);
-		break;
-	case 2:
-		beachrhombs(map_rhombs, outputFile);
-		break;
-	case 3:
-		desertrhombs(map_rhombs, outputFile);
-		break;
-	default:
-		break;
-	};
+
+	RhombsParser::parse_rhombs(map_rhombs, outputFile, static_cast<RhombsParser::SchemeType>(mapIdentifier));
 
 	outputFile.close();
 }
