@@ -23,6 +23,10 @@ void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_
 		own::print(Dictionary::getValue(STRINGS::MAP_DESERT));
 		//std::print("Это пустынная карта");
 		break;
+	case (0x28):
+		own::print(Dictionary::getValue(STRINGS::MAP_MISSION));
+		//std::print("Это миссия");
+		break;
 	default:
 		own::print(Dictionary::getValue(STRINGS::MAP_UNKNOWN));
 		//std::print("Неизвестный тип карты");

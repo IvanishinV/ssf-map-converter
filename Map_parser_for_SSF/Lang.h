@@ -48,6 +48,7 @@ enum class STRINGS
 	MAP_WINTER,
 	MAP_SEA,
 	MAP_DESERT,
+	MAP_MISSION,
 	MAP_UNKNOWN,
 	MAP_SIZE,
 	STRINGS_SIZE	// used only for static assert
