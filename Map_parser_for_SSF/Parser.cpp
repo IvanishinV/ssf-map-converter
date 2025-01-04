@@ -30,21 +30,36 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	inputFile.read(zipData.data(), zipData.size());
 	inputFile.close();
 
-	const std::string rawData = gzip::decompress(zipData.data(), zipData.size());
+	// check for size
+	if (zipData.size() < 8)
+	{
+		std::println("");
+		own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
+		return;
+	}
+	// check for gzip archive
+	const std::string rawData = (*(uint16_t*)zipData.data() == 0x8b1f) ?
+		gzip::decompress(zipData.data(), zipData.size()) :
+		std::string(zipData.cbegin(), zipData.cend());
+
+	// trying to bypass germans umlauts in map file names
+	std::wstring wfilepath = filepath.wstring();
+	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) { return !((c >= 0 && c < 128) || (c >= 0x400 && c < 0x500)); }), wfilepath.cend());
+	const std::filesystem::path filepath_ex{ wfilepath };
+
+	const std::string fileName = filepath_ex.filename().string();
 
 	const std::filesystem::path fileFolder = filepath.parent_path();
-	const std::string fileName = filepath.filename().string();
-	const std::string stemFileName = filepath.stem().string();
-	m_mapFolder = fileFolder / "parser_map.000";		// todo: add check for already converted files to not to 
+	m_mapFolder = fileFolder / "map.000";		// todo: add check for already converted files to not to 
 	m_misFolder = m_mapFolder / "mis.000";
 
-	const uint32_t mapType = *(uint32_t*)rawData.data();
-	switch (mapType)
+	m_mapType = *(uint32_t*)rawData.data();
+	switch (m_mapType)
 	{
 	case (HEADER_SINGLE):
 	{
 		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE), fileName);
-		parseMapFileSMM(rawData);
+		parseMapFileSSM(rawData);
 		break;
 	}
 	case (HEADER_MULTI):
@@ -75,7 +90,8 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	}
 	default:
 	{
-		own::println(Dictionary::getValue(STRINGS::ERROR_FILE));
+		std::println("");
+		own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE));
 	}
 	};
 }

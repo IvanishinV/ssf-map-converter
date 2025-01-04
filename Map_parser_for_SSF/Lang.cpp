@@ -13,7 +13,7 @@ const std::array<DictionaryBlock, std::to_underlying(STRINGS::STRINGS_SIZE)> Dic
 		{ STRINGS::ERROR_FILE_NOT_EXIST, {{ { LANGUAGE::RUSSIAN, "Указанный файл не существует!" }, { LANGUAGE::ENGLISH, "The specified file doesn't exists!" } }} },
 		{ STRINGS::ERROR_OPEN, {{ { LANGUAGE::RUSSIAN, "Ошибка открытия файла {}!" }, { LANGUAGE::ENGLISH, "File {} opening error!" } }} },
 		{ STRINGS::ERROR_WRITE, {{ { LANGUAGE::RUSSIAN, "Ошибка создания файла для записи!" }, { LANGUAGE::ENGLISH, "File writing error!" } }} },
-		{ STRINGS::ERROR_FILE, {{ { LANGUAGE::RUSSIAN, "Файл {} не является картой\n" }, { LANGUAGE::ENGLISH, "The specified file {} is not a map\n" } }} },
+		{ STRINGS::ERROR_FILE, {{ { LANGUAGE::RUSSIAN, "Файл {} не является картой" }, { LANGUAGE::ENGLISH, "The specified file {} is not a map\n" } }} },
 		{ STRINGS::CAMP_MAP, {{ { LANGUAGE::RUSSIAN, "\n{} - часть карты кампании, данный файл отвечает за локацию" }, { LANGUAGE::ENGLISH, "\n{} is a part of campaign map, this file is responsible for the location" } }} },
 		{ STRINGS::CAMP_MIS, {{ { LANGUAGE::RUSSIAN, "\n{} - часть карты кампании, данный файл отвечает за миссию" }, { LANGUAGE::ENGLISH, "\n{} is a part of campaign map, this file is reponsible for the mission" } }} },
 		{ STRINGS::MAP_SINGLE, {{ { LANGUAGE::RUSSIAN, "\n{} - одиночная карта" }, { LANGUAGE::ENGLISH, "\n{} is a singleplayer map" } }} },

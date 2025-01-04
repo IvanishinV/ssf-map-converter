@@ -28,6 +28,12 @@ namespace own
 	{
 		std::println("\033[32m[Success]\033[0m {}", std::vformat(fmt, std::make_format_args(args...)));
 	}
+
+	template<typename... Args>
+	inline void printlnWarning(const std::string_view& fmt, Args&&... args)
+	{
+		std::println("\033[33m[Warning]\033[0m {}", std::vformat(fmt, std::make_format_args(args...)));
+	}
 }
 
 enum class STRINGS

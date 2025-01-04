@@ -8,6 +8,8 @@ public:
 private:
 	std::filesystem::path m_mapFolder;
 	std::filesystem::path m_misFolder;
+	std::string m_stemFileName;
+	uint32_t m_mapType;
 
 	uint32_t parseMapFileSSM(const std::string_view& inputData) const;
 	uint32_t parseMapFileSMM(const std::string_view& inputData) const;

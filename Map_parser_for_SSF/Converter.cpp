@@ -138,13 +138,17 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 	inputFile.read(zipData.data(), zipData.size());
 	inputFile.close();
 
-	// check for gzip archive
-	if (zipData.size() < 8 || *(uint16_t*)zipData.data() != 0x8b1f)
+	// check for size
+	if (zipData.size() < 8)
 	{
-		own::println(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
+		std::println("");
+		own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
 		return;
 	}
-	const std::string rawData = gzip::decompress(zipData.data(), zipData.size());
+	// check for gzip archive
+	const std::string rawData = (*(uint16_t*)zipData.data() == 0x8b1f) ?
+		gzip::decompress(zipData.data(), zipData.size()) :
+		std::string(zipData.cbegin(), zipData.cend());
 
 	// trying to bypass germans umlauts in map file names
 	std::wstring wfilepath = filepath.wstring();
@@ -201,7 +205,8 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 	}
 	default:
 	{
-		own::println(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
+		std::println("");
+		own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
 		return;
 	}
 	};

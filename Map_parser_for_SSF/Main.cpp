@@ -66,7 +66,7 @@ void manualInput()
 	std::getline(std::cin >> std::ws, filename);
 
 	using namespace std::literals::string_view_literals;	// only for "p"sv
-	if (filename == "p"sv)
+	if (filename == "-p"sv)
 	{
 		own::println(Dictionary::getValue(STRINGS::ENTER_PARSE_FILENAME));
 		std::getline(std::cin >> std::ws, filename);
