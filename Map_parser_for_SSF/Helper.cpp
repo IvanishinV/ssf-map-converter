@@ -52,6 +52,13 @@ uint32_t readFileUint32(const std::string_view& input, const uint32_t offset)
 }
 
 
+uint32_t readUint32(scripts2& scripts)
+{
+	const uint32_t num1234 = ((scripts.num4 & 0xFF) << 24) | ((scripts.num3 & 0xFF) << 16) | ((scripts.num2 & 0xFF) << 8) | (scripts.num1 & 0xFF);
+	return num1234;
+}
+
+
 uint32_t minimapsize(uint32_t mapSizeU, uint32_t mapSizeV)
 {
 	if (mapSizeU <= 128 && mapSizeV <= 128 && mapSizeU == mapSizeV)
@@ -93,8 +100,11 @@ uint32_t misScripts(const std::string_view& inputFile, uint32_t scripts_number, 
 }
 
 
-void reverse_num(const uint32_t num1, std::string& str)
+std::string reverse_num(const uint32_t num)
 {
-	str = std::to_string(num1);
-	reverse(str.begin(), str.end());
+	std::string str = std::to_string(num);
+	if (num <= 9)
+		return str;
+	std::reverse(str.begin(), str.end());
+	return str;
 }

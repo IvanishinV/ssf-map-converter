@@ -37,26 +37,87 @@ enum class Action
 	Convert
 };
 
-struct MapHeaderSSM
+struct scripts1
 {
-	// 4 буквы вначале, например SSSM
-	char		fileType[4];			// offset 0x0
-	uint32_t	unknown_1;
-	uint32_t	unknown_2;
-	uint32_t	unknown_3;
-	uint32_t	unknown_4;
-	uint32_t	unknown_5;
-	uint32_t	unknown_6;
-	uint32_t	unknown_7;
-	uint32_t	unknown_8;
-	uint32_t	unknown_9;
-	uint32_t	mapIdentifier;
-	uint32_t	mapWidth;
-	uint32_t	mapHeight;
-	// длина описания миссии
-	//uint32_t	descriptionLength;		// offset 0x34
+	uint32_t size_of_script;
+	uint8_t startscripts1;
+	uint8_t startscripts2;
+	uint8_t startscripts3;
+	uint8_t startscripts4;
 };
-struct MapHeaderSMM
+struct scripts2
 {
+	uint8_t num1;
+	uint8_t num2;
+	uint8_t num3;
+	uint8_t num4;
+};
 
+enum scripts_num
+{
+	bufferNONE = 0x00,
+	bufferAND,
+	bufferOR,
+	bufferUG,
+	bufferUP,
+	bufferUGL,
+	bufferUPL,
+	bufferEND,
+	bufferSPPL,
+	bufferPKP,
+	bufferPKF,
+	bufferETC,
+	bufferSTRT,
+	bufferSTPT,
+	bufferMSTL,
+	bufferSP,
+	bufferSCD,
+	bufferSNM,
+	bufferTM,
+	bufferSGB,
+	bufferSGL1,
+	bufferSGL2,
+	bufferSGG1,
+	bufferSGG2,
+	bufferAPP,
+	bufferAFP,
+	bufferNF,
+	bufferTE,
+	bufferCD,
+	bufferTMS,
+	bufferUGLper,
+	bufferUPLper,
+	bufferUGper,
+	bufferUPper,
+	bufferAIGB,
+	bufferAIZ1,
+	bufferAIZ2,
+	bufferAIG1,
+	bufferAIG2,
+	bufferRU,
+	bufferSRFS,
+	bufferOID,
+	bufferSPTO,
+	bufferSAT,
+	bufferARPO,
+	bufferARPO2,
+	bufferSPPA,
+	bufferLCCV,
+	bufferMO,
+	bufferGWATA,
+	bufferVIC,
+	bufferMIST,
+	bufferSRES,
+	bufferFRES,
+	bufferPFF,
+	bufferFPFF,
+	bufferMFF,
+	bufferSPPO,
+	bufferDGP,
+	bufferFVKGZ,
+	bufferFVKGO = 0x3C,
+	START		= 0x7F,
+	END			= 0x87,
+	bufferstart = 0x464F4143,
+	bufferEND2	= 0x7fffffff,
 };

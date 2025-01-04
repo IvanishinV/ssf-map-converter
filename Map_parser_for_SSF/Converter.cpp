@@ -10,35 +10,182 @@
 #include "RhombsParser.h"
 #include "util.h"
 
-void convertOPN(std::stringstream& bufferScripts_OPN1, const uint32_t logicOperator, const uint32_t scriptNumber, std::stringstream& bufferScriptsOPN, std::stringstream& bufferScripts)
+#pragma region stack_operations
+
+std::stack< std::vector<uint8_t> > one_stack_end_operations(std::vector<uint8_t>& bufferScripts, std::vector<uint8_t>& operand1, std::stack< std::vector<uint8_t> >& stack_for_RPN)
 {
-	//Функция выполняющая обратную польскую нотацию
-	if (scriptNumber == 1)
+	//Если в конце получаем стак с 1 операндом
+	operand1 = stack_for_RPN.top(); stack_for_RPN.pop();
+	bufferScripts.insert(bufferScripts.end(), operand1.begin(), operand1.end());
+	std::format_to(std::back_inserter(bufferScripts), "$END\n!\n");
+	operand1.clear();
+	return stack_for_RPN;
+}
+
+std::stack< std::vector<uint8_t> > two_stack_end_operations(std::vector<uint8_t>& bufferScripts, std::vector<uint8_t>& operand1, std::vector<uint8_t>& operand2, std::stack< std::vector<uint8_t> >& stack_for_RPN)
+{
+	//Если в конце получаем стак с 2мя операндами
+	operand2 = stack_for_RPN.top(); stack_for_RPN.pop();
+	operand1 = stack_for_RPN.top(); stack_for_RPN.pop();
+	bufferScripts.insert(bufferScripts.end(), operand1.begin(), operand1.end());
+	bufferScripts.insert(bufferScripts.end(), operand2.begin(), operand2.end());
+	std::format_to(std::back_inserter(bufferScripts), "$END\n!\n");
+	operand1.clear();
+	operand2.clear();
+	return stack_for_RPN;
+}
+
+std::stack< std::vector<uint8_t> > stack_operations(std::vector<uint8_t>& operand1, std::vector<uint8_t>& operand2, std::stack< std::vector<uint8_t> >& stack_for_RPN, const std::string& script_name)
+{
+	//если в памяти стака 2 операнда
+	operand2 = stack_for_RPN.top(); stack_for_RPN.pop();
+	operand1 = stack_for_RPN.top(); stack_for_RPN.pop();
+	operand1.insert(operand1.end(), script_name.begin(), script_name.end());
+	operand1.insert(operand1.end(), operand2.begin(), operand2.end());
+	stack_for_RPN.push(operand1);
+	operand1.clear();
+	operand2.clear();
+	return stack_for_RPN;
+}
+
+std::stack< std::vector<uint8_t> > stack_operations_NF(std::vector<uint8_t>& operand2, std::stack< std::vector<uint8_t> >& stack_for_RPN, const std::string& script_name)
+{
+	//если в памяти стака 2 операнда но есть логическая операция "Наверно что" производится запись в начало операнда2 логики и назад в стак, 
+	//после идут 2 стандартных пути если есть логическая операция И ИЛИ то 2 стак превращаются в один с записью между ними логики И ИЛИ либо
+	//если логики более нет то дело идет к завершению где происходит проверка количества стаков в памяти и в зависимости от этого происходит свой "$END\n!\n"
+	operand2 = stack_for_RPN.top(); stack_for_RPN.pop();
+	operand2.insert(operand2.begin(), script_name.begin(), script_name.end());
+	stack_for_RPN.push(operand2);
+	operand2.clear();
+	return stack_for_RPN;
+}
+
+std::stack< std::vector<uint8_t> > stack_operations_bracket(std::vector<uint8_t>& operand1, std::vector<uint8_t>& operand2, std::stack< std::vector<uint8_t> >& stack_for_RPN,
+	const std::string& script_name, const std::string& bracket_open, const std::string& bracket_close)
+{
+	//если в памяти стака более двух операндов то происходит операция со скобками
+	operand2 = stack_for_RPN.top(); stack_for_RPN.pop();
+	operand1 = stack_for_RPN.top(); stack_for_RPN.pop();
+	operand1.insert(operand1.begin(), bracket_open.begin(), bracket_open.end());
+	operand1.insert(operand1.end(), script_name.begin(), script_name.end());
+	operand1.insert(operand1.end(), operand2.begin(), operand2.end());
+	operand1.insert(operand1.end(), bracket_close.begin(), bracket_close.end());
+	stack_for_RPN.push(operand1);
+	operand1.clear();
+	operand2.clear();
+	return stack_for_RPN;
+}
+
+#pragma endregion stack_operations
+
+void convertOPN(std::vector<uint8_t>& bufferScripts, std::vector<uint8_t>& operand1, std::vector<uint8_t>& operand2,
+	std::stack< std::vector<uint8_t> >& stack_for_RPN, const uint32_t logicOperator, const uint32_t scriptNumber)
+{
+
+	switch (scriptNumber)
 	{
-		bufferScripts << bufferScripts_OPN1.str();
-		bufferScripts_OPN1.str("");
-	}
-	else
+		//Если operand один но есть вероятность что перед ним есть условие "Наверно что"
+	case 1:
 	{
-		if (logicOperator == 0)
+		switch (logicOperator)
 		{
-			bufferScriptsOPN << bufferScripts_OPN1.str();
+		case 3:
+		{
+			// Унарный оператор 
+			std::format_to(std::back_inserter(bufferScripts), "$nF\n");
+			break;
 		}
-		else
-			if (logicOperator == 1)
+		case 4:
+		{
+			// конец скрипта в первм окне qed
+			one_stack_end_operations(bufferScripts, operand1, stack_for_RPN);
+			break;
+		}
+		}
+
+		break;
+	}
+	//Если operand более одного
+	default:
+	{
+		switch (logicOperator)
+		{
+		case 1:
+		{
+			// И
+			if (stack_for_RPN.size() > 2)
 			{
-				bufferScripts << "$&" << '\n' << bufferScriptsOPN.str();
-				bufferScriptsOPN.str("");
+				stack_operations_bracket(operand1, operand2, stack_for_RPN, "$&\n", "$(\n", "$)\n");
 			}
 			else
-				if (logicOperator == 2)
-				{
-					bufferScripts << "$|" << '\n' << bufferScriptsOPN.str();
-					bufferScriptsOPN.str("");
-				}
+			{
+				if (stack_for_RPN.size() == 1)
+					throw std::logic_error("There is only one element in stack_for_RPN");
+				stack_operations(operand1, operand2, stack_for_RPN, "$&\n");
+			}
+
+			break;
+		}
+		case 2:
+		{
+			// ИЛИ
+			if (stack_for_RPN.size() > 2)
+			{
+				stack_operations_bracket(operand1, operand2, stack_for_RPN, "$|\n", "$(\n", "$)\n");
+			}
+			else
+			{
+				if (stack_for_RPN.size() == 1)
+					throw std::logic_error("There is only one element in stack_for_RPN");
+				stack_operations(operand1, operand2, stack_for_RPN, "$|\n");
+			}
+
+			break;
+		}
+		case 3:
+		{
+			// Наверно что
+			if (stack_for_RPN.size() > 2)
+			{
+				stack_operations_bracket(operand1, operand2, stack_for_RPN, "$nF\n", "$(\n", "$)\n");
+			}
+			else
+			{
+				if (stack_for_RPN.size() == 1)
+					throw std::logic_error("There is only one element in stack_for_RPN");
+				stack_operations_NF(operand2, stack_for_RPN, "$nF\n");
+			}
+
+			break;
+		}
+		case 4:
+		{
+			// конец скрипта в первм окне qed
+			if (stack_for_RPN.size() > 1)
+			{
+
+				two_stack_end_operations(bufferScripts, operand1, operand2, stack_for_RPN);
+			}
+			else
+			{
+				one_stack_end_operations(bufferScripts, operand1, stack_for_RPN);
+			}
+			break;
+		}
+		}
 	}
-	bufferScripts_OPN1.str("");
-	return;
+	}
+}
+
+void getScriptSize(std::vector<uint8_t>& bufferScripts, uint32_t num_scripts)
+{
+	//Функция определения размера скрипта
+	std::vector<uint8_t> cap_scripts;
+	std::format_to(std::back_inserter(cap_scripts), "script \"{}\" size {}\n", num_scripts, bufferScripts.size());
+	bufferScripts.insert(bufferScripts.begin(), cap_scripts.begin(), cap_scripts.end());
+	cap_scripts.clear();
+	//В конце каждого скрипта идет эта каретка, в размер скрипта не входит
+	std::format_to(std::back_inserter(bufferScripts), "\r\n");
 }
 
 void aiFlagsConvert(std::ofstream& outputFileMisGroups, const uint8_t aitype1, const uint8_t aitype2, const uint8_t aitype3, const uint8_t aitype4)
@@ -103,19 +250,6 @@ void aiFlagsConvert(std::ofstream& outputFileMisGroups, const uint8_t aitype1, c
 	if ((AItype4 & 0x4) == 0x4)
 		outputFileMisGroups << " aif_holdfire";
 }
-
-void getScriptSize(std::stringstream& outputfilebuffer, std::stringstream& bufferScripts, uint32_t accumulatorNumberScripts)
-{
-	//для получения размера данных есть метод .size() надо изучить
-	// переписать функцию на size_t getScriptSize(const char* begin)
-	bufferScripts.seekg(0, std::ios::end);
-	size_t size = bufferScripts.tellg();
-	outputfilebuffer << "script \"" << accumulatorNumberScripts << "\" size " << size - 2 << '\n';
-	outputfilebuffer << bufferScripts.str();
-	/*cout << "Размер скрипта: " << size << '\n' << endl;*/
-	return;
-}
-
 
 void Converter::convertMap(const std::filesystem::path& filepath)
 {
@@ -1141,614 +1275,371 @@ void Converter::convertMisScripts(const std::string_view& mis_scripts) const
 		return;
 	}
 	
-	uint32_t numberofscripts = *(uint32_t*)mis_scripts.data();
+	scripts1 struct_scripts;
+	scripts2 scripts;
 
-	//Скрипты1
-	const uint8_t bufferAND[4] = { 1, 0, 0, 0 };
-	const uint8_t bufferOR[4] = { 2, 0, 0, 0 };
-	const uint8_t bufferUG[4] = { 3, 0, 0, 0 };
-	const uint8_t bufferUP[4] = { 4, 0, 0, 0 };
-	const uint8_t bufferUGL[4] = { 5, 0, 0, 0 };
-	const uint8_t bufferUPL[4] = { 6, 0, 0, 0 };
-	const uint8_t bufferPKP[4] = { 9, 0, 0, 0 };
-	const uint8_t bufferPKF[4] = { 10, 0, 0, 0 };
-	const uint8_t bufferTE[4] = { 27, 0, 0, 0 };
-	const uint8_t bufferCD[4] = { 28, 0, 0, 0 };
-	const uint8_t bufferTMS[4] = { 29, 0, 0, 0 };
-	const uint8_t bufferUGLper[4] = { 30, 0, 0, 0 };
-	const uint8_t bufferUPLper[4] = { 31, 0, 0, 0 };
-	const uint8_t bufferUGper[4] = { 32, 0, 0, 0 };
-	const uint8_t bufferUPper[4] = { 33, 0, 0, 0 };
-	const uint8_t bufferAIGB[4] = { 34, 0, 0, 0 };
-	const uint8_t bufferAIZ1[4] = { 35, 0, 0, 0 };
-	const uint8_t bufferAIZ2[4] = { 36, 0, 0, 0 };
-	const uint8_t bufferAIG1[4] = { 37, 0, 0, 0 };
-	const uint8_t bufferAIG2[4] = { 38, 0, 0, 0 };
-	const uint8_t bufferOID[4] = { 41, 0, 0, 0 };
-	const uint8_t bufferGWATA[4] = { 49, 0, 0, 0 };
-	const uint8_t bufferVIC[4] = { 50, 0, 0, 0 };
-	const uint8_t bufferMIST[4] = { 51, 0, 0, 0 };
+	// uint32_t numberOfScripts = *(uint32_t*)mis_scripts.data();
+	// std::println("Number of scripts: {}", numberOfScripts);
 
-	//Скрипты2
-	const uint8_t bufferSPPL[4] = { 8, 0, 0, 0 };
-	const uint8_t bufferETC[4] = { 11, 0, 0, 0 };
-	const uint8_t bufferSTRT[4] = { 12, 0, 0, 0 };
-	const uint8_t bufferSTPT[4] = { 13, 0, 0, 0 };
-	const uint8_t bufferMSTL[4] = { 14, 0, 0, 0 };
-	const uint8_t bufferSP[4] = { 15, 0, 0, 0 };
-	const uint8_t bufferSCD[4] = { 16, 0, 0, 0 };
-	const uint8_t bufferSNM[4] = { 17, 0, 0, 0 };
-	const uint8_t bufferTM[4] = { 18, 0, 0, 0 };
-	const uint8_t bufferSGB[4] = { 19, 0, 0, 0 };
-	const uint8_t bufferSGL1[4] = { 20, 0, 0, 0 };
-	const uint8_t bufferSGL2[4] = { 21, 0, 0, 0 };
-	const uint8_t bufferSGG1[4] = { 22, 0, 0, 0 };
-	const uint8_t bufferSGG2[4] = { 23, 0, 0, 0 };
-	const uint8_t bufferAPP[4] = { 24, 0, 0, 0 };
-	const uint8_t bufferAFP[4] = { 25, 0, 0, 0 };
-	const uint8_t bufferRU[4] = { 39, 0, 0, 0 };
-	const uint8_t bufferSRFS[4] = { 40, 0, 0, 0 };
-	const uint8_t bufferSPTO[4] = { 42, 0, 0, 0 };
-	const uint8_t bufferSAT[4] = { 43, 0, 0, 0 };
-	const uint8_t bufferARPO[4] = { 44, 0, 0, 0 };
-	const uint8_t bufferARPO2[4] = { 45, 0, 0, 0 };
-	const uint8_t bufferSPPA[4] = { 46, 0, 0, 0 };
-	const uint8_t bufferLCCV[4] = { 47, 0, 0, 0 };
-	const uint8_t bufferMO[4] = { 48, 0, 0, 0 };
-	const uint8_t bufferSRES[4] = { 52, 0, 0, 0 };
-	const uint8_t bufferFRES[4] = { 53, 0, 0, 0 };
-	const uint8_t bufferPFF[4] = { 54, 0, 0, 0 };
-	const uint8_t bufferFPFF[4] = { 55, 0, 0, 0 };
-	const uint8_t bufferMFF[4] = { 56, 0, 0, 0 };
-	const uint8_t bufferSPPO[4] = { 57, 0, 0, 0 };
-	const uint8_t bufferDGP[4] = { 58, 0, 0, 0 };
+	std::vector<uint8_t> bufferScripts;
+	std::vector<uint8_t> outputFileBuffer;
+	std::vector<uint8_t> operand1, operand2;
 
-	//Старт, конец
-	const uint8_t bufferEND[4] = { 7, 0, 0, 0 };
-	//uint8_t bufferstart[4] = { 67, 65, 79, 70 };
-	const uint8_t bufferEND2[4] = { 255, 255, 255, 127 };
-	
-	std::stringstream bufferScripts;
-	std::stringstream bufferScriptsOPN;
-	std::stringstream bufferScripts_OPN1;
-	std::stringstream outputFileBuffer;
-	
-	uint32_t accumulatorNumberScripts = 1;
-	
+	std::stack< std::vector<uint8_t> > stack_for_RPN;
 
-	size_t curOffset{ sizeof(numberofscripts) };
-	while (numberofscripts--)
+	uint32_t accumulator_num_scripts = 1;
+
+	std::array <std::string, 200> numberscripts;
+
+	for (size_t curOffset = 4; curOffset + sizeof(scripts1) < mis_scripts.size(); curOffset)
 	{
-		const uint8_t* sizeBuffer = reinterpret_cast<const uint8_t*>(mis_scripts.data()) + curOffset;
-		curOffset += 8;
-		uint8_t sizescripts1 = *(uint8_t*)(sizeBuffer + 0);
-		uint8_t sizescripts2 = *(uint8_t*)(sizeBuffer + 1);
-		uint8_t sizescripts3 = *(uint8_t*)(sizeBuffer + 2);
-		uint8_t sizescripts4 = *(uint8_t*)(sizeBuffer + 3);
+		std::memcpy(&struct_scripts, mis_scripts.data() + curOffset, sizeof(scripts1));
 
-		//uint8_t startscripts1 = *(uint8_t*)(buffer + 4);			// not used
-		//uint8_t startscripts2 = *(uint8_t*)(buffer + 5);
-		//uint8_t startscripts3 = *(uint8_t*)(buffer + 6);
-		//uint8_t startscripts4 = *(uint8_t*)(buffer + 7);
-		uint32_t sizescripts = ((sizescripts4 & 0xFF) << 24) | ((sizescripts3 & 0xFF) << 16) | ((sizescripts2 & 0xFF) << 8) | (sizescripts1 & 0xFF);
+		uint32_t n = 0;
+		uint32_t key = 0;
+		uint32_t script_num_for_OPN = 0;
+		curOffset += sizeof(scripts1);
 
-		uint32_t numberoflines = (sizescripts - 4) / 4; //расчет количества циклов в одном скрипте
-		std::map <uint32_t, std::string> numberscripts;
-		uint32_t n = 0; //присвоение ключа к map
-		uint32_t key = 0; //ключ к map
-		uint32_t scriptNumber = 0; //номер собранных скриптовых комманд в одном скрипте, нужно для выполнения обратной польской нотации
-
-		while (numberoflines--)
+		for (int i = 0; (struct_scripts.size_of_script - sizeof(scripts2)) / sizeof(scripts2) > i; i++)
 		{
-			uint8_t logicOperator = 0; //Логический оператор И ИЛИ
-
-			const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_scripts.data()) + curOffset;
-			curOffset += 4;
-
-			uint8_t num1 = *(uint8_t*)(buffer + 0);
-			uint8_t num2 = *(uint8_t*)(buffer + 1);
-			uint8_t num3 = *(uint8_t*)(buffer + 2);
-			uint8_t num4 = *(uint8_t*)(buffer + 3);
+			uint8_t logicOperator = 0;
+			std::memcpy(&scripts, mis_scripts.data() + curOffset, sizeof(scripts2));
+			curOffset += sizeof(scripts2);
 			{
 				//Переменные значения
-				if (num4 == 128)
+				switch (scripts.num4)
 				{
-					if (num2 == 0)
-					{
-						// Реверс числа
-						std::string str;
-						reverse_num(num1, str);
-						//outputFile << "   " << num1 << "   " << num2 << "   " << num3 << "   " << num4 << '\n';
-						numberscripts[n] = str;
-						//std::cout << key << ": " << str << std::endl;
-						n++;
-					}
-					else
-					{
-						// Реверс числа
-						std::string str;
-						uint16_t num12 = ((num2 & 0xFF) << 8) | (num1 & 0xFF);
-						//char buffertwobytes[2] = { num1, num2 };
-						//SHORT num12 = *(unsigned short*)(buffertwobytes + 0);
-						reverse_num(num12, str);
-						//outputFile << "   " << num1 << "   " << num2 << "   " << num3 << "   " << num4 << '\n';
-						numberscripts[n] = str;
-						//std::cout << key << ": " << str << std::endl;
-						n++;
-					}
-
-				}
-				else if (num2 == 255 && num3 == 255 && num4 == 255) // Операция с координатой ячеек памяти
+				case 255:
 				{
-					// Реверс числа
-					std::string str;
-					uint32_t num1234 = 392 + num1;
-					reverse_num(num1234, str);
-					//outputFile << "   " << num1 << "   " << num2 << "   " << num3 << "   " << num4 << '\n';
-					numberscripts[n] = str;
-					//std::cout << key << ": " << str << std::endl;
+					// Операция с координатой ячеек памяти num1 == 0 - 99 num2 == 255 && num3 == 255 && num4 == 255 (для qed num4 == 255 - 128)
+					numberscripts[n] = reverse_num(((0x7F) << 24) | ((0xFF) << 16) | ((0xFF) << 8) | (scripts.num1 & 0xFF));
 					n++;
 				}
+				break;
+				case START + 1:
+				{
+					// num4 здесь приравнивается к 0 т.к. значение 128 фактически равно 0 и не хранит информацию об Ai командах все что более 128 уже имет какое либо значение комнды Ai
+					numberscripts[n] = reverse_num(((0x00) << 24) | ((scripts.num3 & 0xFF) << 16) | ((scripts.num2 & 0xFF) << 8) | (scripts.num1 & 0xFF));
+					n++;
+				}
+				break;
+				case START + 2:
+				{
 
-				//Скрипты в первом окне редактора карт QED (они же подвержены обратной польской нотации)
-				else if (memcmp(buffer, bufferAND, 4) == 0) // 1, 0, 0, 0
-				{
-					//Если оператор "И"
-					logicOperator = 1;
+					numberscripts[n] = reverse_num(readUint32(scripts));
+					n++;
 				}
-				else if (memcmp(buffer, bufferOR, 4) == 0) // 2, 0, 0, 0
+				break;
+				case START + 3:
 				{
-					//Если оператор "ИЛИ"
-					logicOperator = 2;
+					numberscripts[n] = reverse_num(readUint32(scripts));
+					n++;
 				}
-				else if (memcmp(buffer, bufferUG, 4) == 0) // 3, 0, 0, 0
+				break;
+				case START + 4:
 				{
-					bufferScripts_OPN1 << "$ug" << '\n' << "$UMSK" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$ug1" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sp_8" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sp_9" << '\n' << "$N1" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
+					numberscripts[n] = reverse_num(readUint32(scripts));
+					n++;
 				}
-				else if (memcmp(buffer, bufferUP, 4) == 0) // 4, 0, 0, 0
+				break;
+				case START + 5:
 				{
-					bufferScripts_OPN1 << "$up" << '\n' << "$UMSK" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$up1" << '\n' << "$Plr" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sp_b" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sp_c" << '\n' << "$N1" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
+					numberscripts[n] = reverse_num(readUint32(scripts));
+					n++;
 				}
-				else if (memcmp(buffer, bufferUGL, 4) == 0) // 5, 0, 0, 0
+				break;
+				case START + 6:
 				{
-					bufferScripts_OPN1 << "$ugl" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$N1" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$umx0" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$ugl1" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
+					numberscripts[n] = reverse_num(readUint32(scripts));
+					n++;
 				}
-				else if (memcmp(buffer, bufferUPL, 4) == 0) // 6, 0, 0, 0
+				break;
+				case START + 7:
 				{
-					bufferScripts_OPN1 << "$upl" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$N1" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$umx2" << '\n' << "$Plr" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$upl1" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
+					numberscripts[n] = reverse_num(readUint32(scripts));
+					n++;
 				}
-				else if (memcmp(buffer, bufferPKP, 4) == 0) // 9, 0, 0, 0
+				break;
+				case START + 8:
 				{
-					bufferScripts_OPN1 << "$pkp" << '\n' << "$Plr" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$pkp1" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sp_d" << '\n' << "$N1" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sp_e" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
+					numberscripts[n] = reverse_num(readUint32(scripts));
+					n++;
 				}
-				else if (memcmp(buffer, bufferPKF, 4) == 0) // 10, 0, 0, 0
+				break;
+				case START:
 				{
-					bufferScripts_OPN1 << "$pkf" << '\n' << "$Plr" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$pkf1" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sp_f" << '\n' << "$N1" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$pkf2" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
+					//END - конец скрипта
+					std::format_to(std::back_inserter(bufferScripts), "$END\n");
 				}
-				else if (memcmp(buffer, bufferTE, 4) == 0) // 27, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$te" << '\n' << "$Tr" << '\n' << "#" << numberscripts[key] << '\n';
-					key++;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferCD, 4) == 0) // 28, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$cd" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sp_5" << '\n' << "$T" << '\n' << "#" << numberscripts[key + 1] << '\n';
-					key += 2;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferTMS, 4) == 0) // 29, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$tms" << '\n' << "$CAB" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sp_6" << '\n' << "$T" << '\n' << "#" << numberscripts[key + 1] << '\n';
-					key += 2;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferUGLper, 4) == 0) // 30, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$ugl%" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$N1" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$umx1" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$ugl1" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferUPLper, 4) == 0) // 31, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$upl%" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$N1" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$umx3" << '\n' << "$Plr" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$upl1" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 3] << '\n';
-					key += 4;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferUGper, 4) == 0) // 32, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$ug%u" << '\n' << "$UMSK" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$umx4" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sp_7" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sp_k" << '\n' << "$N1" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$ugut1" << '\n' << "$UMSK" << '\n' << "#" << numberscripts[key + 4]
-						<< '\n' << "$ug%u1" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key + 5] << '\n';
-					key += 6;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferUPper, 4) == 0) // 33, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$up%" << '\n' << "$UMSK" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$up%u1" << '\n' << "$Plr" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sp_a" << '\n' << "$CABE" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sp_k" << '\n' << "$N1" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$ugut1" << '\n' << "$UMSK" << '\n' << "#" << numberscripts[key + 4]
-						<< '\n' << "$up%u2" << '\n' << "$Plr" << '\n' << "#" << numberscripts[key + 5] << '\n';
-					key += 6;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferAIGB, 4) == 0) // 34, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$aigb" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$aigb1" << '\n' << "$AI" << '\n' << "#" << numberscripts[key + 1] << '\n';
-					key += 2;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferAIZ1, 4) == 0) // 35, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$aiz1" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$aiz_1" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 1] << '\n';
-					key += 2;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferAIZ2, 4) == 0) // 36, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$aiz2" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$aiz_2" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 1] << '\n';
-					key += 2;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferAIG1, 4) == 0) // 37, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$aig1" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$aig_1" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key + 1] << '\n';
-					key += 2;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferAIG2, 4) == 0) // 38, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$aig2" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$aig_2" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key + 1] << '\n';
-					key += 2;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferOID, 4) == 0) // 41, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$oid" << '\n' << "$Obj" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$oid1" << '\n';
-					key++;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferGWATA, 4) == 0) // 49, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$gwata" << '\n' << "$Grp" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$gwata1" << '\n' << "$CAB" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$T" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$gwata2" << '\n';
-					key += 3;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferVIC, 4) == 0) // 50, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$vic" << '\n' << "$Lvar" << '\n' << "#" << numberscripts[key] << NUMMEMORY
-						<< '\n' << "$CABE" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$Rvar" << '\n' << "#" << numberscripts[key + 2] << '\n';
-					key += 3;
-					scriptNumber += 1;
-				}
-				else if (memcmp(buffer, bufferMIST, 4) == 0) // 51, 0, 0, 0
-				{
-					bufferScripts_OPN1 << "$mist" << '\n';
-					scriptNumber += 1;
-				}
+				break;
+				case bufferNONE:
+					switch (scripts.num1)
+					{
+						//Логические операторы
+					case bufferAND: logicOperator = 1; break;
+					case bufferOR: logicOperator = 2; break;
+					case bufferNF: logicOperator = 3; break;
 
-				//Скрипты во втором окне редактора карт QED
-				else if (memcmp(buffer, bufferSPPL, 4) == 0) // 8, 0, 0, 0
-				{
-					bufferScripts << "$sppl" << '\n' << "$I" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sppl1" << '\n' << "$P" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sppl2" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 4;
-				}
-				else if (memcmp(buffer, bufferETC, 4) == 0) // 11, 0, 0, 0 
-				{
-					bufferScripts << "$etc" << '\n' << "$" << "\\\\" << "n" << '\n';
-				}
-				else if (memcmp(buffer, bufferSTRT, 4) == 0) // 12, 0, 0, 0
-				{
-					bufferScripts << "$strt" << '\n' << "$Tr" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$strt1" << '\n' << "$T" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferSTPT, 4) == 0) // 13, 0, 0, 0
-				{
-					bufferScripts << "$stpt" << '\n' << "$Tr" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferMSTL, 4) == 0) // 14, 0, 0, 0
-				{
-					bufferScripts << "$mstl" << '\n' << "$L" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferSP, 4) == 0) // 15, 0, 0, 0
-				{
-					bufferScripts << "$sp" << '\n' << "$phrs" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferSCD, 4) == 0) // 16, 0, 0, 0 
-				{
-					bufferScripts << "$scd" << '\n' << "$T" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferSNM, 4) == 0) // 17, 0, 0, 0
-				{
-					bufferScripts << "$snm" << '\n' << "$mission" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferTM, 4) == 0) // 18, 0, 0, 0
-				{
-					bufferScripts << "$tm" << '\n' << "$F" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferSGB, 4) == 0) // 19, 0, 0, 0
-				{
-					bufferScripts << "$sgb" << '\n' << "$G" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sgb1" << '\n' << "$AI" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferSGL1, 4) == 0) // 20, 0, 0, 0	
-				{
-					bufferScripts << "$sgl1" << '\n' << "$G" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sgl11" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferSGL2, 4) == 0) // 21, 0, 0, 0	
-				{
-					bufferScripts << "$sgl2" << '\n' << "$G" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sgl21" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferSGG1, 4) == 0) // 22, 0, 0, 0
-				{
-					bufferScripts << "$sgg1" << '\n' << "$G" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sgg11" << '\n' << "$G" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferSGG2, 4) == 0) // 23, 0, 0, 0
-				{
-					bufferScripts << "$sgg2" << '\n' << "$G" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sgg21" << '\n' << "$G" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferAPP, 4) == 0) // 24, 0, 0, 0
-				{
-					bufferScripts << "$app" << '\n' << "$P" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$I" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$spc" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 3;
-				}
-				else if (memcmp(buffer, bufferAFP, 4) == 0) // 25, 0, 0, 0
-				{
-					bufferScripts << "$afp" << '\n' << "$P" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$I" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$afp1" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 3;
-				}
-				else if (memcmp(buffer, bufferRU, 4) == 0) // 39, 0, 0, 0
-				{
-					bufferScripts << "$ru" << '\n' << "$G " << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$ru1" << '\n' << "$flg" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$ru2" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$ru3" << '\n' << "$T" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$ru4" << '\n' << "$I" << '\n' << "#" << numberscripts[key + 4]
-						<< '\n' << "$ru5" << '\n' << "$I" << '\n' << "#" << numberscripts[key + 5]
-						<< '\n' << "$ru5" << '\n' << "$I" << '\n' << "#" << numberscripts[key + 6]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 7;
-				}
-				else if (memcmp(buffer, bufferSRFS, 4) == 0) // 40, 0, 0, 0
-				{
-					bufferScripts << "$srfs" << '\n' << "$P" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$srfs0" << '\n' << "$resv" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$srfs1" << '\n' << "$flg" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$srfs2" << '\n' << "$L" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$srfs3" << '\n' << "$T" << '\n' << "#" << numberscripts[key + 4]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 5;
-				}
-				else if (memcmp(buffer, bufferSPTO, 4) == 0) // 42, 0, 0, 0
-				{
-					bufferScripts << "$spto" << '\n' << "$I" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$spto1" << '\n' << "$P" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$spto2" << '\n' << "$Obj" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 4;
-				}
-				else if (memcmp(buffer, bufferSAT, 4) == 0) // 43, 0, 0, 0
-				{
-					bufferScripts << "$sat" << '\n' << "$" << "\\\\" << "n" << '\n';;
-				}
-				else if (memcmp(buffer, bufferARPO, 4) == 0) // 44, 0, 0, 0
-				{
-					bufferScripts << "$arpo" << '\n' << "$Obj" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferARPO2, 4) == 0) // 45, 0, 0, 0
-				{
-					bufferScripts << "$arpo" << '\n' << "$Obj" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key++;
-				}
-				else if (memcmp(buffer, bufferSPPA, 4) == 0) // 46, 0, 0, 0
-				{
-					bufferScripts << "$sppa" << '\n' << "$I" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sppa1" << '\n' << "$P" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sppa2"
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 3;
-				}
-				else if (memcmp(buffer, bufferLCCV, 4) == 0) // 47, 0, 0, 0 скрипт не до конца рабочий
-				{
-					bufferScripts << "$lccv" << '\n' << "$Lvar" << '\n' << "#" << numberscripts[key] << NUMMEMORY
-						<< '\n' << "$lccv1" << '\n' << "$Rvar" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-					//$Rvar не расшифрован
-				}
-				else if (memcmp(buffer, bufferMO, 4) == 0) // 48, 0, 0, 0 скрипт не до конца рабочий
-				{
-					bufferScripts << "$mo" << '\n' << "$Lvar" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$Math" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$spc" << '\n' << "$Rvar" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 3;
-					//$Math не расшифрован
-				}
-				else if (memcmp(buffer, bufferSRES, 4) == 0) // 52, 0, 0, 0
-				{
-					bufferScripts << "$sres" << '\n' << "$resv" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sres1" << '\n' << "$resv" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$sres2" << '\n' << "$resv" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$sres3" << '\n' << "$T" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 4;
-				}
-				else if (memcmp(buffer, bufferFRES, 4) == 0) // 53, 0, 0, 0
-				{
-					bufferScripts << "$fres" << '\n' << "$Fmask" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$fres0" << '\n' << "$Fmask" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$fres1" << '\n' << "$Fmask" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$fres2" << '\n' << "$T" << '\n' << "#" << numberscripts[key + 3]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 4;
-				}
-				else if (memcmp(buffer, bufferPFF, 4) == 0) // 54, 0, 0, 0
-				{
-					bufferScripts << "$pff" << '\n' << "$Fmask" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$I" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$spc" << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 3;
-				}
-				else if (memcmp(buffer, bufferFPFF, 4) == 0) // 55, 0, 0, 0
-				{
-					bufferScripts << "$fpff" << '\n' << "$Fmask" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$I" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$fpff1 " << '\n' << "$PT" << '\n' << "#" << numberscripts[key + 2]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 3;
-				}
-				else if (memcmp(buffer, bufferMFF, 4) == 0) // 56, 0, 0, 0
-				{
-					bufferScripts << "$mff" << '\n' << "$Fmask" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$spc" << '\n' << "$phrs" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferSPPO, 4) == 0) // 57, 0, 0, 0
-				{
-					bufferScripts << "$sppo" << '\n' << "$phrs" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$sppo1" << '\n' << "$Obj" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
-				else if (memcmp(buffer, bufferDGP, 4) == 0) // 58, 0, 0, 0
-				{
-					bufferScripts << "$dgp" << '\n' << "$G" << '\n' << "#" << numberscripts[key]
-						<< '\n' << "$dgp1" << '\n' << "$P" << '\n' << "#" << numberscripts[key + 1]
-						<< '\n' << "$" << "\\\\" << "n" << '\n';
-					key += 2;
-				}
+						//Скрипты из первого окна редактора карт
 
-				//END - разделитель между двумя окнами скриптов в редакторе карт QED
-				else if (memcmp(buffer, bufferEND, 4) == 0) // 7, 0, 0, 0
-				{
-					bufferScripts << "$END" << '\n' << "!" << '\n';
-				}
-				//END - конец скрипта
-				else if (memcmp(buffer, bufferEND2, 4) == 0) // 255, 255, 255, 127
-				{
-					bufferScripts << "$END" << '\n' << '\r' << '\n';
-				}
+					case bufferUG: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ug\n$UMSK\n#{}\n$ug1\n$Grp\n#{}\n$sp_8\n$CABE\n#{}\n$sp_9\n$N1\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 3, 0, 0, 0 #{} плейсхолдеры
 
+					case bufferUP: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$up\n$UMSK\n#{}\n$up1\n$Plr\n#{}\n$sp_b\n$CABE\n#{}\n$sp_c\n$N1\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 4, 0, 0, 0
 
-				//Неизвестные скрипты
-				else
-				{
-					bufferScripts << "   " << num1 << "   " << num2 << "   " << num3 << "   " << num4 << '\n';
-					std::println("\033[31m[Error]\033[0m Found bad script in {}: {} {} {} {}.", m_stemFileName, num1, num2, num3, num4);
+					case bufferUGL: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ugl\n$CABE\n#{}\n$N1\n#{}\n$umx0\n$Grp\n#{}\n$ugl1\n$L\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 5, 0, 0, 0
+
+					case bufferUPL: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$upl\n$CABE\n#{}\n$N1\n#{}\n$umx2\n$Plr\n#{}\n$upl1\n$L\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 6, 0, 0, 0
+
+					case bufferPKP: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$pkp\n$Plr\n#{}\n$pkp1\n$CABE\n#{}\n$sp_d\n$N1\n#{}\n$sp_e\n$PT\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 9, 0, 0, 0
+
+					case bufferPKF: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$pkf\n$Plr\n#{}\n$pkf1\n$CABE\n#{}\n$sp_f\n$N1\n#{}\n$pkf2\n$PT\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 10, 0, 0, 0
+
+					case bufferTE: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$te\n$Tr\n#{}\n"
+						, numberscripts[key]);
+						key++; script_num_for_OPN += 1; break; // 27, 0, 0, 0
+
+					case bufferCD: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$cd\n$CABE\n#{}\n$sp_5\n$T\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; script_num_for_OPN += 1; break; // 28, 0, 0, 0
+
+					case bufferTMS: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$tms\n$CAB\n#{}\n$sp_6\n$T\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; script_num_for_OPN += 1; break; // 29, 0, 0, 0
+
+					case bufferUGLper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ugl%\n$CABE\n#{}\n$N1\n#{}\n$umx1\n$Grp\n#{}\n$ugl1\n$L\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 30, 0, 0, 0
+
+					case bufferUPLper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$upl%\n$CABE\n#{}\n$N1\n#{}\n$umx3\n$Plr\n#{}\n$upl1\n$L\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; script_num_for_OPN += 1; break; // 31, 0, 0, 0
+
+					case bufferUGper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ug%u\n$UMSK\n#{}\n$umx4\n$Grp\n#{}\n$sp_7\n$CABE\n#{}\n$sp_k\n$N1\n#{}\n$ugut1\n$UMSK\n#{}\n$ug%u1\n$Grp\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4], numberscripts[key + 5]);
+						key += 6; script_num_for_OPN += 1; break; // 32, 0, 0, 0
+
+					case bufferUPper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$up%\n$UMSK\n#{}\n$up%u1\n$Plr\n#{}\n$sp_a\n$CABE\n#{}\n$sp_k\n$N1\n#{}\n$ugut1\n$UMSK\n#{}\n$up%u2\n$Plr\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4], numberscripts[key + 5]);
+						key += 6; script_num_for_OPN += 1; break; // 33, 0, 0, 0
+
+					case bufferAIGB: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aigb\n$Grp\n#{}\n$aigb1\n$AI\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; script_num_for_OPN += 1; break; // 35, 0, 0, 0
+
+					case bufferAIZ1: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aiz1\n$Grp\n#{}\n$aiz_1\n$L\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; script_num_for_OPN += 1; break; // 35, 0, 0, 0
+
+					case bufferAIZ2: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aiz2\n$Grp\n#{}\n$aiz_2\n$L\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; script_num_for_OPN += 1; break; // 36, 0, 0, 0
+
+					case bufferAIG1: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aig1\n$Grp\n#{}\n$aig_1\n$Grp\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; script_num_for_OPN += 1; break; // 37, 0, 0, 0
+
+					case bufferAIG2: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aig2\n$Grp\n#{}\n$aig_2\n$Grp\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; script_num_for_OPN += 1; break; // 38, 0, 0, 0
+
+					case bufferOID: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$oid\n$Obj\n#{}\n$oid1\n"
+						, numberscripts[key]);
+						key++; script_num_for_OPN += 1; break; // 41, 0, 0, 0
+
+					case bufferGWATA: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$gwata\n$Grp\n#{}\n$gwata1\n$CAB\n#{}\n$T\n#{}\n$gwata2\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; script_num_for_OPN += 1; break; // 49, 0, 0, 0
+
+					case bufferVIC: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$vic\n$Lvar\n#{}\n$CABE\n#{}\n$Rvar\n#{}\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; script_num_for_OPN += 1; break; // 50, 0, 0, 0
+
+					case bufferMIST: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$mist\n"); script_num_for_OPN += 1; break;
+
+						//END - разделитель между двумя окнами скриптов в редакторе карт QED
+					case bufferEND: logicOperator = 4; break;
+						//std::format_to(std::back_inserter(bufferScripts), "$END\n!\n");
+						//break; // 7, 0, 0, 0
+
+						//Скрипты из второго окна редактора карт
+					case bufferSPPL: std::format_to(std::back_inserter(bufferScripts), "$sppl\n$I\n#{}\n$spc\n$PT\n#{}\n$sppl1\n$P\n#{}\n$sppl2\n$L\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; break; // 8, 0, 0, 0
+
+					case bufferETC: std::format_to(std::back_inserter(bufferScripts), "$etc\n$\\\\n\n");
+						break; // 11, 0, 0, 0
+
+					case bufferSTRT: std::format_to(std::back_inserter(bufferScripts), "$strt\n$Tr\n#{}\n$strt1\n$T\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 12, 0, 0, 0
+
+					case bufferSTPT: std::format_to(std::back_inserter(bufferScripts), "$stpt\n$Tr\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 13, 0, 0, 0
+
+					case bufferMSTL: std::format_to(std::back_inserter(bufferScripts), "$mstl\n$L\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 14, 0, 0, 0
+
+					case bufferSP: std::format_to(std::back_inserter(bufferScripts), "$sp\n$phrs\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 15, 0, 0, 0
+
+					case bufferSCD: std::format_to(std::back_inserter(bufferScripts), "$scd\n$T\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 16, 0, 0, 0
+
+					case bufferSNM: std::format_to(std::back_inserter(bufferScripts), "$snm\n$mission\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 17, 0, 0, 0
+
+					case bufferTM: std::format_to(std::back_inserter(bufferScripts), "$tm\n$F\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 18, 0, 0, 0
+
+					case bufferSGB: std::format_to(std::back_inserter(bufferScripts), "$sgb\n$G\n#{}\n$sgb1\n$AI\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 19, 0, 0, 0 
+
+					case bufferSGL1: std::format_to(std::back_inserter(bufferScripts), "$sgl1\n$G\n#{}\n$sgl11\n$L\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 20, 0, 0, 0 
+
+					case bufferSGL2: std::format_to(std::back_inserter(bufferScripts), "$sgl2\n$G\n#{}\n$sgl21\n$L\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 21, 0, 0, 0
+
+					case bufferSGG1: std::format_to(std::back_inserter(bufferScripts), "$sgg1\n$G\n#{}\n$sgg11\n$G\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 22, 0, 0, 0
+
+					case bufferSGG2: std::format_to(std::back_inserter(bufferScripts), "$sgg2\n$G\n#{}\n$sgg21\n$G\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 23, 0, 0, 0
+
+					case bufferAPP: std::format_to(std::back_inserter(bufferScripts), "$app\n$P\n#{}\n$spc\n$I\n#{}\n$spc\n$PT\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; break; // 24, 0, 0, 0
+
+					case bufferAFP: std::format_to(std::back_inserter(bufferScripts), "$afp\n$P\n#{}\n$spc\n$I\n#{}\n$afp1\n$PT\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; break; // 25, 0, 0, 0
+
+					case bufferRU: std::format_to(std::back_inserter(bufferScripts), "$ru\n$G\n#{}\n$ru1\n$flg\n#{}\n$ru2\n$L\n#{}\n$ru3\n$T\n#{}\n$ru4\n$I\n#{}\n$ru5\n$I\n#{}\n$ru5\n$I\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4], numberscripts[key + 5], numberscripts[key + 6]);
+						key += 7; break; // 39, 0, 0, 0
+
+					case bufferSRFS: std::format_to(std::back_inserter(bufferScripts), "$srfs\n$P\n#{}\n$srfs0\n$resv\n#{}\n$srfs1\n$flg\n#{}\n$srfs2\n$L\n#{}\n$srfs3\n$T\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4]);
+						key += 5; break; // 40, 0, 0, 0
+
+					case bufferSPTO: std::format_to(std::back_inserter(bufferScripts), "$spto\n$I\n#{}\n$spc\n$PT\n#{}\n$spto1\n$P\n#{}\n$spto2\n$Obj\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; break; // 42, 0, 0, 0
+
+					case bufferSAT: std::format_to(std::back_inserter(bufferScripts), "$sat\n$\\\\n\n");
+						break; // 43, 0, 0, 0
+
+					case bufferARPO: std::format_to(std::back_inserter(bufferScripts), "$arpo\n$Obj\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 44, 0, 0, 0
+
+					case bufferARPO2: std::format_to(std::back_inserter(bufferScripts), "$arpo\n$Obj\n#{}\n$\\\\n\n"
+						, numberscripts[key]);
+						key++; break; // 45, 0, 0, 0
+
+					case bufferSPPA: std::format_to(std::back_inserter(bufferScripts), "$sppa\n$I\n#{}\n$spc\n$PT\n#{}\n$sppa1\n$P\n#{}\n$sppa2\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; break; // 46, 0, 0, 0
+
+					case bufferLCCV: std::format_to(std::back_inserter(bufferScripts), "$lccv\n$Lvar\n#{}\n$lccv1\n$Rvar\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 47, 0, 0, 0 //$Rvar не расшифрован
+
+					case bufferMO: std::format_to(std::back_inserter(bufferScripts), "$mo\n$Lvar\n#{}\n$spc\n$Math\n#{}\n$spc\n$Rvar\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; break; // 48, 0, 0, 0 //$Math не расшифрован
+
+					case bufferSRES: std::format_to(std::back_inserter(bufferScripts), "$sres\n$resv\n#{}\n$sres1\n$resv\n#{}\n$sres2\n$resv\n#{}\n$sres3\n$T\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; break; // 52, 0, 0, 0
+
+					case bufferFRES: std::format_to(std::back_inserter(bufferScripts), "$fres\n$Fmask\n#{}\n$fres0\n$Fmask\n#{}\n$fres1\n$Fmask\n#{}\n$fres2\n$T\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
+						key += 4; break; // 53, 0, 0, 0
+
+					case bufferPFF: std::format_to(std::back_inserter(bufferScripts), "$pff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$spc\n$PT\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; break; // 54, 0, 0, 0
+
+					case bufferFPFF: std::format_to(std::back_inserter(bufferScripts), "$fpff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$fpff1\n$PT\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
+						key += 3; break; // 55, 0, 0, 0
+
+					case bufferMFF: std::format_to(std::back_inserter(bufferScripts), "$mff\n$Fmask\n#{}\n$spc\n$phrs\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 56, 0, 0, 0
+
+					case bufferSPPO: std::format_to(std::back_inserter(bufferScripts), "$sppo\n$phrs\n#{}\n$sppo1\n$Obj\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 57, 0, 0, 0
+
+					case bufferDGP: std::format_to(std::back_inserter(bufferScripts), "$dgp\n$G\n#{}\n$dgp1\n$P\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break; // 58, 0, 0, 0
+
+					case bufferFVKGZ: std::format_to(std::back_inserter(bufferScripts), "$fvkgz\n$G\n#{}\n$fvkgz1\n$L\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break;
+
+					case bufferFVKGO: std::format_to(std::back_inserter(bufferScripts), "$fvkgo\n$G\n#{}\n$fvkgo1\n$Obj\n#{}\n$\\\\n\n"
+						, numberscripts[key], numberscripts[key + 1]);
+						key += 2; break;
+
+						//Неизвестные скрипты
+					default:
+					{
+						std::format_to(std::back_inserter(bufferScripts), "unknown scripts {} {} {} {}\n", 
+							static_cast<uint16_t>(scripts.num1), 
+							static_cast<uint16_t>(scripts.num2), 
+							static_cast<uint16_t>(scripts.num3), 
+							static_cast<uint16_t>(scripts.num4));
+						std::println("\033[31m[Error]\033[0m Found unknown script in {}: {} {} {} {}.", m_stemFileName, scripts.num1, scripts.num2, scripts.num3, scripts.num4);
+						break;
+					}
+					}
+					break;
 				}
-				convertOPN(bufferScripts_OPN1, logicOperator, scriptNumber, bufferScriptsOPN, bufferScripts);
+				try
+				{
+					convertOPN(bufferScripts, operand1, operand2, stack_for_RPN, logicOperator, script_num_for_OPN);
+				}
+				catch (std::logic_error e)
+				{
+					std::println("\033[31m[Error]\033[0m Got exception for {:x} {:x} {:x} {:x}: {}", scripts.num1, scripts.num2, scripts.num3, scripts.num4, e.what());
+				}
 			}
-
 		}
 
-		getScriptSize(outputFileBuffer, bufferScripts, accumulatorNumberScripts);
-		outputFile << outputFileBuffer.str();
-		bufferScripts.str("");
-		outputFileBuffer.str("");
-		numberscripts.clear();
-		accumulatorNumberScripts++;
+		getScriptSize(bufferScripts, accumulator_num_scripts);
+		outputFile.write((char*)bufferScripts.data(), bufferScripts.size());
+		bufferScripts.clear(); // чистка вектора
+		accumulator_num_scripts++;
 	}
+
 	outputFile.close();
-	return;
 }
 
 void Converter::convertMisWoofers(const std::string_view& mis_woofers) const

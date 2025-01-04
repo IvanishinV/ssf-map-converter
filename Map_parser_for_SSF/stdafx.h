@@ -18,6 +18,7 @@
 #include <array>
 #include <map>
 #include <vector>
+#include <stack>
 #include <string>
 
 #include <math.h>
@@ -26,5 +27,6 @@
 #include <random>
 #include <chrono>
 #include <future>
+#include <stdexcept>
 
 #include "Lang.h"
