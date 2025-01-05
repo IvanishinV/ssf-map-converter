@@ -84,7 +84,7 @@ void convertOPN(std::vector<uint8_t>& bufferScripts, std::vector<uint8_t>& opera
 
 	switch (scriptNumber)
 	{
-		//Если operand один но есть вероятность что перед ним есть условие "Наверно что"
+	//Если operand один но есть вероятность что перед ним есть условие "Наверно что"
 	case 1:
 	{
 		switch (logicOperator)
@@ -145,17 +145,7 @@ void convertOPN(std::vector<uint8_t>& bufferScripts, std::vector<uint8_t>& opera
 		case 3:
 		{
 			// Наверно что
-			if (stack_for_RPN.size() > 2)
-			{
-				stack_operations_bracket(operand1, operand2, stack_for_RPN, "$nF\n", "$(\n", "$)\n");
-			}
-			else
-			{
-				if (stack_for_RPN.size() == 1)
-					throw std::logic_error("There is only one element in stack_for_RPN");
-				stack_operations_NF(operand2, stack_for_RPN, "$nF\n");
-			}
-
+			stack_operations_NF(operand2, stack_for_RPN, "$nF\n");
 			break;
 		}
 		case 4:
@@ -288,7 +278,7 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 	std::wstring wfilepath = filepath.wstring();
 	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) { return !((c >= 0 && c < 128) || (c >= 0x400 && c < 0x500)); }), wfilepath.cend());
 	const std::filesystem::path filepath_ex{ wfilepath };
-	
+
 	const std::string fileName = filepath_ex.filename().string();
 
 	const std::filesystem::path fileFolder = filepath.parent_path();
@@ -368,15 +358,15 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	std::string_view mis_players;
 	std::string_view mis_phrases;
 	std::string_view mis_mapunits;
-	
+
 	// Определите начальную позицию и количество байт для извлечения
 	const uint32_t mapIdentifier = readFileUint32(inputFile, 136);
 	const uint32_t mapSizeU = readFileUint32(inputFile, 140);
 	const uint32_t mapSizeV = readFileUint32(inputFile, 144);
-	
+
 	const uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
 	const uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
-	
+
 	const uint32_t offsetMisScripts = position(inputFile, map_info, FILE_TYPE_OFFSET, MapHeaderSMM);
 	const uint32_t sizeMisScripts = readFileUint32(inputFile, offsetMisScripts);
 	const uint32_t accumulator = misScripts(inputFile, sizeMisScripts, offsetMisScripts);
@@ -404,9 +394,9 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	const uint32_t offsetMisMapUnits = position(inputFile, mis_phrases, offsetMisPhrases + 4, sizeMisPhrases);
 	const uint32_t sizeMisMapUnits = readFileUint32(inputFile, offsetMisMapUnits);
 	const uint32_t mapEndPosition = position(inputFile, mis_mapunits, offsetMisMapUnits + 4, sizeMisMapUnits);
-	
+
 	std::filesystem::create_directories(m_misFolder);
-	
+
 	//MAP
 	const auto resMapRhombs = std::async(std::launch::async, &Converter::convertMapRhombs, this, map_rhombs, mapIdentifier);
 	convertMapDesc();
@@ -427,7 +417,7 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	convertMisPlayers(mis_players);
 	convertMisPhrases(mis_phrases, sizeMisPhrases);
 	convertMisUnits(mis_unitnames, mis_mapunits, mis_support);
-	
+
 	resMapRhombs.wait();
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
@@ -455,16 +445,16 @@ uint32_t Converter::convertMapFileSSM(const std::string_view& inputFile)
 	std::string_view mis_support;
 	std::string_view mis_phrases;
 	std::string_view mis_objects;
-	
+
 	// Определите начальную позицию и количество байт для извлечения
 	uint32_t mapIdentifier = readFileUint32(inputFile, 40);
 	uint32_t mapSizeU = readFileUint32(inputFile, 44);
 	uint32_t mapSizeV = readFileUint32(inputFile, 48);
 	uint32_t maskByte = readFileUint32(inputFile, MapHeaderSSM);
-	
+
 	uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
 	uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
-	
+
 	uint32_t startPositionMisDesc = position(inputFile, map_info, FILE_TYPE_OFFSET, MapHeaderSSM);
 	uint32_t startPositionMapMini = position(inputFile, mis_desc, startPositionMisDesc + 4, maskByte);
 	uint32_t MapMiniSize = minimapsize(mapSizeU, mapSizeV);
@@ -493,9 +483,9 @@ uint32_t Converter::convertMapFileSSM(const std::string_view& inputFile)
 	uint32_t sizeMisPhrases = readFileUint32(inputFile, startPositionMisPhrases);
 	uint32_t startPositionMisObjects = position(inputFile, mis_phrases, startPositionMisPhrases + 4, sizeMisPhrases);
 	uint32_t mapEndPosition = position(inputFile, mis_objects, startPositionMisObjects, MISOBJECTS);
-	
+
 	std::filesystem::create_directories(m_misFolder);
-	
+
 	//MAP
 	const auto resMapRhombs = std::async(std::launch::async, &Converter::convertMapRhombs, this, map_rhombs, mapIdentifier);
 	convertMapDesc();
@@ -518,7 +508,7 @@ uint32_t Converter::convertMapFileSSM(const std::string_view& inputFile)
 	convertMisObjects(mis_objects);
 	convertMisGroups(mis_groups);
 	convertMisPlayers(mis_players);
-	
+
 	resMapRhombs.wait();
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
@@ -533,16 +523,16 @@ uint32_t Converter::convertMapFileSSC_map(const std::string_view& inputFile)
 	std::string_view map_rhombs;
 	std::string_view map_flags;
 	std::string_view map_objects;
-	
+
 	// Определите начальную позицию и количество байт для извлечения
 	// Начальная позиция нужных байтов
 	uint32_t mapIdentifier = readFileUint32(inputFile, 8);
 	uint32_t mapSizeU = readFileUint32(inputFile, 12);
 	uint32_t mapSizeV = readFileUint32(inputFile, 16);
-	
+
 	uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
 	uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
-	
+
 	uint32_t startPositionLandname = position(inputFile, map_info, FILE_TYPE_OFFSET, MapHeaderSSC_map);
 	uint32_t startPositionRhombs = position(inputFile, map_landname, startPositionLandname, LANDNAMESSIZE);
 	uint32_t startPositionFlags = position(inputFile, map_rhombs, startPositionRhombs, rhombsSize);
@@ -551,10 +541,10 @@ uint32_t Converter::convertMapFileSSC_map(const std::string_view& inputFile)
 	uint32_t startPositionObjects = position(inputFile, map_mini2, startPositionMapMini2, rhombsSize / 4);
 	uint32_t mapSizeObjects = readFileUint32(inputFile, startPositionObjects);
 	uint32_t mapEndPosition = position(inputFile, map_objects, startPositionObjects + 4, mapSizeObjects * 8);
-	
-	
+
+
 	std::filesystem::create_directories(m_mapFolder);
-	
+
 	const auto resMapRhombs = std::async(std::launch::async, &Converter::convertMapRhombs, this, map_rhombs, mapIdentifier);
 	convertMapInfo(mapIdentifier, mapSizeU, mapSizeV);
 	convertMapMini(map_mini);
@@ -562,7 +552,7 @@ uint32_t Converter::convertMapFileSSC_map(const std::string_view& inputFile)
 	convertMapCflags(map_flags);
 	convertMapObjects(map_objects);
 	convertMapDesc();
-	
+
 	resMapRhombs.wait();
 	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
@@ -702,13 +692,13 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 	BITMAPFILEHEADER part1{};
 	BITMAPINFOHEADER part2{};
 	RGBQUAD_ part3{};
-	
+
 	part1.bfType = 19778;
 	part1.bfSize = static_cast<DWORD>(size) + (sizeof(part1)) + (sizeof(part2)) + (sizeof(part3));
 	part1.bfReserved1 = GLOBALNULL;
 	part1.bfReserved2 = GLOBALNULL;
 	part1.bfOffBits = (sizeof(part1)) + (sizeof(part2)) + (sizeof(part3));
-	
+
 	part2.biSize = sizeof(part2);
 	part2.biWidth = static_cast<LONG>(sqrt(size / 2));
 	part2.biHeight = static_cast<LONG>(sqrt(size / 2));
@@ -720,11 +710,11 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 	part2.biYPelsPerMeter = GLOBALNULL;
 	part2.biClrUsed = GLOBALNULL;
 	part2.biClrImportant = GLOBALNULL;
-	
+
 	part3.rgbBlue = 63488;
 	part3.rgbGreen = 2016;
 	part3.rgbRed = 31;
-	
+
 	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part1), 14);
 	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part2), 40);
 	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part3), 12);
@@ -923,7 +913,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 		errorWriteFile();
 		return;
 	}
-	
+
 	std::vector<std::string_view> nameunit;
 	nameunit.reserve(mis_unitnames.size() / 16);
 	int numOfNames = 0;
@@ -934,7 +924,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 	}
 
 	uint32_t numberofunit = *(uint32_t*)(mis_mapunits.data());
-	
+
 	// mapunits file will have a reversed strings comparing to the original editor mapunits file
 	size_t curOffset = sizeof(numberofunit);
 	while (curOffset + 13 <= mis_mapunits.size())
@@ -992,7 +982,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 			}
 		}
 	}
-	
+
 	const uint32_t supportSize = *(uint32_t*)(mis_support.data());	// not used
 
 	uint32_t flag_num = 16;
@@ -1018,7 +1008,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 	}
 	//cout << '\n';
 	outputFileSupport << '\n';
-	
+
 	uint32_t accumulator = 0;
 	while (script_num--)
 	{
@@ -1037,7 +1027,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 			//cout << "support " << "\"" << "\"" << '\n';
 			outputFileSupport << "support \"\"\n";
 		}
-		
+
 		uint32_t UnitScriptSize = *(uint32_t*)(mis_support.data() + 324 + 1 + accumulator + NameSize);
 		curOffset = 324 + 1 + accumulator + NameSize + sizeof(UnitScriptSize);
 		accumulator += 5 + NameSize;
@@ -1098,7 +1088,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 		//cout << "end" << '\n';
 		outputFileSupport << "end\n";
 	}
-	
+
 	outputFileMapUnits.close();
 	outputFileSupport.close();
 }
@@ -1130,7 +1120,7 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 		"\"ai_none\"",
 		"\"ai_none\""
 	};
-	
+
 	const size_t maxTries = mis_groups.size() / 27;
 	for (size_t accumulator = 0; accumulator < maxTries; ++accumulator)
 	{
@@ -1167,7 +1157,7 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 		uint8_t hp = *(uint8_t*)(buffer + 24);
 		uint8_t ammo = *(uint8_t*)(buffer + 25);
 		uint8_t expa = *(uint8_t*)(buffer + 26);
-		
+
 		{
 			const uint8_t AI_type = (uint8_t)(aitype1 & 0x0F);
 			outputFileMisGroups << std::format("Group {}\n ai type={} group1={} group2={} zone1={} zone2={}\n  aiflags="
@@ -1184,7 +1174,7 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 			outputFileMisGroups << '\n';
 		}
 
-		
+
 		if (atime1 == 0 && delay1 == 255 && delay2 == 255 && delay3 == 255 && delay4 == 127 && min == 0 && force1 == 255 && force2 == 255 && force3 == 255 && force4 == 127)
 		{
 			outputFileMisGroups << " reserv auto=0 delay=0 min=0 force=0 atime=0";
@@ -1253,7 +1243,7 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 									uint32_t convertforce = force1234 / timeconvertnum;
 									outputFileMisGroups << std::format(" reserv auto=15 delay={} min={} force={} atime={}", convertdelay, min, convertforce, convertatime);
 								}
-		
+
 		{
 			outputFileMisGroups << std::format(" flag={} zone={} hp={} ammo={} expa={}\n"
 				, (uint16_t)flag
@@ -1262,7 +1252,7 @@ void Converter::convertMisGroups(const std::string_view& mis_groups) const
 				, (uint16_t)ammo
 				, (uint16_t)expa);
 		}
-		
+
 	}
 	outputFileMisGroups.close();
 }
@@ -1275,7 +1265,7 @@ void Converter::convertMisScripts(const std::string_view& mis_scripts) const
 		errorWriteFile();
 		return;
 	}
-	
+
 	scripts1 struct_scripts;
 	scripts2 scripts;
 
@@ -1612,10 +1602,10 @@ void Converter::convertMisScripts(const std::string_view& mis_scripts) const
 						//Неизвестные скрипты
 					default:
 					{
-						std::format_to(std::back_inserter(bufferScripts), "unknown scripts {} {} {} {}\n", 
-							static_cast<uint16_t>(scripts.num1), 
-							static_cast<uint16_t>(scripts.num2), 
-							static_cast<uint16_t>(scripts.num3), 
+						std::format_to(std::back_inserter(bufferScripts), "unknown scripts {} {} {} {}\n",
+							static_cast<uint16_t>(scripts.num1),
+							static_cast<uint16_t>(scripts.num2),
+							static_cast<uint16_t>(scripts.num3),
 							static_cast<uint16_t>(scripts.num4));
 						std::println("\033[31m[Error]\033[0m Found unknown script in {}: {} {} {} {}.", m_stemFileName, scripts.num1, scripts.num2, scripts.num3, scripts.num4);
 						break;
@@ -1651,7 +1641,7 @@ void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 		errorWriteFile();
 		return;
 	}
-	
+
 	const uint32_t numOfSounds = readFileUint32(mis_woofers, 0);
 	for (uint32_t i = 0, curOffset = sizeof(numOfSounds); i < numOfSounds; ++i)
 	{
@@ -1659,14 +1649,14 @@ void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 		curOffset += 64;
 		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_woofers.data()) + curOffset;
 		curOffset += 14;
-		
+
 		uint16_t U = *(uint16_t*)(buffer + 0);
 		uint16_t V = *(uint16_t*)(buffer + 2);
 		uint16_t Radius = *(uint16_t*)(buffer + 4);
 		float Worse = *(float*)(buffer + 6);
 		uint16_t MinWait = *(uint16_t*)(buffer + 10);
 		uint16_t MaxWait = *(uint16_t*)(buffer + 12);
-		
+
 		outputFileMisWoofers << "Name=\"" << reinterpret_cast<const char*>(buffername);
 		outputFileMisWoofers << "\"\nU=" << U << "\nV=" << V
 			<< "\nRadius=" << Radius << "\nWorse=" << Worse << "\nMinWait=" << MinWait << "\nMaxWait=" << MaxWait << "\n\n";
@@ -1781,7 +1771,7 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 		errorWriteFile();
 		return;
 	}
-	
+
 	const size_t maxTries = mis_players.size() / 353;
 	for (size_t curTry = 0; curTry < maxTries; ++curTry)
 	{
@@ -1801,7 +1791,7 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 				, green * 4
 				, blue * 8);
 		}
-		
+
 		const uint32_t Numberbomb = *(uint32_t*)(buffer + 69);
 		const uint32_t Bombsbomb = *(uint32_t*)(buffer + 73);
 		const uint32_t Reloadbomb = *(uint32_t*)(buffer + 77);
@@ -1810,7 +1800,7 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 			, Numberbomb
 			, Bombsbomb
 			, Reloadbomb);
-		
+
 		const uint32_t Numberspy = *(uint32_t*)(buffer + 113);
 		const uint32_t Bombsspy = *(uint32_t*)(buffer + 117);
 		const uint32_t Reloadspy = *(uint32_t*)(buffer + 121);
@@ -1837,11 +1827,11 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 			, Numberboxer
 			, Bombsboxer
 			, Reloadboxer);
-		
+
 		outputMisPlayers << std::format(" descent 0\n  group={}\n  expa={}\n"
 			, *(uint8_t*)(buffer + 213)
 			, *(uint8_t*)(buffer + 214));
-		
+
 		outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
 			, (const char*)buffer + 215
 			, *(uint8_t*)(buffer + 279)
@@ -1851,11 +1841,11 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 			, *(uint8_t*)(buffer + 281)
 			, (const char*)buffer + 263
 			, *(uint8_t*)(buffer + 282));
-		
+
 		outputMisPlayers << std::format(" descent 1\n  group={}\n  expa={}\n"
 			, *(uint8_t*)(buffer + 283)
 			, *(uint8_t*)(buffer + 284));
-		
+
 		outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
 			, (const char*)buffer + 285
 			, *(uint8_t*)(buffer + 349)
@@ -1865,7 +1855,7 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 			, *(uint8_t*)(buffer + 351)
 			, (const char*)buffer + 333
 			, *(uint8_t*)(buffer + 352));
-		
+
 		outputMisPlayers << std::format(" planesdir={}\n", *(uint8_t*)(buffer + 36));	// planesdir
 	}
 	outputMisPlayers.close();
