@@ -33,8 +33,8 @@ void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_
 		break;
 	};
 
-
-	own::println(Dictionary::getValue(STRINGS::MAP_SIZE), mapSizeU, mapSizeV, mapEndPosition);
+	(void)mapEndPosition;
+	own::println(Dictionary::getValue(STRINGS::MAP_SIZE), mapSizeU, mapSizeV);
 	//std::println(" נאחלונמל: {} x {}\n׀אחלונ פאיכא: {} באיע", mapSizeU, mapSizeV, mapEndPosition);
 }
 

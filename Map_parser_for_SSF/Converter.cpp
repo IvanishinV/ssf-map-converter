@@ -315,28 +315,28 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 	{
 	case HEADER_SINGLE:
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE), m_stemFileName);
+		own::print(Dictionary::getValue(STRINGS::MAP_SINGLE), m_stemFileName);
 		convertMapFileSSM(rawData);
 
 		break;
 	}
 	case HEADER_MULTI:
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_MULTI), m_stemFileName);
+		own::print(Dictionary::getValue(STRINGS::MAP_MULTI), m_stemFileName);
 		convertMapFileSMM(rawData);
 
 		break;
 	}
 	case HEADER_CAMP_MAP:
 	{
-		own::println(Dictionary::getValue(STRINGS::CAMP_MAP), m_stemFileName);
+		own::print(Dictionary::getValue(STRINGS::CAMP_MAP), m_stemFileName);
 		convertMapFileSSC_map(rawData);
 
 		break;
 	}
 	case HEADER_CAMP_MIS:
 	{
-		own::println(Dictionary::getValue(STRINGS::CAMP_MIS), m_stemFileName);
+		own::print(Dictionary::getValue(STRINGS::CAMP_MIS), m_stemFileName);
 		convertMapFileSCC_mission(rawData);
 
 		break;
