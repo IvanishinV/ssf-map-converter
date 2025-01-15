@@ -1696,9 +1696,14 @@ void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 		uint16_t MinWait = *(uint16_t*)(buffer + 10);
 		uint16_t MaxWait = *(uint16_t*)(buffer + 12);
 
-		outputFileMisWoofers << "Name=\"" << reinterpret_cast<const char*>(buffername);
-		outputFileMisWoofers << "\"\nU=" << U << "\nV=" << V
-			<< "\nRadius=" << Radius << "\nWorse=" << Worse << "\nMinWait=" << MinWait << "\nMaxWait=" << MaxWait << "\n\n";
+		outputFileMisWoofers << std::format("Name=\"{}\"\nU={}\nV={}\nRadius={}\nWorse={}\nMinWait={}\nMaxWait={}\n\n"
+			, reinterpret_cast<const char*>(buffername)
+			, U
+			, V
+			, Radius
+			, Worse
+			, MinWait
+			, MaxWait);
 	}
 	outputFileMisWoofers.close();
 }
