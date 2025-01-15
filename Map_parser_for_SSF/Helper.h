@@ -22,3 +22,5 @@ uint32_t tileArray(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint3
 uint32_t misScripts(const std::string_view& input, uint32_t scripts_number, const uint32_t scripts_position);
 
 std::string reverse_num(const uint32_t num);
+
+void flip_v(char* pixels, const size_t height, const size_t width, const size_t pixelSize);

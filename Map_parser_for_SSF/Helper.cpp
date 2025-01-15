@@ -110,3 +110,18 @@ std::string reverse_num(const uint32_t num)
 	std::reverse(str.begin(), str.end());
 	return str;
 }
+
+
+void flip_v(char* pixels, const size_t height, const size_t width, const size_t pixelSize)
+{
+	std::vector<uint8_t> temp(width * pixelSize);
+
+	for (size_t i = 0; i < height / 2; ++i)
+	{
+		const auto& src = &pixels[i * width * pixelSize];
+		const auto& dst = &pixels[(height - i - 1) * width * pixelSize];
+		std::copy(dst, dst + width * pixelSize, temp.data());
+		std::copy(src, src + width * pixelSize, dst);
+		std::copy(temp.data(), temp.data() + width * pixelSize, src);
+	}
+}

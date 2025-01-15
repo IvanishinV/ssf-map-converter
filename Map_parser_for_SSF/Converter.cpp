@@ -751,6 +751,7 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part2), 40);
 	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part3), 12);
 
+	flip_v(const_cast<char*>(map_mini.data()), part2.biHeight, part2.biWidth, sizeof(uint16_t));
 	if (isEven)
 		outputFileMapMiniBMP.write(reinterpret_cast<const char*>(map_mini.data()), map_mini.size());
 	else
