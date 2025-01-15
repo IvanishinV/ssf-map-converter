@@ -46,54 +46,73 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	std::wstring wfilepath = filepath.wstring();
 	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) { return !((c >= 0 && c < 128) || (c >= 0x400 && c < 0x500)); }), wfilepath.cend());
 	const std::filesystem::path filepath_ex{ wfilepath };
-
-	const std::string fileName = filepath_ex.filename().string();
-
+	m_stemFileName = filepath_ex.string();
 	const std::filesystem::path fileFolder = filepath.parent_path();
-	m_mapFolder = fileFolder / "map.000";		// todo: add check for already converted files to not to 
-	m_misFolder = m_mapFolder / "mis.000";
 
 	m_mapType = *(uint32_t*)rawData.data();
 	switch (m_mapType)
 	{
-	case (HEADER_SINGLE):
+	case HEADER_SINGLE:
+	case HEADER_MULTI:
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE), fileName);
+		m_mapFolder = fileFolder / ("map." + m_stemFileName);
+		m_misFolder = m_mapFolder / "mis.000";
+		break;
+	}
+	case HEADER_CAMP_MAP:
+	{
+		if (m_stemFileName.length() >= 3)
+			m_mapFolder = fileFolder / ("map." + m_stemFileName.substr(0, 3));
+		break;
+	}
+	case HEADER_CAMP_MIS:
+	{
+		if (m_stemFileName.length() >= 3)
+			m_mapFolder = fileFolder / ("map." + m_stemFileName.substr(0, 3));
+		if (m_stemFileName.length() >= 3)
+			m_misFolder = m_mapFolder / ("mis." + m_stemFileName.substr(3, 3));
+
+		break;
+	}
+	}
+
+	switch (m_mapType)
+	{
+	case HEADER_SINGLE:
+	{
+		own::println(Dictionary::getValue(STRINGS::MAP_SINGLE), m_stemFileName);
 		parseMapFileSSM(rawData);
+
 		break;
 	}
-	case (HEADER_MULTI):
+	case HEADER_MULTI:
 	{
-		own::println(Dictionary::getValue(STRINGS::MAP_MULTI), fileName);
+		own::println(Dictionary::getValue(STRINGS::MAP_MULTI), m_stemFileName);
 		parseMapFileSMM(rawData);
+
 		break;
 	}
-	case (HEADER_CAMP_MAP):
+	case HEADER_CAMP_MAP:
 	{
-		if (fileName.length() >= 3)
-			m_mapFolder = fileFolder / ("parser_map." + fileName.substr(0, 3));
-
-		own::println(Dictionary::getValue(STRINGS::CAMP_MAP), fileName);
+		own::println(Dictionary::getValue(STRINGS::CAMP_MAP), m_stemFileName);
 		parseMapFileSSC_map(rawData);
+
 		break;
 	}
-	case (HEADER_CAMP_MIS):
+	case HEADER_CAMP_MIS:
 	{
-		if (fileName.length() >= 3)
-			m_mapFolder = fileFolder / ("parser_map." + fileName.substr(0, 3));
-		if (fileName.length() >= 3)
-			m_misFolder = m_mapFolder / ("mis." + fileName.substr(3, 3));
-
-		own::println(Dictionary::getValue(STRINGS::CAMP_MIS), fileName);
+		own::println(Dictionary::getValue(STRINGS::CAMP_MIS), m_stemFileName);
 		parseMapFileSCC_mission(rawData);
+
 		break;
 	}
 	default:
 	{
 		std::println("");
-		own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE));
+		own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
+		return;
 	}
-	};
+	}
 }
 
 uint32_t Parser::parseMapFileSMM(const std::string_view& inputFile) const

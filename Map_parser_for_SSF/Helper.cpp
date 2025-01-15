@@ -61,23 +61,25 @@ uint32_t readUint32(scripts2& scripts)
 
 uint32_t minimapsize(uint32_t mapSizeU, uint32_t mapSizeV)
 {
-	if (mapSizeU <= 128 && mapSizeV <= 128 && mapSizeU == mapSizeV)
+	// 0x100 0x100	32768
+	// 0x96 0x96	11250
+	// 0x80 0x80	32768
+	// 0x80 0x100	16384
+	static constexpr int MINI_MAP_DEFAULT_SIZE = 0x8000;
+
+	if ((mapSizeU == 128 || mapSizeU == 256) && (mapSizeV == 128 || mapSizeV == 256) && mapSizeU == mapSizeV)
 	{
-		uint32_t MiniSize = mapSizeU * mapSizeV * 2;
-		return MiniSize;
+		return MINI_MAP_DEFAULT_SIZE;
 	}
 	else
 	{
-		uint32_t MiniSize = mapSizeU * mapSizeV / 2;
-		return MiniSize;
+		return mapSizeU * mapSizeV / 2;
 	}
 }
 
 uint32_t tileArray(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_t number)
 {
-	uint32_t result;
-	result = mapSizeU * mapSizeV * number;
-	return result;
+	return mapSizeU * mapSizeV * number;
 }
 
 uint32_t misScripts(const std::string_view& inputFile, uint32_t scripts_number, const uint32_t scripts_position)
