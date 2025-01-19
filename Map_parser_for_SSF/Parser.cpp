@@ -55,20 +55,20 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	case HEADER_SINGLE:
 	case HEADER_MULTI:
 	{
-		m_mapFolder = fileFolder / ("map." + m_stemFileName);
+		m_mapFolder = fileFolder / ("parser_map." + m_stemFileName);
 		m_misFolder = m_mapFolder / "mis.000";
 		break;
 	}
 	case HEADER_CAMP_MAP:
 	{
 		if (m_stemFileName.length() >= 3)
-			m_mapFolder = fileFolder / ("map." + m_stemFileName.substr(0, 3));
+			m_mapFolder = fileFolder / ("parser_map." + m_stemFileName.substr(0, 3));
 		break;
 	}
 	case HEADER_CAMP_MIS:
 	{
 		if (m_stemFileName.length() >= 3)
-			m_mapFolder = fileFolder / ("map." + m_stemFileName.substr(0, 3));
+			m_mapFolder = fileFolder / ("parser_map." + m_stemFileName.substr(0, 3));
 		if (m_stemFileName.length() >= 3)
 			m_misFolder = m_mapFolder / ("mis." + m_stemFileName.substr(3, 3));
 
