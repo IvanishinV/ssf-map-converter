@@ -15,9 +15,7 @@ int8_t readFileInt8(const std::vector<uint8_t>& input, const uint32_t offset);
 uint32_t readFileUint32(const std::vector<uint8_t>& input, const uint32_t offset);
 uint32_t readFileUint32(const std::string_view& input, const uint32_t offset);
 
-uint32_t readUint32(scripts2& scripts);
-
-uint32_t minimapsize(uint32_t mapSizeU, uint32_t mapSizeV);
+uint32_t minimapsize(const uint32_t mapSizeU, const uint32_t mapSizeV);
 uint32_t tileArray(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_t number);
 uint32_t misScripts(const std::string_view& input, uint32_t scripts_number, const uint32_t scripts_position);
 

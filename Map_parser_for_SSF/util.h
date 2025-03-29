@@ -40,19 +40,15 @@ enum class Action
 struct scripts1
 {
 	uint32_t size_of_script;
-	uint8_t startscripts1;
-	uint8_t startscripts2;
-	uint8_t startscripts3;
-	uint8_t startscripts4;
-};
-struct scripts2
-{
-	uint8_t num1;
-	uint8_t num2;
-	uint8_t num3;
-	uint8_t num4;
+	int32_t startscripts;
 };
 
+struct scripts2
+{
+	int32_t num;
+};
+
+// If you need any documentation - there is a separate xlsx file with all the info
 enum scripts_num
 {
 	bufferNONE = 0x00,
@@ -63,17 +59,17 @@ enum scripts_num
 	bufferUGL,
 	bufferUPL,
 	bufferEND,
-	bufferSPPL,
+	bufferSPPL,		// send planes in zone
 	bufferPKP,
 	bufferPKF,
 	bufferETC,
-	bufferSTRT,
+	bufferSTRT,		// set alarm clock
 	bufferSTPT,
 	bufferMSTL,
 	bufferSP,
 	bufferSCD,
 	bufferSNM,
-	bufferTM,
+	bufferTM,		// end mission
 	bufferSGB,
 	bufferSGL1,
 	bufferSGL2,
@@ -82,7 +78,7 @@ enum scripts_num
 	bufferAPP,
 	bufferAFP,
 	bufferNF,
-	bufferTE,
+	bufferTE,		// alarm clock ringing
 	bufferCD,
 	bufferTMS,
 	bufferUGLper,
@@ -95,13 +91,13 @@ enum scripts_num
 	bufferAIG1,
 	bufferAIG2,
 	bufferRU,
-	bufferSRFS,
+	bufferSRFS,		// send reinf
 	bufferOID,
-	bufferSPTO,
+	bufferSPTO,		// send planes
 	bufferSAT,
-	bufferARPO,
-	bufferARPO2,
-	bufferSPPA,
+	bufferARPO,		// add route point
+	bufferASPO,		// add drop point
+	bufferSPPA,		// send plane along an air route
 	bufferLCCV,
 	bufferMO,
 	bufferGWATA,
@@ -116,8 +112,11 @@ enum scripts_num
 	bufferDGP,
 	bufferFVKGZ,
 	bufferFVKGO = 0x3C,
-	START		= 0x7F,
-	END			= 0x87,
 	bufferstart = 0x464F4143,
 	bufferEND2	= 0x7fffffff,
 };
+
+constexpr size_t MAX_NUM_OF_ARGS_IN_INSTRUCTION = 7;
+
+const uint32_t script_reinf_player = 0x4;
+const uint32_t script_reinf_enemy = 0x8;

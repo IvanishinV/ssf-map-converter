@@ -52,14 +52,7 @@ uint32_t readFileUint32(const std::string_view& input, const uint32_t offset)
 }
 
 
-uint32_t readUint32(scripts2& scripts)
-{
-	const uint32_t num1234 = ((scripts.num4 & 0xFF) << 24) | ((scripts.num3 & 0xFF) << 16) | ((scripts.num2 & 0xFF) << 8) | (scripts.num1 & 0xFF);
-	return num1234;
-}
-
-
-uint32_t minimapsize(uint32_t mapSizeU, uint32_t mapSizeV)
+uint32_t minimapsize(const uint32_t mapSizeU, const uint32_t mapSizeV)
 {
 	// 0x100 0x100	32768
 	// 0x96 0x96	11250

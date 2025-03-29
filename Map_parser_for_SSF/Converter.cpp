@@ -81,7 +81,6 @@ std::stack< std::vector<uint8_t> > stack_operations_bracket(std::vector<uint8_t>
 void convertOPN(std::vector<uint8_t>& bufferScripts, std::vector<uint8_t>& operand1, std::vector<uint8_t>& operand2,
 	std::stack< std::vector<uint8_t> >& stack_for_RPN, const uint32_t logicOperator, const uint32_t scriptNumber)
 {
-
 	switch (scriptNumber)
 	{
 		//Если operand один но есть вероятность что перед ним есть условие "Наверно что"
@@ -167,11 +166,11 @@ void convertOPN(std::vector<uint8_t>& bufferScripts, std::vector<uint8_t>& opera
 	}
 }
 
-void getScriptSize(std::vector<uint8_t>& bufferScripts, uint32_t num_scripts)
+void getScriptSize(std::vector<uint8_t>& bufferScripts, const uint32_t cur_script_num, const std::string_view& script_name)
 {
 	//Функция определения размера скрипта
 	std::vector<uint8_t> cap_scripts;
-	std::format_to(std::back_inserter(cap_scripts), "script \"{}\" size {}\n", num_scripts, bufferScripts.size());
+	std::format_to(std::back_inserter(cap_scripts), "script \"{}{}\" size {}\n", cur_script_num, script_name, bufferScripts.size());
 	bufferScripts.insert(bufferScripts.begin(), cap_scripts.begin(), cap_scripts.end());
 	cap_scripts.clear();
 	//В конце каждого скрипта идет эта каретка, в размер скрипта не входит
@@ -717,7 +716,7 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 
 	if ((m_mapSizeU == 128 || m_mapSizeU == 256) && (m_mapSizeV == 128 || m_mapSizeV == 256) && m_mapSizeU == m_mapSizeV)
 		isDoubled = false;
-	
+
 	const size_t size = (isDoubled == true ? (isEven ? m_mapSizeU : m_mapSizeU + 2) / 2 : 128)
 		* (isDoubled == true ? m_mapSizeV / 2 : 128)
 		* sizeof(uint16_t);
@@ -1305,9 +1304,6 @@ void Converter::convertMisScripts(const std::string_view& mis_scripts) const
 		return;
 	}
 
-	scripts1 struct_scripts;
-	scripts2 scripts;
-
 	// uint32_t numberOfScripts = *(uint32_t*)mis_scripts.data();
 	// std::println("Number of scripts: {}", numberOfScripts);
 
@@ -1317,356 +1313,340 @@ void Converter::convertMisScripts(const std::string_view& mis_scripts) const
 
 	std::stack< std::vector<uint8_t> > stack_for_RPN;
 
-	uint32_t accumulator_num_scripts = 1;
+	uint32_t cur_script_num = 1;
 
-	std::array <std::string, 200> numberscripts;
+	std::array<std::string, MAX_NUM_OF_ARGS_IN_INSTRUCTION> instruction_args;
+	std::array<int, MAX_NUM_OF_ARGS_IN_INSTRUCTION> instr_args_num;
 
 	for (size_t curOffset = 4; curOffset + sizeof(scripts1) < mis_scripts.size(); curOffset)
 	{
-		std::memcpy(&struct_scripts, mis_scripts.data() + curOffset, sizeof(scripts1));
+		std::string script_name = "";
 
-		uint32_t n = 0;
-		uint32_t key = 0;
-		uint32_t script_num_for_OPN = 0;
+		const scripts1& struct_scripts = *(scripts1*)(mis_scripts.data() + curOffset);
 		curOffset += sizeof(scripts1);
 
-		for (int i = 0; (struct_scripts.size_of_script - sizeof(scripts2)) / sizeof(scripts2) > i; i++)
+		uint32_t n = 0;
+		uint32_t script_num_for_OPN = 0;
+
+		for (size_t i = 0; i < (struct_scripts.size_of_script - sizeof(scripts2)) / sizeof(scripts2); i++)
 		{
-			uint8_t logicOperator = 0;
-			std::memcpy(&scripts, mis_scripts.data() + curOffset, sizeof(scripts2));
+			const scripts2& scripts = *(scripts2*)(mis_scripts.data() + curOffset);
+
 			curOffset += sizeof(scripts2);
+			uint8_t logicOperator = 0;
+
+			if (scripts.num < 0) // сито  - положительный int это набор команды, отрицательный int это операнды к командам
 			{
-				//Переменные значения
-				switch (scripts.num4)
+				instruction_args[n] = reverse_num(scripts.num & 0x7FFFFFFF);
+				instr_args_num[n] = scripts.num & 0x7FFFFFFF;
+				n++;
+			}
+			else
+			{
+				n = 0;
+				switch (scripts.num)
 				{
-				case 255:
-				{
-					// Операция с координатой ячеек памяти num1 == 0 - 99 num2 == 255 && num3 == 255 && num4 == 255 (для qed num4 == 255 - 128)
-					numberscripts[n] = reverse_num(((0x7F) << 24) | ((0xFF) << 16) | ((0xFF) << 8) | (scripts.num1 & 0xFF));
-					n++;
-				}
-				break;
-				case START + 1:
-				{
-					// num4 здесь приравнивается к 0 т.к. значение 128 фактически равно 0 и не хранит информацию об Ai командах все что более 128 уже имет какое либо значение комнды Ai
-					numberscripts[n] = reverse_num(((0x00) << 24) | ((scripts.num3 & 0xFF) << 16) | ((scripts.num2 & 0xFF) << 8) | (scripts.num1 & 0xFF));
-					n++;
-				}
-				break;
-				case START + 2:
-				{
+					//Логические операторы
+				case bufferAND: logicOperator = 1; break;
+				case bufferOR: logicOperator = 2; break;
+				case bufferNF: logicOperator = 3; break;
 
-					numberscripts[n] = reverse_num(readUint32(scripts));
-					n++;
-				}
-				break;
-				case START + 3:
-				{
-					numberscripts[n] = reverse_num(readUint32(scripts));
-					n++;
-				}
-				break;
-				case START + 4:
-				{
-					numberscripts[n] = reverse_num(readUint32(scripts));
-					n++;
-				}
-				break;
-				case START + 5:
-				{
-					numberscripts[n] = reverse_num(readUint32(scripts));
-					n++;
-				}
-				break;
-				case START + 6:
-				{
-					numberscripts[n] = reverse_num(readUint32(scripts));
-					n++;
-				}
-				break;
-				case START + 7:
-				{
-					numberscripts[n] = reverse_num(readUint32(scripts));
-					n++;
-				}
-				break;
-				case START + 8:
-				{
-					numberscripts[n] = reverse_num(readUint32(scripts));
-					n++;
-				}
-				break;
-				case START:
-				{
-					//END - конец скрипта
-					std::format_to(std::back_inserter(bufferScripts), "$END\n");
-				}
-				break;
-				case bufferNONE:
-					switch (scripts.num1)
-					{
-						//Логические операторы
-					case bufferAND: logicOperator = 1; break;
-					case bufferOR: logicOperator = 2; break;
-					case bufferNF: logicOperator = 3; break;
+					//Скрипты из первого окна редактора карт
 
-						//Скрипты из первого окна редактора карт
+				case bufferUG: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ug\n$UMSK\n#{}\n$ug1\n$Grp\n#{}\n$sp_8\n$CABE\n#{}\n$sp_9\n$N1\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 3, 0, 0, 0
 
-					case bufferUG: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ug\n$UMSK\n#{}\n$ug1\n$Grp\n#{}\n$sp_8\n$CABE\n#{}\n$sp_9\n$N1\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 3, 0, 0, 0 #{} плейсхолдеры
+				case bufferUP: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$up\n$UMSK\n#{}\n$up1\n$Plr\n#{}\n$sp_b\n$CABE\n#{}\n$sp_c\n$N1\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 4, 0, 0, 0
 
-					case bufferUP: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$up\n$UMSK\n#{}\n$up1\n$Plr\n#{}\n$sp_b\n$CABE\n#{}\n$sp_c\n$N1\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 4, 0, 0, 0
+				case bufferUGL: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ugl\n$CABE\n#{}\n$N1\n#{}\n$umx0\n$Grp\n#{}\n$ugl1\n$L\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 5, 0, 0, 0
 
-					case bufferUGL: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ugl\n$CABE\n#{}\n$N1\n#{}\n$umx0\n$Grp\n#{}\n$ugl1\n$L\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 5, 0, 0, 0
+				case bufferUPL: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$upl\n$CABE\n#{}\n$N1\n#{}\n$umx2\n$Plr\n#{}\n$upl1\n$L\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 6, 0, 0, 0
 
-					case bufferUPL: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$upl\n$CABE\n#{}\n$N1\n#{}\n$umx2\n$Plr\n#{}\n$upl1\n$L\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 6, 0, 0, 0
+				case bufferPKP: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$pkp\n$Plr\n#{}\n$pkp1\n$CABE\n#{}\n$sp_d\n$N1\n#{}\n$sp_e\n$PT\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 9, 0, 0, 0
 
-					case bufferPKP: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$pkp\n$Plr\n#{}\n$pkp1\n$CABE\n#{}\n$sp_d\n$N1\n#{}\n$sp_e\n$PT\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 9, 0, 0, 0
+				case bufferPKF: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$pkf\n$Plr\n#{}\n$pkf1\n$CABE\n#{}\n$sp_f\n$N1\n#{}\n$pkf2\n$PT\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 10, 0, 0, 0
 
-					case bufferPKF: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$pkf\n$Plr\n#{}\n$pkf1\n$CABE\n#{}\n$sp_f\n$N1\n#{}\n$pkf2\n$PT\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 10, 0, 0, 0
+				case bufferTE: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$te\n$Tr\n#{}\n"
+					, instruction_args[0]);
 
-					case bufferTE: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$te\n$Tr\n#{}\n"
-						, numberscripts[key]);
-						key++; script_num_for_OPN += 1; break; // 27, 0, 0, 0
+					script_name += std::format("_alarm-{}", instr_args_num[0]);
 
-					case bufferCD: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$cd\n$CABE\n#{}\n$sp_5\n$T\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; script_num_for_OPN += 1; break; // 28, 0, 0, 0
+					script_num_for_OPN += 1; break; // 27, 0, 0, 0
 
-					case bufferTMS: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$tms\n$CAB\n#{}\n$sp_6\n$T\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; script_num_for_OPN += 1; break; // 29, 0, 0, 0
+				case bufferCD: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$cd\n$CABE\n#{}\n$sp_5\n$T\n#{}\n"
+					, instruction_args[0], instruction_args[1]);
+					script_num_for_OPN += 1; break; // 28, 0, 0, 0
 
-					case bufferUGLper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ugl%\n$CABE\n#{}\n$N1\n#{}\n$umx1\n$Grp\n#{}\n$ugl1\n$L\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 30, 0, 0, 0
+				case bufferTMS: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$tms\n$CAB\n#{}\n$sp_6\n$T\n#{}\n"
+					, instruction_args[0], instruction_args[1]);
+					script_num_for_OPN += 1; break; // 29, 0, 0, 0
 
-					case bufferUPLper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$upl%\n$CABE\n#{}\n$N1\n#{}\n$umx3\n$Plr\n#{}\n$upl1\n$L\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; script_num_for_OPN += 1; break; // 31, 0, 0, 0
+				case bufferUGLper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ugl%\n$CABE\n#{}\n$N1\n#{}\n$umx1\n$Grp\n#{}\n$ugl1\n$L\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 30, 0, 0, 0
 
-					case bufferUGper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ug%u\n$UMSK\n#{}\n$umx4\n$Grp\n#{}\n$sp_7\n$CABE\n#{}\n$sp_k\n$N1\n#{}\n$ugut1\n$UMSK\n#{}\n$ug%u1\n$Grp\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4], numberscripts[key + 5]);
-						key += 6; script_num_for_OPN += 1; break; // 32, 0, 0, 0
+				case bufferUPLper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$upl%\n$CABE\n#{}\n$N1\n#{}\n$umx3\n$Plr\n#{}\n$upl1\n$L\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					script_num_for_OPN += 1; break; // 31, 0, 0, 0
 
-					case bufferUPper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$up%\n$UMSK\n#{}\n$up%u1\n$Plr\n#{}\n$sp_a\n$CABE\n#{}\n$sp_k\n$N1\n#{}\n$ugut1\n$UMSK\n#{}\n$up%u2\n$Plr\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4], numberscripts[key + 5]);
-						key += 6; script_num_for_OPN += 1; break; // 33, 0, 0, 0
+				case bufferUGper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$ug%u\n$UMSK\n#{}\n$umx4\n$Grp\n#{}\n$sp_7\n$CABE\n#{}\n$sp_k\n$N1\n#{}\n$ugut1\n$UMSK\n#{}\n$ug%u1\n$Grp\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3], instruction_args[4], instruction_args[5]);
+					script_num_for_OPN += 1; break; // 32, 0, 0, 0
 
-					case bufferAIGB: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aigb\n$Grp\n#{}\n$aigb1\n$AI\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; script_num_for_OPN += 1; break; // 35, 0, 0, 0
+				case bufferUPper: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$up%\n$UMSK\n#{}\n$up%u1\n$Plr\n#{}\n$sp_a\n$CABE\n#{}\n$sp_k\n$N1\n#{}\n$ugut1\n$UMSK\n#{}\n$up%u2\n$Plr\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3], instruction_args[4], instruction_args[5]);
+					script_num_for_OPN += 1; break; // 33, 0, 0, 0
 
-					case bufferAIZ1: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aiz1\n$Grp\n#{}\n$aiz_1\n$L\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; script_num_for_OPN += 1; break; // 35, 0, 0, 0
+				case bufferAIGB: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aigb\n$Grp\n#{}\n$aigb1\n$AI\n#{}\n"
+					, instruction_args[0], instruction_args[1]);
+					script_num_for_OPN += 1; break; // 35, 0, 0, 0
 
-					case bufferAIZ2: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aiz2\n$Grp\n#{}\n$aiz_2\n$L\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; script_num_for_OPN += 1; break; // 36, 0, 0, 0
+				case bufferAIZ1: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aiz1\n$Grp\n#{}\n$aiz_1\n$L\n#{}\n"
+					, instruction_args[0], instruction_args[1]);
+					script_num_for_OPN += 1; break; // 35, 0, 0, 0
 
-					case bufferAIG1: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aig1\n$Grp\n#{}\n$aig_1\n$Grp\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; script_num_for_OPN += 1; break; // 37, 0, 0, 0
+				case bufferAIZ2: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aiz2\n$Grp\n#{}\n$aiz_2\n$L\n#{}\n"
+					, instruction_args[0], instruction_args[1]);
+					script_num_for_OPN += 1; break; // 36, 0, 0, 0
 
-					case bufferAIG2: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aig2\n$Grp\n#{}\n$aig_2\n$Grp\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; script_num_for_OPN += 1; break; // 38, 0, 0, 0
+				case bufferAIG1: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aig1\n$Grp\n#{}\n$aig_1\n$Grp\n#{}\n"
+					, instruction_args[0], instruction_args[1]);
+					script_num_for_OPN += 1; break; // 37, 0, 0, 0
 
-					case bufferOID: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$oid\n$Obj\n#{}\n$oid1\n"
-						, numberscripts[key]);
-						key++; script_num_for_OPN += 1; break; // 41, 0, 0, 0
+				case bufferAIG2: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$aig2\n$Grp\n#{}\n$aig_2\n$Grp\n#{}\n"
+					, instruction_args[0], instruction_args[1]);
+					script_num_for_OPN += 1; break; // 38, 0, 0, 0
 
-					case bufferGWATA: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$gwata\n$Grp\n#{}\n$gwata1\n$CAB\n#{}\n$T\n#{}\n$gwata2\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; script_num_for_OPN += 1; break; // 49, 0, 0, 0
+				case bufferOID: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$oid\n$Obj\n#{}\n$oid1\n"
+					, instruction_args[0]);
+					script_num_for_OPN += 1; break; // 41, 0, 0, 0
 
-					case bufferVIC: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$vic\n$Lvar\n#{}\n$CABE\n#{}\n$Rvar\n#{}\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; script_num_for_OPN += 1; break; // 50, 0, 0, 0
+				case bufferGWATA: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$gwata\n$Grp\n#{}\n$gwata1\n$CAB\n#{}\n$T\n#{}\n$gwata2\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					script_num_for_OPN += 1; break; // 49, 0, 0, 0
 
-					case bufferMIST: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$mist\n"); script_num_for_OPN += 1; break;
+				case bufferVIC: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$vic\n$Lvar\n#{}\n$CABE\n#{}\n$Rvar\n#{}\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					script_num_for_OPN += 1; break; // 50, 0, 0, 0
 
-						//END - разделитель между двумя окнами скриптов в редакторе карт QED
-					case bufferEND: logicOperator = 4; break;
-						//std::format_to(std::back_inserter(bufferScripts), "$END\n!\n");
-						//break; // 7, 0, 0, 0
+				case bufferMIST: std::format_to(std::back_inserter(stack_for_RPN.emplace()), "$mist\n");
+					script_num_for_OPN += 1; break; // 51, 0, 0, 0
 
-						//Скрипты из второго окна редактора карт
-					case bufferSPPL: std::format_to(std::back_inserter(bufferScripts), "$sppl\n$I\n#{}\n$spc\n$PT\n#{}\n$sppl1\n$P\n#{}\n$sppl2\n$L\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; break; // 8, 0, 0, 0
+					//END - разделитель между двумя окнами скриптов в редакторе карт QED
+				case bufferEND: logicOperator = 4; break;
+					//std::format_to(std::back_inserter(bufferScripts), "$END\n!\n");
+					//break; // 7, 0, 0, 0
 
-					case bufferETC: std::format_to(std::back_inserter(bufferScripts), "$etc\n$\\\\n\n");
-						break; // 11, 0, 0, 0
+					//Скрипты из второго окна редактора карт
+				case bufferSPPL: std::format_to(std::back_inserter(bufferScripts), "$sppl\n$I\n#{}\n$spc\n$PT\n#{}\n$sppl1\n$P\n#{}\n$sppl2\n$L\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
 
-					case bufferSTRT: std::format_to(std::back_inserter(bufferScripts), "$strt\n$Tr\n#{}\n$strt1\n$T\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 12, 0, 0, 0
+					script_name += std::format("_snd-{}-plane-{}-{}-zone-{}"
+						, instr_args_num[0]
+						, (instr_args_num[1] == 0) ? "bmb" : (instr_args_num[1] == 1) ? "int" : (instr_args_num[1] == 2) ? "tr" : "crg"
+						, (instr_args_num[2] == 0) ? "pl" : (instr_args_num[2] == 1) ? "en" : (instr_args_num[2] == 2) ? "al" : "neu"
+						, instr_args_num[3]);
 
-					case bufferSTPT: std::format_to(std::back_inserter(bufferScripts), "$stpt\n$Tr\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 13, 0, 0, 0
+					break; // 8, 0, 0, 0
 
-					case bufferMSTL: std::format_to(std::back_inserter(bufferScripts), "$mstl\n$L\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 14, 0, 0, 0
+				case bufferETC: std::format_to(std::back_inserter(bufferScripts), "$etc\n$\\\\n\n");
+					break; // 11, 0, 0, 0
 
-					case bufferSP: std::format_to(std::back_inserter(bufferScripts), "$sp\n$phrs\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 15, 0, 0, 0
+				case bufferSTRT: std::format_to(std::back_inserter(bufferScripts), "$strt\n$Tr\n#{}\n$strt1\n$T\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
 
-					case bufferSCD: std::format_to(std::back_inserter(bufferScripts), "$scd\n$T\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 16, 0, 0, 0
+					script_name += std::format("_set-al-{}", instr_args_num[0]);
 
-					case bufferSNM: std::format_to(std::back_inserter(bufferScripts), "$snm\n$mission\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 17, 0, 0, 0
+					break; // 12, 0, 0, 0
 
-					case bufferTM: std::format_to(std::back_inserter(bufferScripts), "$tm\n$F\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 18, 0, 0, 0
+				case bufferSTPT: std::format_to(std::back_inserter(bufferScripts), "$stpt\n$Tr\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
+					break; // 13, 0, 0, 0
 
-					case bufferSGB: std::format_to(std::back_inserter(bufferScripts), "$sgb\n$G\n#{}\n$sgb1\n$AI\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 19, 0, 0, 0 
+				case bufferMSTL: std::format_to(std::back_inserter(bufferScripts), "$mstl\n$L\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
+					break; // 14, 0, 0, 0
 
-					case bufferSGL1: std::format_to(std::back_inserter(bufferScripts), "$sgl1\n$G\n#{}\n$sgl11\n$L\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 20, 0, 0, 0 
+				case bufferSP: std::format_to(std::back_inserter(bufferScripts), "$sp\n$phrs\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
+					break; // 15, 0, 0, 0
 
-					case bufferSGL2: std::format_to(std::back_inserter(bufferScripts), "$sgl2\n$G\n#{}\n$sgl21\n$L\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 21, 0, 0, 0
+				case bufferSCD: std::format_to(std::back_inserter(bufferScripts), "$scd\n$T\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
+					break; // 16, 0, 0, 0
 
-					case bufferSGG1: std::format_to(std::back_inserter(bufferScripts), "$sgg1\n$G\n#{}\n$sgg11\n$G\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 22, 0, 0, 0
+				case bufferSNM: std::format_to(std::back_inserter(bufferScripts), "$snm\n$mission\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
+					break; // 17, 0, 0, 0
 
-					case bufferSGG2: std::format_to(std::back_inserter(bufferScripts), "$sgg2\n$G\n#{}\n$sgg21\n$G\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 23, 0, 0, 0
+				case bufferTM: std::format_to(std::back_inserter(bufferScripts), "$tm\n$F\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
 
-					case bufferAPP: std::format_to(std::back_inserter(bufferScripts), "$app\n$P\n#{}\n$spc\n$I\n#{}\n$spc\n$PT\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; break; // 24, 0, 0, 0
+					script_name += instr_args_num[0] == 1 ? "_win" : instr_args_num[0] == 2 ? "_lose" : "_draw";
 
-					case bufferAFP: std::format_to(std::back_inserter(bufferScripts), "$afp\n$P\n#{}\n$spc\n$I\n#{}\n$afp1\n$PT\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; break; // 25, 0, 0, 0
+					break; // 18, 0, 0, 0
 
-					case bufferRU: std::format_to(std::back_inserter(bufferScripts), "$ru\n$G\n#{}\n$ru1\n$flg\n#{}\n$ru2\n$L\n#{}\n$ru3\n$T\n#{}\n$ru4\n$I\n#{}\n$ru5\n$I\n#{}\n$ru5\n$I\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4], numberscripts[key + 5], numberscripts[key + 6]);
-						key += 7; break; // 39, 0, 0, 0
+				case bufferSGB: std::format_to(std::back_inserter(bufferScripts), "$sgb\n$G\n#{}\n$sgb1\n$AI\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 19, 0, 0, 0 
 
-					case bufferSRFS: std::format_to(std::back_inserter(bufferScripts), "$srfs\n$P\n#{}\n$srfs0\n$resv\n#{}\n$srfs1\n$flg\n#{}\n$srfs2\n$L\n#{}\n$srfs3\n$T\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3], numberscripts[key + 4]);
-						key += 5; break; // 40, 0, 0, 0
+				case bufferSGL1: std::format_to(std::back_inserter(bufferScripts), "$sgl1\n$G\n#{}\n$sgl11\n$L\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 20, 0, 0, 0 
 
-					case bufferSPTO: std::format_to(std::back_inserter(bufferScripts), "$spto\n$I\n#{}\n$spc\n$PT\n#{}\n$spto1\n$P\n#{}\n$spto2\n$Obj\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; break; // 42, 0, 0, 0
+				case bufferSGL2: std::format_to(std::back_inserter(bufferScripts), "$sgl2\n$G\n#{}\n$sgl21\n$L\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 21, 0, 0, 0
 
-					case bufferSAT: std::format_to(std::back_inserter(bufferScripts), "$sat\n$\\\\n\n");
-						break; // 43, 0, 0, 0
+				case bufferSGG1: std::format_to(std::back_inserter(bufferScripts), "$sgg1\n$G\n#{}\n$sgg11\n$G\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 22, 0, 0, 0
 
-					case bufferARPO: std::format_to(std::back_inserter(bufferScripts), "$arpo\n$Obj\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 44, 0, 0, 0
+				case bufferSGG2: std::format_to(std::back_inserter(bufferScripts), "$sgg2\n$G\n#{}\n$sgg21\n$G\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 23, 0, 0, 0
 
-					case bufferARPO2: std::format_to(std::back_inserter(bufferScripts), "$arpo\n$Obj\n#{}\n$\\\\n\n"
-						, numberscripts[key]);
-						key++; break; // 45, 0, 0, 0
+				case bufferAPP: std::format_to(std::back_inserter(bufferScripts), "$app\n$P\n#{}\n$spc\n$I\n#{}\n$spc\n$PT\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					break; // 24, 0, 0, 0
 
-					case bufferSPPA: std::format_to(std::back_inserter(bufferScripts), "$sppa\n$I\n#{}\n$spc\n$PT\n#{}\n$sppa1\n$P\n#{}\n$sppa2\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; break; // 46, 0, 0, 0
+				case bufferAFP: std::format_to(std::back_inserter(bufferScripts), "$afp\n$P\n#{}\n$spc\n$I\n#{}\n$afp1\n$PT\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					break; // 25, 0, 0, 0
 
-					case bufferLCCV: std::format_to(std::back_inserter(bufferScripts), "$lccv\n$Lvar\n#{}\n$lccv1\n$Rvar\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 47, 0, 0, 0 //$Rvar не расшифрован
+				case bufferRU: std::format_to(std::back_inserter(bufferScripts), "$ru\n$G\n#{}\n$ru1\n$flg\n#{}\n$ru2\n$L\n#{}\n$ru3\n$T\n#{}\n$ru4\n$I\n#{}\n$ru5\n$I\n#{}\n$ru5\n$I\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3], instruction_args[4], instruction_args[5], instruction_args[6]);
+					break; // 39, 0, 0, 0
 
-					case bufferMO: std::format_to(std::back_inserter(bufferScripts), "$mo\n$Lvar\n#{}\n$spc\n$Math\n#{}\n$spc\n$Rvar\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; break; // 48, 0, 0, 0 //$Math не расшифрован
+				case bufferSRFS: std::format_to(std::back_inserter(bufferScripts), "$srfs\n$P\n#{}\n$srfs0\n$resv\n#{}\n$srfs1\n$flg\n#{}\n$srfs2\n$L\n#{}\n$srfs3\n$T\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3], instruction_args[4]);
 
-					case bufferSRES: std::format_to(std::back_inserter(bufferScripts), "$sres\n$resv\n#{}\n$sres1\n$resv\n#{}\n$sres2\n$resv\n#{}\n$sres3\n$T\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; break; // 52, 0, 0, 0
+					script_name += std::format("_reinf-{}-{}-{}"
+						, (instr_args_num[0] == 0) ? "pl" : (instr_args_num[0] == 1) ? "en" : (instr_args_num[0] == 2) ? "al" : "neu"
+						, (char)('A' + instr_args_num[2])
+						, std::string{ instruction_args[3].rbegin(), instruction_args[3].rend() });
 
-					case bufferFRES: std::format_to(std::back_inserter(bufferScripts), "$fres\n$Fmask\n#{}\n$fres0\n$Fmask\n#{}\n$fres1\n$Fmask\n#{}\n$fres2\n$T\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2], numberscripts[key + 3]);
-						key += 4; break; // 53, 0, 0, 0
+					break; // 40, 0, 0, 0
 
-					case bufferPFF: std::format_to(std::back_inserter(bufferScripts), "$pff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$spc\n$PT\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; break; // 54, 0, 0, 0
+				case bufferSPTO: std::format_to(std::back_inserter(bufferScripts), "$spto\n$I\n#{}\n$spc\n$PT\n#{}\n$spto1\n$P\n#{}\n$spto2\n$Obj\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
 
-					case bufferFPFF: std::format_to(std::back_inserter(bufferScripts), "$fpff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$fpff1\n$PT\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1], numberscripts[key + 2]);
-						key += 3; break; // 55, 0, 0, 0
+					script_name += std::format("_snd-{}-plane-{}-{}-{}"
+						, instr_args_num[0]
+						, (instr_args_num[1] == 0) ? "bmb" : (instr_args_num[1] == 1) ? "int" : (instr_args_num[1] == 2) ? "tr" : "crg"
+						, (instr_args_num[2] == 0) ? "pl" : (instr_args_num[2] == 1) ? "en" : (instr_args_num[2] == 2) ? "al" : "neu"
+						, instr_args_num[3]);
 
-					case bufferMFF: std::format_to(std::back_inserter(bufferScripts), "$mff\n$Fmask\n#{}\n$spc\n$phrs\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 56, 0, 0, 0
+					break; // 42, 0, 0, 0
 
-					case bufferSPPO: std::format_to(std::back_inserter(bufferScripts), "$sppo\n$phrs\n#{}\n$sppo1\n$Obj\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 57, 0, 0, 0
+				case bufferSAT: std::format_to(std::back_inserter(bufferScripts), "$sat\n$\\\\n\n");
+					break; // 43, 0, 0, 0
 
-					case bufferDGP: std::format_to(std::back_inserter(bufferScripts), "$dgp\n$G\n#{}\n$dgp1\n$P\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break; // 58, 0, 0, 0
+				case bufferARPO: std::format_to(std::back_inserter(bufferScripts), "$arpo\n$Obj\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
+					break; // 45, 0, 0, 0
 
-					case bufferFVKGZ: std::format_to(std::back_inserter(bufferScripts), "$fvkgz\n$G\n#{}\n$fvkgz1\n$L\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break;
+				case bufferASPO: std::format_to(std::back_inserter(bufferScripts), "$aspo\n$Obj\n#{}\n$\\\\n\n"
+					, instruction_args[0]);
+					break; // 44, 0, 0, 0
 
-					case bufferFVKGO: std::format_to(std::back_inserter(bufferScripts), "$fvkgo\n$G\n#{}\n$fvkgo1\n$Obj\n#{}\n$\\\\n\n"
-						, numberscripts[key], numberscripts[key + 1]);
-						key += 2; break;
+				case bufferSPPA: std::format_to(std::back_inserter(bufferScripts), "$sppa\n$I\n#{}\n$spc\n$PT\n#{}\n$sppa1\n$P\n#{}\n$sppa2\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
 
-						//Неизвестные скрипты
-					default:
-					{
-						std::format_to(std::back_inserter(bufferScripts), "unknown scripts {} {} {} {}\n",
-							static_cast<uint16_t>(scripts.num1),
-							static_cast<uint16_t>(scripts.num2),
-							static_cast<uint16_t>(scripts.num3),
-							static_cast<uint16_t>(scripts.num4));
-						std::println("\033[31m[Error]\033[0m Found unknown script in {}: {} {} {} {}.", m_stemFileName, scripts.num1, scripts.num2, scripts.num3, scripts.num4);
-						break;
-					}
-					}
+					script_name += std::format("_snd-{}-plane-route-{}-{}"
+						, instr_args_num[0]
+						, (instr_args_num[1] == 0) ? "bmb" : (instr_args_num[1] == 1) ? "int" : (instr_args_num[1] == 2) ? "tr" : "crg"
+						, (instr_args_num[2] == 0) ? "pl" : (instr_args_num[2] == 1) ? "en" : (instr_args_num[2] == 2) ? "al" : "neu");
+
+					break; // 46, 0, 0, 0
+
+				case bufferLCCV: std::format_to(std::back_inserter(bufferScripts), "$lccv\n$Lvar\n#{}\n$lccv1\n$Rvar\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 47, 0, 0, 0 //$Rvar не расшифрован
+
+				case bufferMO: std::format_to(std::back_inserter(bufferScripts), "$mo\n$Lvar\n#{}\n$spc\n$Math\n#{}\n$spc\n$Rvar\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					break; // 48, 0, 0, 0 //$Math не расшифрован
+
+				case bufferSRES: std::format_to(std::back_inserter(bufferScripts), "$sres\n$resv\n#{}\n$sres1\n$resv\n#{}\n$sres2\n$resv\n#{}\n$sres3\n$T\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3]);
+					break; // 52, 0, 0, 0
+
+				case bufferFRES: std::format_to(std::back_inserter(bufferScripts), "$fres\n$Fmask\n#{}\n$fres0\n$resv\n#{}\n$fres1\n$resv\n#{}\n$fres2\n$resv\n#{}\n$fres3\n$T\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2], instruction_args[3], instruction_args[4]);
+					break; // 53, 0, 0, 0
+
+				case bufferPFF: std::format_to(std::back_inserter(bufferScripts), "$pff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$spc\n$PT\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					break; // 54, 0, 0, 0
+
+				case bufferFPFF: std::format_to(std::back_inserter(bufferScripts), "$fpff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$fpff1\n$PT\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					break; // 55, 0, 0, 0
+
+				case bufferMFF: std::format_to(std::back_inserter(bufferScripts), "$mff\n$Fmask\n#{}\n$spc\n$phrs\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 56, 0, 0, 0
+
+				case bufferSPPO: std::format_to(std::back_inserter(bufferScripts), "$sppo\n$phrs\n#{}\n$sppo1\n$Obj\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 57, 0, 0, 0
+
+				case bufferDGP: std::format_to(std::back_inserter(bufferScripts), "$dgp\n$G\n#{}\n$dgp1\n$P\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+					break; // 58, 0, 0, 0
+
+				case bufferFVKGZ: std::format_to(std::back_inserter(bufferScripts), "$fvkgz\n$G\n#{}\n$fvkgz1\n$L\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
 					break;
-				}
-				try
+
+				case bufferFVKGO: std::format_to(std::back_inserter(bufferScripts), "$fvkgo\n$G\n#{}\n$fvkgo1\n$Obj\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1]);
+
+					script_name += std::format("_kat-{}", instr_args_num[0]);
+					break;
+
+				case 0x7FFFFFFF: std::format_to(std::back_inserter(bufferScripts), "$END\n");
+					break; //END - конец скрипта
+
+				default:
 				{
-					convertOPN(bufferScripts, operand1, operand2, stack_for_RPN, logicOperator, script_num_for_OPN);
+					std::format_to(std::back_inserter(bufferScripts), "unknown script {}\n", scripts.num);
+					std::println("\033[31m[Error]\033[0m Found unknown script in {}: {}.", m_stemFileName, scripts.num);
+					break; //Неизвестные скрипты
 				}
-				catch (std::logic_error e)
-				{
-					std::println("\033[31m[Error]\033[0m Got exception for {:x} {:x} {:x} {:x}: {}", scripts.num1, scripts.num2, scripts.num3, scripts.num4, e.what());
+
 				}
+			}
+
+			try
+			{
+				convertOPN(bufferScripts, operand1, operand2, stack_for_RPN, logicOperator, script_num_for_OPN);
+			}
+			catch (std::logic_error e)
+			{
+				std::println("\033[31m[Error]\033[0m Got exception for {}: {}", scripts.num, e.what());
 			}
 		}
 
-		getScriptSize(bufferScripts, accumulator_num_scripts);
+		// max script name length is 63 symbols - 2 symbols for num
+		script_name = script_name.substr(0, 61);
+		getScriptSize(bufferScripts, cur_script_num, script_name);
 		outputFile.write((char*)bufferScripts.data(), bufferScripts.size());
+
 		bufferScripts.clear(); // чистка вектора
-		accumulator_num_scripts++;
+		++cur_script_num;
 	}
 
 	outputFile.close();
