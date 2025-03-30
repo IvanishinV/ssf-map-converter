@@ -13,8 +13,3 @@ If a folder was specified, the program will convert all possible files from this
 - single player map (e.g. "Spionage.ssm") is converted into map.Spionage.ssm" folder
 - multi player map (e.g. "I (3-3).smm") is converted into "map.I (3-3).smm" folder
 After converting, you can place the output folder in the game's "maps.ca" folder (the editor only reads folders with names in the format "map.***").
-
-Compilation
------------
-
-Use Visual Studio 2022 and invoke the .sln.
