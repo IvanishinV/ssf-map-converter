@@ -255,7 +255,7 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 		return;
 	}
 
-	std::vector<char> zipData(inputFile.tellg());
+	std::vector<char> zipData(static_cast<size_t>(inputFile.tellg()));
 
 	inputFile.seekg(std::ios::beg);
 	inputFile.read(zipData.data(), zipData.size());
@@ -755,7 +755,7 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 		outputFileMapMiniBMP.write(reinterpret_cast<const char*>(map_mini.data()), map_mini.size());
 	else
 	{
-		for (size_t i = 0; i < part2.biHeight; ++i)
+		for (LONG i = 0; i < part2.biHeight; ++i)
 			outputFileMapMiniBMP.write(reinterpret_cast<const char*>(map_mini.data() + i * part2.biWidth * sizeof(uint16_t)), wideWidth * sizeof(uint16_t));
 	}
 	outputFileMapMiniBMP.close();
@@ -954,7 +954,7 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 
 	std::vector<std::string_view> nameunit;
 	nameunit.reserve(mis_unitnames.size() / 16);
-	int numOfNames = 0;
+	LONG numOfNames = 0;
 	while (numOfNames * 16 < mis_unitnames.size())
 	{
 		nameunit.push_back(mis_unitnames.data() + numOfNames * 16);

@@ -24,7 +24,7 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 		return;
 	}
 
-	std::vector<char> zipData(inputFile.tellg());
+	std::vector<char> zipData(static_cast<size_t>(inputFile.tellg()));
 
 	inputFile.seekg(std::ios::beg);
 	inputFile.read(zipData.data(), zipData.size());
