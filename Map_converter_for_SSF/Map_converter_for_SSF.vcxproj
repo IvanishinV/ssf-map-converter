@@ -14,7 +14,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{505df84b-85e7-4197-ba60-352080f9d5f6}</ProjectGuid>
-    <RootNamespace>MapparserforSSF</RootNamespace>
+    <RootNamespace>MapconverterforSSF</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
