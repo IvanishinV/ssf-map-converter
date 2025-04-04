@@ -368,6 +368,7 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	std::string_view map_objects;
 	std::string_view map_mines;
 	//MIS
+	std::string_view mis_objects;
 	std::string_view mis_desc;
 	std::string_view mis_unitnames;
 	std::string_view mis_woofers;
@@ -386,7 +387,8 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	const uint32_t rhombsSize = tileArray(m_mapSizeU, m_mapSizeV, 2);
 	const uint32_t flagSize = tileArray(m_mapSizeU, m_mapSizeV, 4);
 
-	const uint32_t offsetMisScripts = position(inputFile, map_info, FILE_TYPE_OFFSET, MapHeaderSMM);
+	const uint32_t offsetMisObjects = position(inputFile, map_info, FILE_TYPE_OFFSET, MapHeaderSMM);
+	const uint32_t offsetMisScripts = position(inputFile, mis_objects, offsetMisObjects, MISOBJECTS);
 	const uint32_t sizeMisScripts = readFileUint32(inputFile, offsetMisScripts);
 	const uint32_t accumulator = misScripts(inputFile, sizeMisScripts, offsetMisScripts);
 	const uint32_t offsetMisDesc = position(inputFile, mis_scripts, offsetMisScripts, accumulator + 4);
@@ -425,6 +427,7 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	convertMapCflags(map_flags);
 	convertMapObjects(map_objects);
 	//MIS
+	convertMisObjects(mis_objects);
 	convertMisDesc();
 	convertMisMult(map_info, 1);
 	convertMisInfo();
@@ -436,6 +439,25 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	convertMisPlayers(mis_players);
 	convertMisPhrases(mis_phrases, sizeMisPhrases);
 	convertMisUnits(mis_unitnames, mis_mapunits, mis_support);
+
+	{
+		std::ofstream outputFileMisGroups(m_misFolder / "groups", std::ios::binary);
+		if (!outputFileMisGroups)
+		{
+			errorWriteFile();
+		}
+		else
+		{
+			for (size_t i = 0; i < 100; ++i)
+			{
+				outputFileMisGroups << std::format("Group {}\n", i)
+					<< " ai type=\"ai_none\" group1=0 group2=0 zone1=0 zone2=0\n"
+					<< "  aiflags=\n"
+					<< " reserv auto=0 delay=0 min=0 force=0 atime=0 flag=0 zone=0 hp=100 ammo=100 \n"
+					<< "expa=0\n";
+			}
+		}
+	}
 
 	resMapRhombs.wait();
 	displayinfo(m_mapSizeU, m_mapSizeV, m_mapIdentifier, mapEndPosition);

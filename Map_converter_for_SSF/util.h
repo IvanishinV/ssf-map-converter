@@ -3,7 +3,7 @@
 #include <cstdint>
 
 const uint32_t FILE_TYPE_OFFSET = 0x0;
-const uint32_t MapHeaderSMM = 548;
+const uint32_t MapHeaderSMM = 148;
 const uint32_t MapHeaderSSM = 52;
 const uint32_t MapHeaderSSC_mission = 24;
 const uint32_t MapHeaderSSC_map = 20;

@@ -135,6 +135,7 @@ uint32_t Parser::parseMapFileSMM(const std::string_view& inputFile) const
 	std::ofstream outputMisPlayers(m_mapFolder / "mis_players", std::ios::binary);
 	std::ofstream outputMisPhrases(m_mapFolder / "mis_phrases", std::ios::binary);
 	std::ofstream outputMisMapUnits(m_mapFolder / "mis_mapunits", std::ios::binary);
+	std::ofstream outputMisObjects(m_mapFolder / "mis_objects", std::ios::binary);
 	
 	// Определите начальную позицию и количество байт для извлечения
 	uint32_t mapIdentifier = readFileUint32(inputFile, 136);
@@ -143,9 +144,9 @@ uint32_t Parser::parseMapFileSMM(const std::string_view& inputFile) const
 	
 	uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
 	uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
-	
-	uint32_t startPositionMapInfo = 0;
-	uint32_t startPositionMisScripts = position(inputFile, outputMapInfo, startPositionMapInfo, MapHeaderSMM);
+
+	uint32_t startPositionMisObjects = position(inputFile, outputMapInfo, FILE_TYPE_OFFSET, MapHeaderSMM);
+	uint32_t startPositionMisScripts = position(inputFile, outputMisObjects, startPositionMisObjects, MISOBJECTS);
 	uint32_t sizeMisScripts = readFileUint32(inputFile, startPositionMisScripts);
 	uint32_t accumulator = misScripts(inputFile, sizeMisScripts, startPositionMisScripts);
 	uint32_t startPositionMisDesc = position(inputFile, outputMisScripts, startPositionMisScripts, accumulator + 4);
@@ -208,8 +209,7 @@ uint32_t Parser::parseMapFileSSM(const std::string_view& inputFile) const
 	uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
 	uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
 	
-	uint32_t startPositionMapInfo = 0;
-	uint32_t startPositionMisDesc = position(inputFile, outputMapInfo, startPositionMapInfo, MapHeaderSSM);
+	uint32_t startPositionMisDesc = position(inputFile, outputMapInfo, FILE_TYPE_OFFSET, MapHeaderSSM);
 	uint32_t startPositionMapMini = position(inputFile, outputMisDesc, startPositionMisDesc + 4, maskByte);
 	uint32_t MapMiniSize = minimapsize(mapSizeU, mapSizeV);
 	uint32_t startPositionRhombs = position(inputFile, outputMiniMap, startPositionMapMini, MapMiniSize);
@@ -263,8 +263,7 @@ uint32_t Parser::parseMapFileSSC_map(const std::string_view& inputFile) const
 	uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
 	uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
 	
-	uint32_t startPositionMapInfo = 0;
-	uint32_t startPositionLandname = position(inputFile, outputMapInfo, startPositionMapInfo, MapHeaderSSC_map);
+	uint32_t startPositionLandname = position(inputFile, outputMapInfo, FILE_TYPE_OFFSET, MapHeaderSSC_map);
 	uint32_t startPositionRhombs = position(inputFile, outputMapLandnames, startPositionLandname, LANDNAMESSIZE);
 	uint32_t startPositionFlags = position(inputFile, outputMapRhombs, startPositionRhombs, rhombsSize);
 	uint32_t startPositionMapMini = position(inputFile, outputMapFlags, startPositionFlags, flagSize);

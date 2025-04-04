@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Map_parser_for_SSF.rc
+// Used by Map_converter_for_SSF.rc
 
 // Next default values for new objects
 // 
