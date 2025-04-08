@@ -26,7 +26,11 @@ const std::array<DictionaryBlock, std::to_underlying(STRINGS::STRINGS_SIZE)> Dic
 		{ STRINGS::MAP_DESERT, {{ { LANGUAGE::RUSSIAN, "пустынная карта" }, { LANGUAGE::ENGLISH, "desert map" } }} },
 		{ STRINGS::MAP_MISSION, {{ { LANGUAGE::RUSSIAN, "миссия" }, { LANGUAGE::ENGLISH, "mission" } }} },
 		{ STRINGS::MAP_UNKNOWN, {{ { LANGUAGE::RUSSIAN, "Неизвестный тип карты" }, { LANGUAGE::ENGLISH, "This is an unknown map type" } }} },
-		{ STRINGS::MAP_SIZE, {{ { LANGUAGE::RUSSIAN, " размером \033[35m{} x {}\033[0m." }, { LANGUAGE::ENGLISH, " of size \033[35m{} x {}\033[0m." } }} }
+		{ STRINGS::MAP_SIZE, {{ { LANGUAGE::RUSSIAN, " размером \033[35m{} x {}\033[0m." }, { LANGUAGE::ENGLISH, " of size \033[35m{} x {}\033[0m." } }} },
+
+		{ STRINGS::OUT_OF_RANGE_ERROR, {{ { LANGUAGE::RUSSIAN, "Получена ошибка 'out of range' во время обработки карты. Скорее всего файл битый." }, { LANGUAGE::ENGLISH, "Got an 'out of range' error during file processing. Most likely it's broken." } }} },
+		{ STRINGS::EXCEPTION_ERROR, {{ { LANGUAGE::RUSSIAN, "Получена ошибка '{}' во время обработки карты. Скорее всего файл битый." }, { LANGUAGE::ENGLISH, "Got an '{}' error during file processing. Most likely it's broken." } }} },
+		{ STRINGS::UNKNOWN_EXCEPTION_ERROR, {{ { LANGUAGE::RUSSIAN, "Получена неизвестная ошибка во время обработки карты. Скорее всего файл битый." }, { LANGUAGE::ENGLISH, "Got an unknown error during file processing. Most likely it's broken." } }} }
 	}
 };
 

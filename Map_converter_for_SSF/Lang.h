@@ -57,7 +57,12 @@ enum class STRINGS
 	MAP_MISSION,
 	MAP_UNKNOWN,
 	MAP_SIZE,
-	STRINGS_SIZE	// used only for static assert
+
+	OUT_OF_RANGE_ERROR,
+	EXCEPTION_ERROR,
+	UNKNOWN_EXCEPTION_ERROR,
+
+	STRINGS_SIZE	// used for getting number of STRINGS enums
 };
 
 enum class LANGUAGE

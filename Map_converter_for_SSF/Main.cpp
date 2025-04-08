@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 		break;
 	};
 
-	std::println("Map converer for SS1 & SSF, \033[32mv.0.6.6\033[0m by NASHRIPPER and IVA");
+	std::println("Map converer for SS1 & SSF, \033[32mv.0.6.7\033[0m by NASHRIPPER and IVA");
 
 	using namespace std::literals;
 	if (argc == 3)

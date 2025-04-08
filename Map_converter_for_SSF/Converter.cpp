@@ -308,53 +308,60 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 	}
 	}
 
-	//try
-	//{
-	switch (m_mapType)
+	try
 	{
-	case HEADER_SINGLE:
-	{
-		own::print(Dictionary::getValue(STRINGS::MAP_SINGLE), m_stemFileName);
-		convertMapFileSSM(rawData);
+		switch (m_mapType)
+		{
+		case HEADER_SINGLE:
+		{
+			own::print(Dictionary::getValue(STRINGS::MAP_SINGLE), m_stemFileName);
+			convertMapFileSSM(rawData);
 
-		break;
-	}
-	case HEADER_MULTI:
-	{
-		own::print(Dictionary::getValue(STRINGS::MAP_MULTI), m_stemFileName);
-		convertMapFileSMM(rawData);
+			break;
+		}
+		case HEADER_MULTI:
+		{
+			own::print(Dictionary::getValue(STRINGS::MAP_MULTI), m_stemFileName);
+			convertMapFileSMM(rawData);
 
-		break;
-	}
-	case HEADER_CAMP_MAP:
-	{
-		own::print(Dictionary::getValue(STRINGS::CAMP_MAP), m_stemFileName);
-		convertMapFileSSC_map(rawData);
+			break;
+		}
+		case HEADER_CAMP_MAP:
+		{
+			own::print(Dictionary::getValue(STRINGS::CAMP_MAP), m_stemFileName);
+			convertMapFileSSC_map(rawData);
 
-		break;
-	}
-	case HEADER_CAMP_MIS:
-	{
-		own::print(Dictionary::getValue(STRINGS::CAMP_MIS), m_stemFileName);
-		convertMapFileSCC_mission(rawData);
+			break;
+		}
+		case HEADER_CAMP_MIS:
+		{
+			own::print(Dictionary::getValue(STRINGS::CAMP_MIS), m_stemFileName);
+			convertMapFileSCC_mission(rawData);
 
-		break;
-	}
-	default:
-	{
-		std::println("");
-		own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
-		return;
-	}
-	}
+			break;
+		}
+		default:
+		{
+			std::println("");
+			own::printlnWarning(Dictionary::getValue(STRINGS::ERROR_FILE), filepath.string());
+			return;
+		}
+		}
 
-	own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filepath_ex.string(), m_mapFolder.string());
-	//}
-	//catch (...)
-	//{
-	//	std::println("Got exception)");
-	//	exit(0);
-	//}
+		own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filepath_ex.string(), m_mapFolder.string());
+	}
+	catch (const std::out_of_range& e)
+	{
+		own::printlnError(Dictionary::getValue(STRINGS::OUT_OF_RANGE_ERROR));
+	}
+	catch (const std::exception& e)
+	{
+		own::printlnError(Dictionary::getValue(STRINGS::EXCEPTION_ERROR), e.what());
+	}
+	catch (...)
+	{
+		own::printlnError(Dictionary::getValue(STRINGS::UNKNOWN_EXCEPTION_ERROR));
+	}
 }
 
 uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
