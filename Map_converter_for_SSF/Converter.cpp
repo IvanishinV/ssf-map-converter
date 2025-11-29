@@ -738,7 +738,8 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 	}
 
 	// Mini map size logic is too complicated. Default 128x128 and 256x256 or 128x256 or some other square maps have mini map 128x128.
-	// But if it has any other size, mini map size should be calculated
+	// But if it has any other size, mini map size should be calculated.
+	// Campaign maps has mini map 128x128 or 256x256 depending on its size. I'm not sure if there are campaign maps of a different size
 	bool isDoubled{ true };
 	const bool isEven{ (m_mapSizeU / 2 & 1) == 0 };
 	const size_t wideWidth = (isEven ? m_mapSizeU : m_mapSizeU + 2) / 2;
@@ -746,8 +747,11 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 	if ((m_mapSizeU == 128 || m_mapSizeU == 256) && (m_mapSizeV == 128 || m_mapSizeV == 256) && m_mapSizeU == m_mapSizeV)
 		isDoubled = false;
 
-	const size_t size = (isDoubled == true ? (isEven ? m_mapSizeU : m_mapSizeU + 2) / 2 : 128)
-		* (isDoubled == true ? m_mapSizeV / 2 : 128)
+	const uint32_t defaultSizeU = m_mapType == HEADER_CAMP_MAP ? m_mapSizeU : 128;
+	const uint32_t defaultSizeV = m_mapType == HEADER_CAMP_MAP ? m_mapSizeV : 128;
+
+	const size_t size = (isDoubled == true ? (isEven ? m_mapSizeU : m_mapSizeU + 2) / 2 : defaultSizeU)
+		* (isDoubled == true ? m_mapSizeV / 2 : defaultSizeV)
 		* sizeof(uint16_t);
 	BITMAPFILEHEADER part1{};
 	BITMAPINFOHEADER part2{};
@@ -760,8 +764,8 @@ void Converter::convertMapMini(const std::string_view& map_mini) const
 	part1.bfOffBits = sizeof(part1) + sizeof(part2) + sizeof(part3);
 
 	part2.biSize = sizeof(part2);
-	part2.biWidth = isDoubled == true ? m_mapSizeU / 2 : 128;
-	part2.biHeight = isDoubled == true ? m_mapSizeV / 2 : 128;
+	part2.biWidth = isDoubled == true ? m_mapSizeU / 2 : defaultSizeU;
+	part2.biHeight = isDoubled == true ? m_mapSizeV / 2 : defaultSizeV;
 	part2.biPlanes = 1;
 	part2.biBitCount = 16;
 	part2.biCompression = BI_BITFIELDS;
