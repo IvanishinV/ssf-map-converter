@@ -350,7 +350,7 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 
 		own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filepath_ex.string(), m_mapFolder.string());
 	}
-	catch (const std::out_of_range& e)
+	catch (const std::out_of_range&)
 	{
 		own::printlnError(Dictionary::getValue(STRINGS::OUT_OF_RANGE_ERROR));
 	}
