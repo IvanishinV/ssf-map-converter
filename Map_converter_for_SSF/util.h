@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+using pixel = uint16_t;
+
 const uint32_t FILE_TYPE_OFFSET = 0x0;
 const uint32_t MapHeaderSMM = 148;
 const uint32_t MapHeaderSSM = 52;

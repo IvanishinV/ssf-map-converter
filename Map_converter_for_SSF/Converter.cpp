@@ -1822,6 +1822,7 @@ void Converter::convertMisObjects(const std::string_view& mis_objects) const
 
 void Converter::convertMisPlayers(const std::string_view& mis_players) const
 {
+
 	std::ofstream outputMisPlayers(m_misFolder / "players", std::ios::binary);
 	if (!outputMisPlayers)
 	{
@@ -1829,91 +1830,81 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 		return;
 	}
 
-	const size_t maxTries = mis_players.size() / 353;
+	const size_t maxTries = mis_players.size() / sizeof(players);
+
+	const uint8_t* dataPtr = reinterpret_cast<const uint8_t*>(mis_players.data());
+
 	for (size_t curTry = 0; curTry < maxTries; ++curTry)
 	{
-		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_players.data()) + curTry * 353;
+		const players* buffer = reinterpret_cast<const players*>(dataPtr + curTry * sizeof(players));
 
 		{
-			const uint16_t RGB_Color = *(uint16_t*)(buffer + 33);
-			const uint16_t red = (RGB_Color >> 11) & 0x1F;
-			const uint16_t green = (RGB_Color >> 5) & 0x3F;
-			const uint16_t blue = RGB_Color & 0x1F;
+			const uint16_t red = (buffer->color >> 11) & 0x1F;
+			const uint16_t green = (buffer->color >> 5) & 0x3F;
+			const uint16_t blue = buffer->color & 0x1F;
 			outputMisPlayers << std::format("Player {}\n name=\"{}\"\n team={}\n nation={}\n color={} {} {}\n"
 				, curTry					// Player
-				, (const char*)buffer		// name
-				, *(uint8_t*)(buffer + 32)	// team
-				, *(uint8_t*)(buffer + 35)	// nation
+				, buffer->name
+				, buffer->team
+				, buffer->nation
 				, red * 8
 				, green * 4
 				, blue * 8);
 		}
 
-		const uint32_t Numberbomb = *(uint32_t*)(buffer + 69);
-		const uint32_t Bombsbomb = *(uint32_t*)(buffer + 73);
-		const uint32_t Reloadbomb = *(uint32_t*)(buffer + 77);
 		outputMisPlayers << std::format(" bomb\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 37
-			, Numberbomb
-			, Bombsbomb
-			, Reloadbomb);
+			, buffer->airReinforcementBomb.name
+			, buffer->airReinforcementBomb.number
+			, buffer->airReinforcementBomb.bombs
+			, buffer->airReinforcementBomb.reloads);
 
-		const uint32_t Numberspy = *(uint32_t*)(buffer + 113);
-		const uint32_t Bombsspy = *(uint32_t*)(buffer + 117);
-		const uint32_t Reloadspy = *(uint32_t*)(buffer + 121);
 		outputMisPlayers << std::format(" spy\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 81
-			, Numberspy
-			, Bombsspy
-			, Reloadspy);
+			, buffer->airReinforcementSpy.name
+			, buffer->airReinforcementSpy.number
+			, buffer->airReinforcementSpy.bombs
+			, buffer->airReinforcementSpy.reloads);
 
-		const uint32_t Numbertransport = *(uint32_t*)(buffer + 157);
-		const uint32_t Bombstransport = *(uint32_t*)(buffer + 161);
-		const uint32_t Reloadtransport = *(uint32_t*)(buffer + 165);
 		outputMisPlayers << std::format(" transport\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 125
-			, Numbertransport
-			, Bombstransport
-			, Reloadtransport);
+			, buffer->airReinforcementTransport.name
+			, buffer->airReinforcementTransport.number
+			, buffer->airReinforcementTransport.bombs
+			, buffer->airReinforcementTransport.reloads);
 
-		const uint32_t Numberboxer = *(uint32_t*)(buffer + 201);
-		const uint32_t Bombsboxer = *(uint32_t*)(buffer + 205);
-		const uint32_t Reloadboxer = *(uint32_t*)(buffer + 209);
 		outputMisPlayers << std::format(" boxer\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 169
-			, Numberboxer
-			, Bombsboxer
-			, Reloadboxer);
+			, buffer->airReinforcementBoxer.name
+			, buffer->airReinforcementBoxer.number
+			, buffer->airReinforcementBoxer.bombs
+			, buffer->airReinforcementBoxer.reloads);
 
 		outputMisPlayers << std::format(" descent 0\n  group={}\n  expa={}\n"
-			, *(uint8_t*)(buffer + 213)
-			, *(uint8_t*)(buffer + 214));
+			, buffer->group1.group
+			, buffer->group1.expa);
 
 		outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
-			, (const char*)buffer + 215
-			, *(uint8_t*)(buffer + 279)
-			, (const char*)buffer + 231
-			, *(uint8_t*)(buffer + 280)
-			, (const char*)buffer + 247
-			, *(uint8_t*)(buffer + 281)
-			, (const char*)buffer + 263
-			, *(uint8_t*)(buffer + 282));
+			, buffer->group1.ID0
+			, buffer->group1.number0
+			, buffer->group1.ID1
+			, buffer->group1.number1
+			, buffer->group1.ID2
+			, buffer->group1.number2
+			, buffer->group1.ID3
+			, buffer->group1.number3);
 
 		outputMisPlayers << std::format(" descent 1\n  group={}\n  expa={}\n"
-			, *(uint8_t*)(buffer + 283)
-			, *(uint8_t*)(buffer + 284));
+			, buffer->group2.group
+			, buffer->group2.expa);
 
 		outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
-			, (const char*)buffer + 285
-			, *(uint8_t*)(buffer + 349)
-			, (const char*)buffer + 301
-			, *(uint8_t*)(buffer + 350)
-			, (const char*)buffer + 317
-			, *(uint8_t*)(buffer + 351)
-			, (const char*)buffer + 333
-			, *(uint8_t*)(buffer + 352));
+			, buffer->group2.ID0
+			, buffer->group2.number0
+			, buffer->group2.ID1
+			, buffer->group2.number1
+			, buffer->group2.ID2
+			, buffer->group2.number2
+			, buffer->group2.ID3
+			, buffer->group2.number3);
 
-		outputMisPlayers << std::format(" planesdir={}\n", *(uint8_t*)(buffer + 36));	// planesdir
+		outputMisPlayers << std::format(" planesdir={}\n", buffer->planesdir);
 	}
 	outputMisPlayers.close();
 }
