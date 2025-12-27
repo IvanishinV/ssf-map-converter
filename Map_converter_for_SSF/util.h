@@ -4,6 +4,15 @@
 
 using pixel = uint16_t;
 
+/**
+ * @param number of flags for support
+ */
+const uint32_t VALUEFLAG = 16;
+/**
+ * @param number of script for support
+ */
+const uint32_t VALUESCRIPT = 64;
+
 const uint32_t FILE_TYPE_OFFSET = 0x0;
 const uint32_t MapHeaderSMM = 148;
 const uint32_t MapHeaderSSM = 52;

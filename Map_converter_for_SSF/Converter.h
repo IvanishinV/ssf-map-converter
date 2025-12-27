@@ -2,7 +2,20 @@
 
 #include "util.h"
 
-struct unitBase //Passenger
+struct coordinatesFlag
+{
+	int u;
+	int v;
+};
+
+struct flag
+{
+	coordinatesFlag		redFlag;
+	coordinatesFlag		blueFlag;
+	uint32_t			valueRedFlag;
+};
+
+struct unitBase //Entity, Passenger
 {
 	uint8_t grp;
 	uint8_t hp;
@@ -12,7 +25,7 @@ struct unitBase //Passenger
 	uint8_t ID;
 };
 
-struct unitBaseIn //Support
+struct unitBaseIn //Vehicles, support
 {
 	unitBase unit;
 	uint8_t in;
@@ -25,15 +38,20 @@ struct coordinates
 };
 
 #pragma pack(push, 1)
+/**
+ * @param unit - parameters entity or vehicles
+ * @param pos - unit position on the map.
+ * @param dir - unit rotation, clockwise from 0 to 31, 32 positions in total.
+ * @param owner - player=0, enemy=1, ally=2, neutral=3.
+ */
 struct unitsMap
 {
 	unitBaseIn unit;
 	coordinates pos;
-	uint8_t dir;
+	uint8_t dir; //todo возможно относится к структуре coordinates
 	uint8_t owner;
 };
 #pragma pack (pop)
-
 
 struct aviation
 {
