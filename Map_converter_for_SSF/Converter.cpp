@@ -1774,9 +1774,8 @@ void Converter::convertMisObjects(const std::string_view& mis_objects) const
 	const size_t maxTries = mis_objects.size() / 2;
 	for (size_t i = 0; i < maxTries; ++i)
 	{
-		uint8_t num1 = mis_objects[i * 2];
-		uint8_t num2 = mis_objects[i * 2 + 1];
-		outputFileMisObjects << num1 << num2 << GLOBALNULL << GLOBALNULL;
+		U8 num1 = mis_objects[i * 2];
+		outputFileMisObjects << num1 << GLOBALNULL << GLOBALNULL << GLOBALNULL;
 	}
 	outputFileMisObjects.close();
 }
