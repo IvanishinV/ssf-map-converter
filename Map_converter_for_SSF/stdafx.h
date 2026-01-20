@@ -30,5 +30,3 @@
 #include <stdexcept>
 
 #include "Lang.h"
-
-#include "types.h"

@@ -9,6 +9,7 @@
 #include "Displayinfo.h"
 #include "RhombsParser.h"
 #include "util.h"
+#include "types.h"
 
 #pragma region stack_operations
 
@@ -1771,12 +1772,18 @@ void Converter::convertMisObjects(const std::string_view& mis_objects) const
 		return;
 	}
 
-	const size_t maxTries = mis_objects.size() / 2;
-	for (size_t i = 0; i < maxTries; ++i)
+	const coordinates16* src = reinterpret_cast<const coordinates16*>(mis_objects.data());
+	const size_t count = mis_objects.size() / sizeof(coordinates16);
+
+	std::vector<coordinates32> dst(count);
+
+	for (size_t i = 0; i < count; ++i)
 	{
-		U8 num1 = mis_objects[i * 2];
-		outputFileMisObjects << num1 << GLOBALNULL << GLOBALNULL << GLOBALNULL;
+		dst[i].u = src[i].u;
+		dst[i].v = src[i].v;
 	}
+
+	outputFileMisObjects.write(reinterpret_cast<const char*>(dst.data()), count * sizeof(coordinates32));
 	outputFileMisObjects.close();
 }
 

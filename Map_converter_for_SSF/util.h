@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-using pixel = uint16_t;
-
 /**
  * @param number of flags for support
  */

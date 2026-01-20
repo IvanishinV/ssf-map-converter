@@ -87,6 +87,7 @@
     <ClInclude Include="Converter.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RhombsParser.h" />
+    <ClInclude Include="types.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="stdafx.h" />
