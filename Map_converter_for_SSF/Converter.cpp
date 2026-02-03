@@ -1656,29 +1656,21 @@ void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 		return;
 	}
 
-	const uint32_t numOfSounds = readFileUint32(mis_woofers, 0);
-	for (uint32_t i = 0, curOffset = sizeof(numOfSounds); i < numOfSounds; ++i)
-	{
-		const uint8_t* buffername = reinterpret_cast<const uint8_t*>(mis_woofers.data()) + curOffset;
-		curOffset += 64;
-		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_woofers.data()) + curOffset;
-		curOffset += 14;
+	const uint32_t count = readFileUint32(mis_woofers, 0);
+	const woofers* src = reinterpret_cast<const woofers*>(mis_woofers.data() + sizeof(count));
 
-		uint16_t U = *(uint16_t*)(buffer + 0);
-		uint16_t V = *(uint16_t*)(buffer + 2);
-		uint16_t Radius = *(uint16_t*)(buffer + 4);
-		float Worse = *(float*)(buffer + 6);
-		uint16_t MinWait = *(uint16_t*)(buffer + 10);
-		uint16_t MaxWait = *(uint16_t*)(buffer + 12);
+	for (uint32_t curTry = 0; curTry < count; ++curTry)
+	{
+		src += curTry;
 
 		outputFileMisWoofers << std::format("Name=\"{}\"\nU={}\nV={}\nRadius={}\nWorse={}\nMinWait={}\nMaxWait={}\n\n"
-			, reinterpret_cast<const char*>(buffername)
-			, U
-			, V
-			, Radius
-			, Worse
-			, MinWait
-			, MaxWait);
+			, src->name
+			, src->pos.u
+			, src->pos.v
+			, src->radius
+			, src->worse
+			, src->minWait
+			, src->maxWait);
 	}
 	outputFileMisWoofers.close();
 }

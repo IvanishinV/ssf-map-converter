@@ -2,6 +2,10 @@
 
 #include <cstdint>
 
+constexpr uint32_t size_arr16 = 16;
+constexpr uint32_t size_arr32 = 32;
+constexpr uint32_t size_arr64 = 64;
+
 /**
  * @param number of flags for support
  */

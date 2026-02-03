@@ -96,3 +96,15 @@ struct players
 	descent group2;
 };
 #pragma pack (pop)
+
+#pragma pack(push, 1)
+struct woofers
+{
+	char name[size_arr64];
+	coordinates16 pos;
+	uint16_t radius;
+	float worse;
+	uint16_t minWait;
+	uint16_t maxWait;
+};
+#pragma pack (pop)
