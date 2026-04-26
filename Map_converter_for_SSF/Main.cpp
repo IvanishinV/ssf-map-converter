@@ -113,6 +113,7 @@ static void detectLanguage()
 	case 0x0440:	// ky-KG
 	case 0x0442:	// tk-TM
 	case 0x0443:	// uk-UA
+	case 0x043F:	// kk-KZ
 	case 0x7843:	// uz-Cyrl-UZ
 	case 0x0843:	// uz-Cyrl-UZ
 		Dictionary::setLang(LANGUAGE::RUSSIAN);
@@ -127,7 +128,7 @@ static void detectLanguage()
 		return;
 
 	const std::string_view sv{lang};
-	for (const auto prefix : {"ru", "be", "uk", "kk", "ky", "tt", "uz"})
+	for (const auto prefix : {"ru", "be", "uk", "kk", "ky", "tt", "tk", "uz", "ba", "sah", "az"})
 		if (sv.starts_with(prefix))
 		{
 			Dictionary::setLang(LANGUAGE::RUSSIAN);
