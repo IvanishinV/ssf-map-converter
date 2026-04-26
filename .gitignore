@@ -365,3 +365,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# CMake / VSCode out-of-source builds
+/build/
+/build-*/
+CMakeUserPresets.json
+.cache/
+compile_commands.json
+
+# VSCode workspace personal files
+.vscode/

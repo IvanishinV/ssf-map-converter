@@ -7,7 +7,9 @@
 #include "util.h"
 
 #include <gzip/decompress.hpp>
+#ifdef _MSC_VER
 #pragma comment(lib, "zlibstatic.lib")
+#endif
 
 void openFileAndProcess(const Action action, const std::string_view& filename)
 {
@@ -77,7 +79,12 @@ void manualInput()
 
 	openFileAndProcess(action, filename);
 
+#ifdef _WIN32
 	system("pause");
+#else
+	std::println("Press Enter to exit...");
+	std::cin.get();
+#endif
 }
 
 void printUsage(const std::string_view& appName)
@@ -87,6 +94,7 @@ void printUsage(const std::string_view& appName)
 
 int main(int argc, char** argv)
 {
+#ifdef _WIN32
 	// This is for color output
 	const HANDLE hs = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD consoleMode;
@@ -123,6 +131,18 @@ int main(int argc, char** argv)
 		setlocale(LC_ALL, "rus");
 		break;
 	};
+#else
+	if (const char* lang = std::getenv("LANG"); lang)
+	{
+		std::string_view sv{lang};
+		if (sv.starts_with("ru") || sv.starts_with("be") || sv.starts_with("uk")
+		    || sv.starts_with("kk") || sv.starts_with("ky") || sv.starts_with("tt")
+		    || sv.starts_with("uz"))
+		{
+			Dictionary::setLang(LANGUAGE::RUSSIAN);
+		}
+	}
+#endif
 
 	std::println("Map converer for SS1 & SSF, \033[32mv.0.6.8\033[0m by NASHRIPPER and IVA");
 
