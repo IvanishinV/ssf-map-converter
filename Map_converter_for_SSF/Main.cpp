@@ -72,12 +72,8 @@ void manualInput()
 
 	openFileAndProcess(action, filename);
 
-#ifdef _WIN32
-	system("pause");
-#else
 	std::println("Press Enter to exit...");
 	std::cin.get();
-#endif
 }
 
 void printUsage(std::string_view appName)

@@ -378,3 +378,6 @@ compile_commands.json
 
 # Regression tests (local only)
 /tests/
+
+# Local agent context (not for public repo)
+/CLAUDE.md
