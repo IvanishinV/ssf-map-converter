@@ -375,3 +375,6 @@ compile_commands.json
 
 # VSCode workspace personal files
 .vscode/
+
+# Regression tests (local only)
+/tests/

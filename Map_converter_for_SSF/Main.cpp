@@ -11,47 +11,42 @@
 #pragma comment(lib, "zlibstatic.lib")
 #endif
 
-void openFileAndProcess(const Action action, const std::string_view& filename)
+template <typename Fn>
+static size_t processPath(const std::filesystem::path& path, Fn&& process)
+{
+	if (!std::filesystem::is_directory(path))
+	{
+		process(path);
+		return 1;
+	}
+
+	// Snapshot entries before processing: the binary writes outputs back into
+	// the same directory, and concurrent mutation of a directory_iterator is
+	// implementation-defined.
+	std::vector<std::filesystem::path> files;
+	for (const auto& entry : std::filesystem::directory_iterator(path))
+		if (entry.is_regular_file())
+			files.push_back(entry.path());
+
+	for (const auto& f : files)
+		process(f);
+	return files.size();
+}
+
+void openFileAndProcess(const Action action, std::string_view filename)
 {
 	const auto start = std::chrono::high_resolution_clock::now();
 
 	size_t count{ 0 };
-
 	if (action == Action::Convert)
 	{
 		Converter conv;
-		if (std::filesystem::is_directory(filename))
-		{
-			for (const auto& file : std::filesystem::directory_iterator(filename))
-				if (file.is_regular_file())
-				{
-					conv.convertMap(file.path());
-					++count;
-				}
-		}
-		else
-		{
-			conv.convertMap(filename);
-			++count;
-		}
+		count = processPath(filename, [&](const std::filesystem::path& p) { conv.convertMap(p); });
 	}
 	else
 	{
 		Parser parser;
-		if (std::filesystem::is_directory(filename))
-		{
-			for (const auto& file : std::filesystem::directory_iterator(filename))
-				if (file.is_regular_file())
-				{
-					parser.parseMap(file.path().string());
-					++count;
-				}
-		}
-		else
-		{
-			parser.parseMap(filename);
-			++count;
-		}
+		count = processPath(filename, [&](const std::filesystem::path& p) { parser.parseMap(p.string()); });
 	}
 
 	const auto end = std::chrono::high_resolution_clock::now();
@@ -67,14 +62,12 @@ void manualInput()
 	own::println(Dictionary::getValue(STRINGS::ENTER_FILENAME));
 	std::getline(std::cin >> std::ws, filename);
 
-	using namespace std::literals::string_view_literals;	// only for "p"sv
+	using namespace std::literals::string_view_literals;
 	if (filename == "-p"sv)
 	{
 		own::println(Dictionary::getValue(STRINGS::ENTER_PARSE_FILENAME));
 		std::getline(std::cin >> std::ws, filename);
-
-		Action* act = const_cast<Action*>(&action);
-		*act = Action::Parse;
+		action = Action::Parse;
 	}
 
 	openFileAndProcess(action, filename);
@@ -87,30 +80,32 @@ void manualInput()
 #endif
 }
 
-void printUsage(const std::string_view& appName)
+void printUsage(std::string_view appName)
 {
 	std::println("Usage: {} <file|campaign folder>", appName);
 }
 
-int main(int argc, char** argv)
+static void setupConsole()
 {
 #ifdef _WIN32
-	// This is for color output
 	const HANDLE hs = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD consoleMode;
-	if (GetConsoleMode(hs, &consoleMode))
-	{
-		if ((consoleMode & (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) != (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING))
-		{
-			if (SetConsoleMode(hs, ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING) == NULL)
-			{
-				std::println("[Error] Couldn't set color output mode. Output will be with \"\033[32m\" symbols. Last error: {}", GetLastError());
-			}
-		}
-	}
+	if (!GetConsoleMode(hs, &consoleMode))
+		return;
 
-	const LANGID langId = GetUserDefaultUILanguage();
-	switch (langId)
+	const DWORD wanted = ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	if ((consoleMode & wanted) == wanted)
+		return;
+
+	if (SetConsoleMode(hs, wanted) == NULL)
+		std::println("[Error] Couldn't set color output mode. Output will be with \"\033[32m\" symbols. Last error: {}", GetLastError());
+#endif
+}
+
+static void detectLanguage()
+{
+#ifdef _WIN32
+	switch (GetUserDefaultUILanguage())
 	{
 	case 0x0423:	// be-BY
 	case 0x0419:	// ru-RU
@@ -125,54 +120,98 @@ int main(int argc, char** argv)
 	case 0x7843:	// uz-Cyrl-UZ
 	case 0x0843:	// uz-Cyrl-UZ
 		Dictionary::setLang(LANGUAGE::RUSSIAN);
-
 		SetConsoleCP(1251);
 		SetConsoleOutputCP(1251);
 		setlocale(LC_ALL, "rus");
 		break;
-	};
+	}
 #else
-	if (const char* lang = std::getenv("LANG"); lang)
-	{
-		std::string_view sv{lang};
-		if (sv.starts_with("ru") || sv.starts_with("be") || sv.starts_with("uk")
-		    || sv.starts_with("kk") || sv.starts_with("ky") || sv.starts_with("tt")
-		    || sv.starts_with("uz"))
+	const char* lang = std::getenv("LANG");
+	if (!lang)
+		return;
+
+	const std::string_view sv{lang};
+	for (const auto prefix : {"ru", "be", "uk", "kk", "ky", "tt", "uz"})
+		if (sv.starts_with(prefix))
 		{
 			Dictionary::setLang(LANGUAGE::RUSSIAN);
+			return;
 		}
-	}
 #endif
+}
 
-	std::println("Map converer for SS1 & SSF, \033[32mv.0.6.8\033[0m by NASHRIPPER and IVA");
+struct CliArgs
+{
+	enum class Mode { Help, Manual, Process, BadUsage };
+	Mode mode{ Mode::Manual };
+	Action action{ Action::Convert };
+	std::string_view path;
+};
 
+static CliArgs parseArgs(int argc, char** argv)
+{
 	using namespace std::literals;
+	CliArgs args;
+
+	if (argc == 1)
+	{
+		args.mode = CliArgs::Mode::Manual;
+		return args;
+	}
+	if (argc == 2)
+	{
+		if (argv[1] == "-h"sv)
+			args.mode = CliArgs::Mode::Help;
+		else
+		{
+			args.mode = CliArgs::Mode::Process;
+			args.action = Action::Convert;
+			args.path = argv[1];
+		}
+		return args;
+	}
 	if (argc == 3)
 	{
 		if (argv[1] == "-c"sv)
-			openFileAndProcess(Action::Convert, argv[2]);
-		else if (argv[1] == "-p"sv)
-			openFileAndProcess(Action::Parse, argv[2]);
-		else
 		{
-			printUsage(argv[0]);
-			return 0;
+			args.mode = CliArgs::Mode::Process;
+			args.action = Action::Convert;
+			args.path = argv[2];
+			return args;
+		}
+		if (argv[1] == "-p"sv)
+		{
+			args.mode = CliArgs::Mode::Process;
+			args.action = Action::Parse;
+			args.path = argv[2];
+			return args;
 		}
 	}
-	else if (argc == 2)
+
+	args.mode = CliArgs::Mode::BadUsage;
+	return args;
+}
+
+int main(int argc, char** argv)
+{
+	setupConsole();
+	detectLanguage();
+
+	std::println("Map converter for SS1 & SSF, \033[32mv.0.6.8\033[0m by NASHRIPPER and IVA");
+
+	const CliArgs args = parseArgs(argc, argv);
+	switch (args.mode)
 	{
-		if (argv[1] == "-h"sv)
-		{
-			printUsage(argv[0]);
-		}
-		else
-		{
-			openFileAndProcess(Action::Convert, argv[1]);
-		}
+	case CliArgs::Mode::Help:
+	case CliArgs::Mode::BadUsage:
+		printUsage(argv[0]);
+		return 0;
+	case CliArgs::Mode::Process:
+		openFileAndProcess(args.action, args.path);
+		return 0;
+	case CliArgs::Mode::Manual:
+		manualInput();
 		return 0;
 	}
-	else
-		manualInput();
-
 	return 0;
 }
