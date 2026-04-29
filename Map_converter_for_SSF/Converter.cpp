@@ -1659,7 +1659,7 @@ void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 	const uint32_t count = readFileUint32(mis_woofers, 0);
 	const woofers* src = reinterpret_cast<const woofers*>(mis_woofers.data() + sizeof(count));
 
-	for (uint32_t curTry = 0; curTry < count; ++curTry)
+	for (uint32_t curTry = 0; curTry < count; ++curTry, ++src)
 	{
 		outputFileMisWoofers << std::format("Name=\"{}\"\nU={}\nV={}\nRadius={}\nWorse={}\nMinWait={}\nMaxWait={}\n\n"
 			, src->name
@@ -1669,8 +1669,6 @@ void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 			, src->worse
 			, src->minWait
 			, src->maxWait);
-
-		src++;
 	}
 	outputFileMisWoofers.close();
 }
