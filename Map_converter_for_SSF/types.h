@@ -56,7 +56,7 @@ struct unitsMap
 
 struct aviation
 {
-	char name[32];
+	char name[size_arr32];
 	uint32_t number;
 	uint32_t bombs;
 	uint32_t reloads;
@@ -67,33 +67,26 @@ struct descent
 {
 	uint8_t group;
 	uint8_t expa;
-	char ID0[16];
-	char ID1[16];
-	char ID2[16];
-	char ID3[16];
-	uint8_t number0;
-	uint8_t number1;
-	uint8_t number2;
-	uint8_t number3;
+	char ID[4][size_arr32];
+	uint8_t number[4];
 };
 #pragma pack (pop)
 
 #pragma pack(push, 1)
+/**
+ * @param planesdir - plane rotation, clockwise from 0 to 7, 8 positions in total.
+ */
 struct players
 {
-	char name[32];
+	char name[size_arr32];
 	uint8_t team;
 	pixel	color;
 	uint8_t nation;
 	uint8_t planesdir;
 
-	aviation airReinforcementBomb;
-	aviation airReinforcementSpy;
-	aviation airReinforcementTransport;
-	aviation airReinforcementBoxer;
+	aviation airReinforcement[VALUEREINFORCEMENT];
 
-	descent group1;
-	descent group2;
+	descent group[2];
 };
 #pragma pack (pop)
 
