@@ -67,7 +67,7 @@ struct descent
 {
 	uint8_t group;
 	uint8_t expa;
-	char ID[4][size_arr32];
+	char ID[4][size_arr16];
 	uint8_t number[4];
 };
 #pragma pack (pop)
