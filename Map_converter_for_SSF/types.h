@@ -1,7 +1,6 @@
 #pragma once
 
-using pixel = unsigned int;
-
+using pixel = uint16_t;
 
 struct coordinates16
 {
@@ -19,7 +18,7 @@ struct flag
 {
 	coordinates32		redFlag;
 	coordinates32		blueFlag;
-	uint32_t			valueRedFlag;
+	int					valueRedFlag;
 };
 
 struct unitBase //Entity, Passenger
@@ -86,7 +85,7 @@ struct players
 
 	aviation airReinforcement[VALUEREINFORCEMENT];
 
-	descent group[2];
+	descent group[VALUEDESCENT];
 };
 #pragma pack (pop)
 
@@ -101,3 +100,14 @@ struct woofers
 	uint16_t maxWait;
 };
 #pragma pack (pop)
+
+static_assert(sizeof(coordinates16) == 4);
+static_assert(sizeof(coordinates32) == 8);
+static_assert(sizeof(flag) == 20);
+static_assert(sizeof(unitBase) == 6);
+static_assert(sizeof(unitBaseIn) == 7);
+static_assert(sizeof(unitsMap) == 13);
+static_assert(sizeof(aviation) == 44);
+static_assert(sizeof(descent) == 70);
+static_assert(sizeof(players) == 353);
+static_assert(sizeof(woofers) == 78);

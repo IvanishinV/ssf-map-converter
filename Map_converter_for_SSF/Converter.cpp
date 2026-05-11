@@ -1018,10 +1018,10 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 				, (uint16_t)misMapUnit->unit.in
 				, (uint16_t)misMapUnit->owner);
 		}
-		uint16_t In = misMapUnit->unit.in; // Passenger
-		if (In > 0)
+
+		if (misMapUnit->unit.in > 0) // Passenger
 		{
-			while (In--)
+			for (uint32_t n = 0; n < misMapUnit->unit.in; ++n)
 			{
 				const unitBase* misMapUnitPassenger = reinterpret_cast<const unitBase*>(dataPtr + curOffset);
 				curOffset += sizeof(unitBase);
@@ -1096,10 +1096,9 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 						, (uint16_t)misSupportUnit->in);
 				}
 
-				uint16_t In = misSupportUnit->in; // Passenger
-				if (In > 0)
+				if (misSupportUnit->in > 0) // Passenger
 				{
-					for (uint32_t n = 0; n < In; ++n)
+					for (uint32_t n = 0; n < misSupportUnit->in; ++n)
 					{
 						dataPtr = reinterpret_cast<const uint8_t*>(mis_support.data()) + curOffset;
 						const unitBase* misSupportUnitPassenger = reinterpret_cast<const unitBase*>(dataPtr);
@@ -1779,7 +1778,6 @@ void Converter::convertMisObjects(const std::string_view& mis_objects) const
 
 void Converter::convertMisPlayers(const std::string_view& mis_players) const
 {
-
 	std::ofstream outputMisPlayers(m_misFolder / "players", std::ios::binary);
 	if (!outputMisPlayers)
 	{
@@ -1787,7 +1785,7 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 		return;
 	}
 
-	const char* TYPEREINFORCEMENT[] = { {"bomb"}, {"spy"}, {"transport"}, {"boxer"} };
+	static constexpr const char* TYPEREINFORCEMENT[] = { "bomb", "spy", "transport", "boxer" };
 	const size_t maxTries = mis_players.size() / sizeof(players);
 	const uint8_t* dataPtr = reinterpret_cast<const uint8_t*>(mis_players.data());
 
@@ -1804,9 +1802,9 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 				, buffer->name
 				, buffer->team
 				, buffer->nation
-				, red * static_cast<uint16_t>(DISPLAYGAMMA::SRGB_RED)
-				, green * static_cast<uint16_t>(DISPLAYGAMMA::SRGB_GREEN)
-				, blue * static_cast<uint16_t>(DISPLAYGAMMA::SRGB_BLUE));
+				, red	<< static_cast<uint8_t>(RGB565_SHIFT::R)
+				, green	<< static_cast<uint8_t>(RGB565_SHIFT::G)
+				, blue	<< static_cast<uint8_t>(RGB565_SHIFT::B));
 		}
 
 		for (uint32_t i = 0; i < VALUEREINFORCEMENT; ++i)
@@ -1819,7 +1817,7 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 				, buffer->airReinforcement[i].reloads);
 		}
 
-		for (uint32_t k = 0; k < VALUEDECENT; k++)
+		for (uint32_t k = 0; k < VALUEDESCENT; k++)
 		{
 			outputMisPlayers << std::format(" descent {}\n  group={}\n  expa={}\n"
 				, k

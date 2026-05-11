@@ -2,12 +2,7 @@
 
 #include <cstdint>
 
-enum class DISPLAYGAMMA : uint16_t
-{
-	SRGB_RED = 8,			// standart for red color
-	SRGB_GREEN = 4,			// standart for green color
-	SRGB_BLUE = 8			// standart for blue color
-};
+enum class RGB565_SHIFT : uint8_t { R = 3, G = 2, B = 3 };
 
 constexpr uint32_t size_arr16 = 16;
 constexpr uint32_t size_arr32 = 32;
@@ -28,7 +23,7 @@ const uint32_t VALUEREINFORCEMENT = 4;
 /**
  * @param number of decent for player
  */
-const uint32_t VALUEDECENT = 2;
+const uint32_t VALUEDESCENT = 2;
 
 const uint32_t FILE_TYPE_OFFSET = 0x0;
 const uint32_t MapHeaderSMM = 148;
