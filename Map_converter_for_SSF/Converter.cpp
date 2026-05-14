@@ -15,6 +15,7 @@
 #include "convert/map_landname.h"
 #include "convert/map_cflags.h"
 #include "convert/map_info.h"
+#include "convert/map_mini.h"
 
 #pragma region stack_operations
 
@@ -682,72 +683,7 @@ void Converter::convertMapInfo() const
 
 void Converter::convertMapMini(const std::string_view& map_mini) const
 {
-	std::ofstream outputFileMapMiniBMP(m_mapFolder / "map_mini.bmp", std::ios::binary);
-	if (!outputFileMapMiniBMP)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	// Mini map size logic is too complicated. Default 128x128 and 256x256 or 128x256 or some other square maps have mini map 128x128.
-	// But if it has any other size, mini map size should be calculated.
-	// Campaign maps has mini map 128x128 or 256x256 depending on its size. I'm not sure if there are campaign maps of a different size
-	bool isDoubled{ true };
-	const bool isEven{ (m_mapSizeU / 2 & 1) == 0 };
-	const size_t wideWidth = (isEven ? m_mapSizeU : m_mapSizeU + 2) / 2;
-
-	if ((m_mapSizeU == 128 || m_mapSizeU == 256) && (m_mapSizeV == 128 || m_mapSizeV == 256) && m_mapSizeU == m_mapSizeV)
-		isDoubled = false;
-
-	const uint32_t defaultSizeU = m_mapType == HEADER_CAMP_MAP ? m_mapSizeU : 128;
-	const uint32_t defaultSizeV = m_mapType == HEADER_CAMP_MAP ? m_mapSizeV : 128;
-
-	const size_t size = (isDoubled == true ? (isEven ? m_mapSizeU : m_mapSizeU + 2) / 2 : defaultSizeU)
-		* (isDoubled == true ? m_mapSizeV / 2 : defaultSizeV)
-		* sizeof(uint16_t);
-	BITMAPFILEHEADER part1{};
-	BITMAPINFOHEADER part2{};
-	BMP_RGB565_MASKS part3{};
-
-	part1.bfType = BMP_SIGNATURE;
-	part1.bfSize = static_cast<DWORD>(size) + sizeof(part1) + sizeof(part2) + sizeof(part3);
-	part1.bfReserved1 = 0;
-	part1.bfReserved2 = 0;
-	part1.bfOffBits = sizeof(part1) + sizeof(part2) + sizeof(part3);
-
-	part2.biSize = sizeof(part2);
-	part2.biWidth = isDoubled == true ? m_mapSizeU / 2 : defaultSizeU;
-	part2.biHeight = isDoubled == true ? m_mapSizeV / 2 : defaultSizeV;
-	part2.biPlanes = 1;
-	part2.biBitCount = 16;
-	part2.biCompression = BI_BITFIELDS;
-	part2.biSizeImage = 0;
-	part2.biXPelsPerMeter = 0;
-	part2.biYPelsPerMeter = 0;
-	part2.biClrUsed = 0;
-	part2.biClrImportant = 0;
-
-	part3.redMask   = RGB565_MASK_RED;
-	part3.greenMask = RGB565_MASK_GREEN;
-	part3.blueMask  = RGB565_MASK_BLUE;
-
-	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part1), sizeof(part1));
-	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part2), sizeof(part2));
-	outputFileMapMiniBMP.write(reinterpret_cast<const char*>(&part3), sizeof(part3));
-
-	// FIXME: flip_v mutates the const string_view storage (technically UB) and the odd-size
-	// else-branch overshoots each row by wideWidth-biWidth pixels, with the final overshoot
-	// reading past map_mini.end() into the parent rawData buffer. Output happens to be stable
-	// because rawData outlives this call. Fixing means changing the wire format of map_mini.bmp.
-	flip_v(const_cast<char*>(map_mini.data()), part2.biHeight, part2.biWidth, sizeof(uint16_t));
-	if (isEven)
-		outputFileMapMiniBMP.write(map_mini.data(), map_mini.size());
-	else
-	{
-		for (LONG i = 0; i < part2.biHeight; ++i)
-			outputFileMapMiniBMP.write(map_mini.data() + i * part2.biWidth * sizeof(uint16_t), wideWidth * sizeof(uint16_t));
-	}
-	outputFileMapMiniBMP.close();
+	convert::map_mini(m_mapFolder, m_mapType, m_mapSizeU, m_mapSizeV, map_mini);
 }
 
 void Converter::convertMapLandname(const std::string_view& map_landname) const
