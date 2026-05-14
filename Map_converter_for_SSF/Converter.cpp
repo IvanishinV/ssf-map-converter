@@ -24,6 +24,12 @@
 #include "convert/mis_units.h"
 #include "convert/mis_groups.h"
 #include "convert/mis_scripts.h"
+#include "convert/mis_woofers.h"
+#include "convert/mis_mines.h"
+#include "convert/mis_tree.h"
+#include "convert/mis_phrases.h"
+#include "convert/mis_objects.h"
+#include "convert/mis_players.h"
 
 
 void Converter::convertMap(const std::filesystem::path& filepath)
@@ -536,193 +542,30 @@ void Converter::convertMisScripts(const std::string_view& mis_scripts) const
 
 void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 {
-	std::ofstream outputFileMisWoofers(m_misFolder / "sounds", std::ios::binary);
-	if (!outputFileMisWoofers)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	const uint32_t count = readFileUint32(mis_woofers, 0);
-	const woofers* src = reinterpret_cast<const woofers*>(mis_woofers.data() + sizeof(count));
-
-	for (uint32_t curTry = 0; curTry < count; ++curTry, ++src)
-	{
-		outputFileMisWoofers << std::format("Name=\"{}\"\nU={}\nV={}\nRadius={}\nWorse={}\nMinWait={}\nMaxWait={}\n\n"
-			, src->name
-			, src->pos.u
-			, src->pos.v
-			, src->radius
-			, src->worse
-			, src->minWait
-			, src->maxWait);
-	}
-	outputFileMisWoofers.close();
+	convert::mis_woofers(m_misFolder, mis_woofers);
 }
 
 void Converter::convertMisMines(const std::string_view& map_mines) const
 {
-	std::ofstream outputFileMisMines(m_misFolder / "mines", std::ios::binary);
-	if (!outputFileMisMines)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	std::vector<uint8_t> mapMines(LOCATIONSSIZE, 0);
-
-	const size_t maxTries = map_mines.size() / m_mapSizeU;
-	for (size_t i = 0; i < maxTries; ++i)
-		std::copy(map_mines.cbegin() + i * m_mapSizeU, map_mines.cbegin() + i * m_mapSizeU + m_mapSizeU, mapMines.begin() + 512 * i);
-
-	outputFileMisMines.write(reinterpret_cast<const char*>(mapMines.data()), mapMines.size());
-	outputFileMisMines.close();
+	convert::mis_mines(m_misFolder, map_mines, m_mapSizeU);
 }
 
 void Converter::convertMisTree(const std::string_view& mis_desc) const
 {
-	std::ofstream outputFileMisTree(m_misFolder / "misdesc", std::ios::binary);
-	if (!outputFileMisTree)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	outputFileMisTree.write(reinterpret_cast<const char*>(mis_desc.data()), mis_desc.size());
-	outputFileMisTree.close();
+	convert::mis_tree(m_misFolder, mis_desc);
 }
 
 void Converter::convertMisPhrases(const std::string_view& mis_phrases, const uint32_t sizeMisPhrases) const
 {
-	std::ofstream outputFileMisPharses(m_misFolder / "phrases", std::ios::binary);
-	if (!outputFileMisPharses)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	std::vector<uint8_t> phrases(32000, 0);
-	size_t phrasesOffset{ 0 };
-	uint32_t accumulator{ 0 };
-	uint32_t sizeline;
-	while (accumulator < sizeMisPhrases && phrasesOffset < 32000)
-	{
-		//uint32_t numtext = readFileInt8(mis_phrases, 0 + accumulator);		// not used
-
-		sizeline = readFileInt8(mis_phrases, 1 + accumulator);
-		position(mis_phrases, phrases, 2 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = readFileInt8(mis_phrases, 2 + accumulator);
-		position(mis_phrases, phrases, 3 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = readFileInt8(mis_phrases, 3 + accumulator);
-		position(mis_phrases, phrases, 4 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = readFileInt8(mis_phrases, 4 + accumulator);
-		position(mis_phrases, phrases, 5 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = readFileInt8(mis_phrases, 5 + accumulator);
-		position(mis_phrases, phrases, 6 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-		accumulator += 6;
-	}
-
-	outputFileMisPharses.write(reinterpret_cast<const char*>(phrases.data()), phrases.size());
-	outputFileMisPharses.close();
+	convert::mis_phrases(m_misFolder, mis_phrases, sizeMisPhrases);
 }
 
 void Converter::convertMisObjects(const std::string_view& mis_objects) const
 {
-	std::ofstream outputFileMisObjects(m_misFolder / "objs", std::ios::binary);
-	if (!outputFileMisObjects)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	const coordinates16* src = reinterpret_cast<const coordinates16*>(mis_objects.data());
-	const size_t count = mis_objects.size() / sizeof(coordinates16);
-
-	std::vector<coordinates32> dst(count);
-
-	for (size_t i = 0; i < count; ++i)
-	{
-		dst[i].u = src[i].u;
-		dst[i].v = src[i].v;
-	}
-
-	outputFileMisObjects.write(reinterpret_cast<const char*>(dst.data()), count * sizeof(coordinates32));
-	outputFileMisObjects.close();
+	convert::mis_objects(m_misFolder, mis_objects);
 }
 
 void Converter::convertMisPlayers(const std::string_view& mis_players) const
 {
-	std::ofstream outputMisPlayers(m_misFolder / "players", std::ios::binary);
-	if (!outputMisPlayers)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	static constexpr const char* TYPEREINFORCEMENT[] = { "bomb", "spy", "transport", "boxer" };
-	const size_t maxTries = mis_players.size() / sizeof(players);
-	const uint8_t* dataPtr = reinterpret_cast<const uint8_t*>(mis_players.data());
-
-	for (size_t curTry = 0; curTry < maxTries; ++curTry)
-	{
-		const players* buffer = reinterpret_cast<const players*>(dataPtr + curTry * sizeof(players));
-
-		{
-			const uint16_t red = (buffer->color >> 11) & 0x1F;
-			const uint16_t green = (buffer->color >> 5) & 0x3F;
-			const uint16_t blue = buffer->color & 0x1F;
-			outputMisPlayers << std::format("Player {}\n name=\"{}\"\n team={}\n nation={}\n color={} {} {}\n"
-				, curTry					// Player
-				, buffer->name
-				, buffer->team
-				, buffer->nation
-				, red	<< static_cast<uint8_t>(RGB565_SHIFT::R)
-				, green	<< static_cast<uint8_t>(RGB565_SHIFT::G)
-				, blue	<< static_cast<uint8_t>(RGB565_SHIFT::B));
-		}
-
-		for (uint32_t i = 0; i < VALUEREINFORCEMENT; ++i)
-		{
-			outputMisPlayers << std::format(" {}\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-				, TYPEREINFORCEMENT[i]
-				, buffer->airReinforcement[i].name
-				, buffer->airReinforcement[i].number
-				, buffer->airReinforcement[i].bombs
-				, buffer->airReinforcement[i].reloads);
-		}
-
-		for (uint32_t k = 0; k < VALUEDESCENT; k++)
-		{
-			outputMisPlayers << std::format(" descent {}\n  group={}\n  expa={}\n"
-				, k
-				, buffer->group[k].group
-				, buffer->group[k].expa);
-
-			outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
-				, buffer->group[k].ID[0]
-				, buffer->group[k].number[0]
-				, buffer->group[k].ID[1]
-				, buffer->group[k].number[1]
-				, buffer->group[k].ID[2]
-				, buffer->group[k].number[2]
-				, buffer->group[k].ID[3]
-				, buffer->group[k].number[3]);
-		}
-		outputMisPlayers << std::format(" planesdir={}\n", buffer->planesdir);
-	}
-	outputMisPlayers.close();
+	convert::mis_players(m_misFolder, mis_players);
 }
