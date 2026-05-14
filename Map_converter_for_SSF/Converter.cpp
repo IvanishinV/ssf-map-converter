@@ -14,6 +14,7 @@
 #include "convert/map_desc.h"
 #include "convert/map_landname.h"
 #include "convert/map_cflags.h"
+#include "convert/map_info.h"
 
 #pragma region stack_operations
 
@@ -674,40 +675,9 @@ uint32_t Converter::convertMapFileSCC_mission(const std::string_view& inputFile)
 	return 0;
 }
 
-#pragma pack(push, 1)
-struct MAP_INFO_HEADER
-{
-	MAP_INFO_HEADER(uint32_t mapIdentifier, uint32_t mapSizeU, uint32_t mapSizeV)
-	{
-		this->mapIdentifier = mapIdentifier;
-		this->mapSizeU = mapSizeU;
-		this->mapSizeV = mapSizeV;
-		unknown_1 = GLOBALNULL;
-		unknown_2 = GLOBALNULL;
-		unknown_3 = GLOBALNULL;
-	}
-
-private:
-	uint32_t mapIdentifier;
-	uint32_t mapSizeU;
-	uint32_t mapSizeV;
-	uint8_t unknown_1;
-	uint8_t unknown_2;
-	uint8_t unknown_3;
-};
-#pragma pack (pop)
-
 void Converter::convertMapInfo() const
 {
-	std::ofstream outputMapInfo(m_mapFolder / "info", std::ios::binary);
-	if (!outputMapInfo)
-	{
-		errorWriteFile();
-		return;
-	}
-	MAP_INFO_HEADER part1(m_mapIdentifier, m_mapSizeU, m_mapSizeV);
-	outputMapInfo.write(reinterpret_cast<const char*>(&part1), sizeof(part1));
-	outputMapInfo.close();
+	convert::map_info(m_mapFolder, m_mapIdentifier, m_mapSizeU, m_mapSizeV);
 }
 
 void Converter::convertMapMini(const std::string_view& map_mini) const
