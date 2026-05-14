@@ -11,6 +11,7 @@
 #include "util.h"
 #include "wire/types.h"
 #include "wire/bmp.h"
+#include "convert/map_desc.h"
 
 #pragma region stack_operations
 
@@ -839,21 +840,7 @@ void Converter::convertMapObjects(const std::string_view& map_objects) const
 
 void Converter::convertMapDesc() const
 {
-	std::ofstream outputFileMapDesc(m_mapFolder / "desc", std::ios::binary);
-	if (!outputFileMapDesc)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	switch (m_mapType)
-	{
-	case HEADER_SINGLE:
-	case HEADER_MULTI:
-		outputFileMapDesc.write(m_stemFileName.data(), m_stemFileName.length());
-	}
-
-	outputFileMapDesc.close();
+	convert::map_desc(m_mapFolder, m_mapType, m_stemFileName);
 }
 
 void Converter::convertMapRhombs(const std::string_view& map_rhombs) const
