@@ -9,7 +9,7 @@
 #include "Displayinfo.h"
 #include "RhombsParser.h"
 #include "util.h"
-#include "types.h"
+#include "wire/types.h"
 
 #pragma region stack_operations
 
