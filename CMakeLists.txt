@@ -9,11 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/Map_converter_for_SSF)
 
-file(GLOB SRC CONFIGURE_DEPENDS "${SRC_DIR}/*.cpp")
-
-if(WIN32)
-  list(APPEND SRC ${SRC_DIR}/Map_converter_for_SSF.rc)
-endif()
+file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "${SRC_DIR}/*.cpp")
 
 add_executable(map_converter ${SRC})
 
