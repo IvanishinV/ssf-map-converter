@@ -5,11 +5,7 @@
 #include "Parser.h"
 #include "Displayinfo.h"
 #include "util.h"
-
-#include <gzip/decompress.hpp>
-#ifdef _MSC_VER
-#pragma comment(lib, "zlibstatic.lib")
-#endif
+#include "Version.h"
 
 template <typename Fn>
 static size_t processPath(const std::filesystem::path& path, Fn&& process)
@@ -46,7 +42,7 @@ void openFileAndProcess(const Action action, std::string_view filename)
 	else
 	{
 		Parser parser;
-		count = processPath(filename, [&](const std::filesystem::path& p) { parser.parseMap(p.string()); });
+		count = processPath(filename, [&](const std::filesystem::path& p) { parser.parseMap(p); });
 	}
 
 	const auto end = std::chrono::high_resolution_clock::now();
@@ -96,7 +92,7 @@ static void setupConsole()
 	if ((consoleMode & wanted) == wanted)
 		return;
 
-	if (SetConsoleMode(hs, wanted) == NULL)
+	if (!SetConsoleMode(hs, wanted))
 		std::println("[Error] Couldn't set color output mode. Output will be with \"\033[32m\" symbols. Last error: {}", GetLastError());
 #endif
 }
@@ -199,7 +195,7 @@ int main(int argc, char** argv)
 	setupConsole();
 	detectLanguage();
 
-	std::println("Map converter for SS1 & SSF, \033[32mv.0.6.8\033[0m by NASHRIPPER and IVA");
+	std::println("Map converter for SS1 & SSF, \033[32mv.{}\033[0m by NASHRIPPER and IVA", MAP_CONVERTER_VERSION);
 
 	const CliArgs args = parseArgs(argc, argv);
 	switch (args.mode)
@@ -207,13 +203,13 @@ int main(int argc, char** argv)
 	case CliArgs::Mode::Help:
 	case CliArgs::Mode::BadUsage:
 		printUsage(argv[0]);
-		return 0;
+		break;
 	case CliArgs::Mode::Process:
 		openFileAndProcess(args.action, args.path);
-		return 0;
+		break;
 	case CliArgs::Mode::Manual:
 		manualInput();
-		return 0;
+		break;
 	}
 	return 0;
 }

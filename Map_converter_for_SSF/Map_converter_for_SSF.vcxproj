@@ -89,6 +89,7 @@
     <ClInclude Include="RhombsParser.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="util.h" />
+    <ClInclude Include="Version.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
