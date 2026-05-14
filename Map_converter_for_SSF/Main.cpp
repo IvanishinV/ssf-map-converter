@@ -70,6 +70,9 @@ void manualInput()
 		action = Action::Parse;
 	}
 
+	if (filename.empty())
+		return;
+
 	openFileAndProcess(action, filename);
 
 	std::println("Press Enter to exit...");
@@ -159,6 +162,8 @@ static CliArgs parseArgs(int argc, char** argv)
 	{
 		if (argv[1] == "-h"sv)
 			args.mode = CliArgs::Mode::Help;
+		else if (argv[1] == "-c"sv || argv[1] == "-p"sv)
+			args.mode = CliArgs::Mode::BadUsage;
 		else
 		{
 			args.mode = CliArgs::Mode::Process;
