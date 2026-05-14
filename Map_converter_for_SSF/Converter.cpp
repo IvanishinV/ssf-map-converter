@@ -17,6 +17,10 @@
 #include "convert/map_info.h"
 #include "convert/map_mini.h"
 #include "convert/map_objects.h"
+#include "convert/mis_desc.h"
+#include "convert/mis_mult.h"
+#include "convert/mis_info.h"
+#include "convert/mis_zones.h"
 
 #pragma region stack_operations
 
@@ -723,90 +727,22 @@ void Converter::convertMapRhombs(const std::string_view& map_rhombs) const
 
 void Converter::convertMisDesc() const
 {
-	std::ofstream outputFileMisDesc(m_misFolder / "desc", std::ios::binary);
-	if (!outputFileMisDesc)
-	{
-		errorWriteFile();
-		return;
-	}
-	outputFileMisDesc.close();
+	convert::mis_desc(m_misFolder);
 }
 
 void Converter::convertMisMult(const std::string_view& map_info, const uint32_t maptypeheader) const
 {
-	std::ofstream outputMapMisMult(m_misFolder / "mismult", std::ios::binary);
-	if (!outputMapMisMult)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	if (maptypeheader == 0 || maptypeheader == 1)
-	{
-		outputMapMisMult.write(reinterpret_cast<const char*>(map_info.data()) + 24, 16);
-	}
-	else
-	{
-		for (uint32_t n = 0; n < 16; n++)
-		{
-			outputMapMisMult << GLOBALNULL;
-		}
-	}
-	outputMapMisMult.close();
+	convert::mis_mult(m_misFolder, map_info, maptypeheader);
 }
-
-#pragma pack(push, 1)
-struct MIS_INFO_HEADER
-{
-private:
-	uint32_t unknown_1;
-	uint32_t unknown_2;
-	uint32_t mapSizeU;
-	uint32_t mapSizeV;
-public:
-	MIS_INFO_HEADER(uint32_t mapSizeU, uint32_t mapSizeV)
-	{
-		unknown_1 = GLOBALNULL;
-		unknown_2 = GLOBALNULL;
-		this->mapSizeU = mapSizeU;
-		this->mapSizeV = mapSizeV;
-	}
-};
-#pragma pack (pop)
 
 void Converter::convertMisInfo() const
 {
-	std::ofstream outputMisInfo(m_misFolder / "info", std::ios::binary);
-	if (!outputMisInfo)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	MIS_INFO_HEADER part1(m_mapSizeU, m_mapSizeV);
-	outputMisInfo.write(reinterpret_cast<const char*>(&part1), sizeof(part1));
-	outputMisInfo.close();
+	convert::mis_info(m_misFolder, m_mapSizeU, m_mapSizeV);
 }
 
 void Converter::convertMisZones(const std::string_view& mis_zones) const
 {
-	std::ofstream outputFileMisZones(m_misFolder / "locations", std::ios::binary);
-	if (!outputFileMisZones)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	std::vector<uint8_t> misZones(LOCATIONSSIZE, 0);
-
-	const size_t maxTries = mis_zones.size() / m_mapSizeU;
-	for (size_t i = 0; i < maxTries; ++i)
-	{
-		std::copy(mis_zones.cbegin() + i * m_mapSizeU, mis_zones.cbegin() + i * m_mapSizeU + m_mapSizeU, misZones.begin() + 512 * i);
-	}
-
-	outputFileMisZones.write(reinterpret_cast<const char*>(misZones.data()), misZones.size());
-	outputFileMisZones.close();
+	convert::mis_zones(m_misFolder, mis_zones, m_mapSizeU);
 }
 
 void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std::string_view& mis_mapunits, const std::string_view& mis_support) const
