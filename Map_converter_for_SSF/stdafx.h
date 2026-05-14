@@ -10,7 +10,6 @@
   #endif
 
   #include <Windows.h>
-  #include <conio.h>
 #else
   #include <cstdint>
 
@@ -20,7 +19,6 @@
   using WORD  = uint16_t;
   using BYTE  = uint8_t;
 
-  inline constexpr uint32_t BI_RGB       = 0;
   inline constexpr uint32_t BI_BITFIELDS = 3;
 
   #define LOWORD(l)        ((WORD)((uint32_t)(l) & 0xFFFF))
@@ -54,12 +52,8 @@
     uint32_t biClrImportant;
   };
 
-  struct RGBQUAD {
-    uint8_t rgbBlue;
-    uint8_t rgbGreen;
-    uint8_t rgbRed;
-    uint8_t rgbReserved;
-  };
+  static_assert(sizeof(BITMAPFILEHEADER) == 14);
+  static_assert(sizeof(BITMAPINFOHEADER) == 40);
 #endif
 
 #include <iostream>
@@ -72,7 +66,7 @@
 #include <stack>
 #include <string>
 
-#include <math.h>
+#include <cmath>
 
 #include <filesystem>
 #include <random>

@@ -8,46 +8,33 @@ constexpr uint32_t size_arr16 = 16;
 constexpr uint32_t size_arr32 = 32;
 constexpr uint32_t size_arr64 = 64;
 
-/**
- * @param number of flags for support
- */
-const uint32_t VALUEFLAG = 16;
-/**
- * @param number of script for support
- */
-const uint32_t VALUESUPPORT = 64;
-/**
- * @param number of reinforcement for player
- */
-const uint32_t VALUEREINFORCEMENT = 4;
-/**
- * @param number of decent for player
- */
-const uint32_t VALUEDESCENT = 2;
+/// number of flags for support
+constexpr uint32_t VALUEFLAG = 16;
+/// number of scripts for support
+constexpr uint32_t VALUESUPPORT = 64;
+/// number of reinforcements per player
+constexpr uint32_t VALUEREINFORCEMENT = 4;
+/// number of descent groups per player
+constexpr uint32_t VALUEDESCENT = 2;
 
-const uint32_t FILE_TYPE_OFFSET = 0x0;
-const uint32_t MapHeaderSMM = 148;
-const uint32_t MapHeaderSSM = 52;
-const uint32_t MapHeaderSSC_mission = 24;
-const uint32_t MapHeaderSSC_map = 20;
-//const uint32_t MapMiniSize = 32768;
-const uint32_t LANDNAMESSIZE = 180;
-//const uint32_t MISUNITNAMES = 16;
-const uint32_t MISGROUPSSIZE = 2700;
-const uint32_t MISPLAYERSSIZE = 353;
-const uint32_t MISMUSICSIZE = 78;
-const uint32_t MISOBJECTS = 400;
+constexpr uint32_t FILE_TYPE_OFFSET = 0x0;
+constexpr uint32_t MapHeaderSMM = 148;
+constexpr uint32_t MapHeaderSSM = 52;
+constexpr uint32_t MapHeaderSSC_mission = 24;
+constexpr uint32_t MapHeaderSSC_map = 20;
+constexpr uint32_t LANDNAMESSIZE = 180;
+constexpr uint32_t MISGROUPSSIZE = 2700;
+constexpr uint32_t MISPLAYERSSIZE = 353;
+constexpr uint32_t MISMUSICSIZE = 78;
+constexpr uint32_t MISOBJECTS = 400;
 
-//Глобальная константа пустышки
-const uint8_t GLOBALNULL = 0x00;
+constexpr uint8_t GLOBALNULL = 0x00;
 
-//константа размера файлов для мин и зон
-const uint32_t LOCATIONSSIZE = 262144;
+constexpr uint32_t LOCATIONSSIZE = 262144;
 
-//Значение из скриптов при работе с памятью
-const uint32_t NUMMEMORY = 3847412;
+constexpr uint32_t NUMMEMORY = 3847412;
 
-const uint32_t timeconvertnum = 25;
+constexpr uint32_t timeconvertnum = 25;
 
 constexpr uint32_t HEADER_SINGLE = 0x4d535353;	// SSSM
 constexpr uint32_t HEADER_MULTI = 0x4d4d5353;	// SSMM
@@ -141,5 +128,5 @@ enum scripts_num
 
 constexpr size_t MAX_NUM_OF_ARGS_IN_INSTRUCTION = 7;
 
-const uint32_t script_reinf_player = 0x4;
-const uint32_t script_reinf_enemy = 0x8;
+constexpr uint32_t script_reinf_player = 0x4;
+constexpr uint32_t script_reinf_enemy = 0x8;
