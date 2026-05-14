@@ -16,6 +16,7 @@
 #include "convert/map_cflags.h"
 #include "convert/map_info.h"
 #include "convert/map_mini.h"
+#include "convert/map_objects.h"
 
 #pragma region stack_operations
 
@@ -698,15 +699,7 @@ void Converter::convertMapCflags(const std::string_view& map_flags) const
 
 void Converter::convertMapObjects(const std::string_view& map_objects) const
 {
-	std::ofstream outputMapObjects(m_mapFolder / "objects", std::ios::binary);
-	if (!outputMapObjects)
-	{
-		errorWriteFile();
-		return;
-	}
-
-	outputMapObjects.write(reinterpret_cast<const char*>(map_objects.data()), map_objects.size());
-	outputMapObjects.close();
+	convert::map_objects(m_mapFolder, map_objects);
 }
 
 void Converter::convertMapDesc() const
