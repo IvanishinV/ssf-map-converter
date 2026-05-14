@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #include "Helper.h"
+#include "io/wire_reader.h"
 
 
 uint32_t position(const std::string_view& input, std::vector<uint8_t>& output, const uint32_t srcOffset, const size_t dstOffset, const uint32_t size)
@@ -77,21 +78,15 @@ uint32_t tileArray(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint3
 
 uint32_t misScripts(const std::string_view& inputFile, uint32_t scripts_number, const uint32_t scripts_position)
 {
-	if (scripts_number == 0)
+	WireReader r{ std::as_bytes(std::span{ inputFile }) };
+	const std::size_t start = scripts_position + 4;
+	r.seek(start);
+	while (scripts_number--)
 	{
-		return 0;
+		const auto coaf = r.read<uint32_t>();
+		r.skip(coaf);
 	}
-	else
-	{
-		uint32_t accumulator = 0;
-		while (scripts_number--)
-		{
-			uint32_t COAF;
-			COAF = readFileUint32(inputFile, scripts_position + 4 + accumulator);
-			accumulator += COAF + 4;
-		}
-		return accumulator;
-	}
+	return static_cast<uint32_t>(r.tell() - start);
 }
 
 
