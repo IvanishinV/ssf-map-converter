@@ -9,6 +9,7 @@
 #include "Displayinfo.h"
 #include "RhombsParser.h"
 #include "util.h"
+#include "types.h"
 
 #pragma region stack_operations
 
@@ -995,168 +996,128 @@ void Converter::convertMisUnits(const std::string_view& mis_unitnames, const std
 	}
 
 	uint32_t numberofunit = *(uint32_t*)(mis_mapunits.data());
-
+	const uint8_t* dataPtr = reinterpret_cast<const uint8_t*>(mis_mapunits.data());
 	// mapunits file will have a reversed strings comparing to the original editor mapunits file
 	size_t curOffset = sizeof(numberofunit);
-	while (curOffset + 13 <= mis_mapunits.size())
+	while (curOffset + sizeof(unitsMap) <= mis_mapunits.size())
 	{
-		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_mapunits.data()) + curOffset;
-		curOffset += 13;
+		const unitsMap* misMapUnit = reinterpret_cast<const unitsMap*>(dataPtr + curOffset);
+		curOffset += sizeof(unitsMap);
 
-		uint8_t GRP = *(uint8_t*)(buffer + 0);
-		uint8_t HP = *(uint8_t*)(buffer + 1);
-		uint8_t Ammo = *(uint8_t*)(buffer + 2);
-		uint8_t Expa = *(uint8_t*)(buffer + 3);
-		uint8_t Lives = *(uint8_t*)(buffer + 4);
-		uint8_t ID = *(uint8_t*)(buffer + 5);
-		uint8_t In = *(uint8_t*)(buffer + 6);
-		uint16_t U = *(uint16_t*)(buffer + 7);
-		uint16_t V = *(uint16_t*)(buffer + 9);
-		uint8_t Dir = *(uint8_t*)(buffer + 11);
-		uint8_t Owner = *(uint8_t*)(buffer + 12);
 		{
 			outputFileMapUnits << std::format("ID={} GRP={} HP={} Ammo={} Expa={} Lives={} U={} V={} Dir={} In={} Owner={}\n"
-				, nameunit[ID]
-				, (uint16_t)GRP
-				, (uint16_t)HP
-				, (uint16_t)Ammo
-				, (uint16_t)Expa
-				, (uint16_t)Lives
-				, (uint16_t)U
-				, (uint16_t)V
-				, (uint16_t)Dir
-				, (uint16_t)In
-				, (uint16_t)Owner);
+				, nameunit[misMapUnit->unit.unit.ID]
+				, (uint16_t)misMapUnit->unit.unit.grp
+				, (uint16_t)misMapUnit->unit.unit.hp
+				, (uint16_t)misMapUnit->unit.unit.ammo
+				, (uint16_t)misMapUnit->unit.unit.expa
+				, (uint16_t)misMapUnit->unit.unit.lives
+				, (uint16_t)misMapUnit->pos.u
+				, (uint16_t)misMapUnit->pos.v
+				, (uint16_t)misMapUnit->dir
+				, (uint16_t)misMapUnit->unit.in
+				, (uint16_t)misMapUnit->owner);
 		}
-		if (In > 0)
-		{
-			while (In--)
-			{
-				const uint8_t* unitBuffer = reinterpret_cast<const uint8_t*>(mis_mapunits.data()) + curOffset;
-				curOffset += 6;
 
-				uint8_t GRPpassenger = *(uint8_t*)(unitBuffer + 0);
-				uint8_t HPpassenger = *(uint8_t*)(unitBuffer + 1);
-				uint8_t Ammopassenger = *(uint8_t*)(unitBuffer + 2);
-				uint8_t Expapassenger = *(uint8_t*)(unitBuffer + 3);
-				uint8_t Livespassenger = *(uint8_t*)(unitBuffer + 4);
-				uint8_t IDpassenger = *(uint8_t*)(unitBuffer + 5);
+		if (misMapUnit->unit.in > 0) // Passenger
+		{
+			for (uint32_t n = 0; n < misMapUnit->unit.in; ++n)
+			{
+				const unitBase* misMapUnitPassenger = reinterpret_cast<const unitBase*>(dataPtr + curOffset);
+				curOffset += sizeof(unitBase);
 				{
 					outputFileMapUnits << std::format(" ID={} GRP={} HP={} Ammo={} Expa={} Lives={}\n"
-						, nameunit[IDpassenger]
-						, (uint16_t)GRPpassenger
-						, (uint16_t)HPpassenger
-						, (uint16_t)Ammopassenger
-						, (uint16_t)Expapassenger
-						, (uint16_t)Livespassenger);
+						, nameunit[misMapUnitPassenger->ID]
+						, (uint16_t)misMapUnitPassenger->grp
+						, (uint16_t)misMapUnitPassenger->hp
+						, (uint16_t)misMapUnitPassenger->ammo
+						, (uint16_t)misMapUnitPassenger->expa
+						, (uint16_t)misMapUnitPassenger->lives);
 				}
 			}
 		}
 	}
 
 	const uint32_t supportSize = *(uint32_t*)(mis_support.data());	// not used
+	dataPtr = reinterpret_cast<const uint8_t*>(mis_support.data());
 
-	uint32_t flag_num = 16;
-	uint32_t script_num = 64;
 	curOffset = sizeof(supportSize);
-	while (flag_num--)
+	for (uint32_t i = 0; i < VALUEFLAG; ++i)
 	{
-		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_support.data()) + curOffset;
-		curOffset += 20;
+		const flag* buffer = reinterpret_cast<const flag*>(dataPtr + curOffset);
+		curOffset += sizeof(flag);
 
-		int num1 = *(uint32_t*)(buffer + 0);
-		int num2 = *(uint32_t*)(buffer + 4);
-		int num3 = *(uint32_t*)(buffer + 8);
-		int num4 = *(uint32_t*)(buffer + 12);
-		int num5 = *(uint32_t*)(buffer + 16);
-		//cout << "flag " << num1 << " " << num2 << " " << num5 << " " << num3 << " " << num4 << '\n';
 		outputFileSupport << std::format("flag {},{},{},{},{}\n"
-			, num1
-			, num2
-			, num5
-			, num3
-			, num4);
+			, buffer->redFlag.u
+			, buffer->redFlag.v
+			, buffer->valueRedFlag
+			, buffer->blueFlag.u
+			, buffer->blueFlag.v);
 	}
-	//cout << '\n';
 	outputFileSupport << '\n';
 
 	uint32_t accumulator = 0;
-	while (script_num--)
+	for (uint32_t i = 0; i < VALUESUPPORT; ++i)
 	{
-		const uint8_t NameSize = mis_support[324 + accumulator];
+		const uint8_t NameSize = mis_support[sizeof(flag) * VALUEFLAG + sizeof(supportSize) + accumulator];
 
 		if (NameSize > 0)
 		{
-			const uint8_t* buffername = reinterpret_cast<const uint8_t*>(mis_support.data()) + 324 + 1 + accumulator;
-			//cout << "support " << "\"" << buffername << "\"" << '\n';
+			const uint8_t* buffername = reinterpret_cast<const uint8_t*>(mis_support.data()) + sizeof(flag) * VALUEFLAG + sizeof(supportSize) + sizeof(NameSize) + accumulator;
 			outputFileSupport << "support \"";
 			outputFileSupport.write((const char*)buffername, NameSize);
 			outputFileSupport << "\"\n";
 		}
 		else
 		{
-			//cout << "support " << "\"" << "\"" << '\n';
 			outputFileSupport << "support \"\"\n";
 		}
 
-		uint32_t UnitScriptSize = *(uint32_t*)(mis_support.data() + 324 + 1 + accumulator + NameSize);
-		curOffset = 324 + 1 + accumulator + NameSize + sizeof(UnitScriptSize);
-		accumulator += 5 + NameSize;
+		uint32_t UnitScriptSize = *(uint32_t*)(mis_support.data() + sizeof(flag) * VALUEFLAG + sizeof(supportSize) + sizeof(NameSize) + NameSize + accumulator);
+		curOffset = sizeof(flag) * VALUEFLAG + sizeof(supportSize) + sizeof(NameSize) + NameSize + sizeof(UnitScriptSize) + accumulator;
+		accumulator += sizeof(NameSize) + NameSize + sizeof(UnitScriptSize);
 		if (UnitScriptSize > 0)
 		{
-			while (UnitScriptSize--)
+			for (uint32_t k = 0; k < UnitScriptSize; ++k)
 			{
-				const uint8_t* bufferunit = reinterpret_cast<const uint8_t*>(mis_support.data()) + curOffset;
-				curOffset += 7;
+				dataPtr = reinterpret_cast<const uint8_t*>(mis_support.data()) + curOffset;
+				const unitBaseIn* misSupportUnit = reinterpret_cast<const unitBaseIn*>(dataPtr);
 
-				uint8_t GRP = *(uint8_t*)(bufferunit + 0);
-				uint8_t HP = *(uint8_t*)(bufferunit + 1);
-				uint8_t Ammo = *(uint8_t*)(bufferunit + 2);
-				uint8_t Expa = *(uint8_t*)(bufferunit + 3);
-				uint8_t Lives = *(uint8_t*)(bufferunit + 4);
-				uint8_t Id = *(uint8_t*)(bufferunit + 5);
-				uint8_t In = *(uint8_t*)(bufferunit + 6);
-				accumulator += 7;
+				curOffset += sizeof(unitBaseIn);
+				accumulator += sizeof(unitBaseIn);
 				{
-					//cout << "ID=" << Id << " GRP=" << GRP << " HP=" << HP << " Ammo=" << Ammo << " Expa=" << Expa << " Lives=" << Lives << " In=" << In << '\n';
 					outputFileSupport << std::format(" ID={} Grp={} HP={} Ammo={} Expa={} Lives={} In={}\n"
-						, nameunit[Id]
-						, (uint16_t)GRP
-						, (uint16_t)HP
-						, (uint16_t)Ammo
-						, (uint16_t)Expa
-						, (uint16_t)Lives
-						, (uint16_t)In);
+						, nameunit[misSupportUnit->unit.ID]
+						, (uint16_t)misSupportUnit->unit.grp
+						, (uint16_t)misSupportUnit->unit.hp
+						, (uint16_t)misSupportUnit->unit.ammo
+						, (uint16_t)misSupportUnit->unit.expa
+						, (uint16_t)misSupportUnit->unit.lives
+						, (uint16_t)misSupportUnit->in);
 				}
-				if (In > 0)
-				{
-					while (In--)
-					{
-						const uint8_t* bufferUnit = reinterpret_cast<const uint8_t*>(mis_support.data()) + curOffset;
-						curOffset += 6;
 
-						uint8_t GRPpasseenger = *(uint8_t*)(bufferUnit + 0);
-						uint8_t HPpasseenger = *(uint8_t*)(bufferUnit + 1);
-						uint8_t Ammopasseenger = *(uint8_t*)(bufferUnit + 2);
-						uint8_t Expapasseenger = *(uint8_t*)(bufferUnit + 3);
-						uint8_t Livespasseenger = *(uint8_t*)(bufferUnit + 4);
-						uint8_t Idpasseenger = *(uint8_t*)(bufferUnit + 5);
-						accumulator += 6;
+				if (misSupportUnit->in > 0) // Passenger
+				{
+					for (uint32_t n = 0; n < misSupportUnit->in; ++n)
+					{
+						dataPtr = reinterpret_cast<const uint8_t*>(mis_support.data()) + curOffset;
+						const unitBase* misSupportUnitPassenger = reinterpret_cast<const unitBase*>(dataPtr);
+						curOffset += sizeof(unitBase);
+						accumulator += sizeof(unitBase);
+
 						{
-							//cout << "ID=" << Idpasseenger << " GRP=" << GRPpasseenger << " HP=" << HPpasseenger << " Ammo=" << Ammopasseenger << " Expa=" << Expapasseenger << " Lives=" << Livespasseenger << '\n';
 							outputFileSupport << std::format("  ID={} Grp={} HP={} Ammo={} Expa={} Lives={}\n"
-								, nameunit[Idpasseenger]
-								, (uint16_t)GRPpasseenger
-								, (uint16_t)HPpasseenger
-								, (uint16_t)Ammopasseenger
-								, (uint16_t)Expapasseenger
-								, (uint16_t)Livespasseenger);
+								, nameunit[misSupportUnitPassenger->ID]
+								, (uint16_t)misSupportUnitPassenger->grp
+								, (uint16_t)misSupportUnitPassenger->hp
+								, (uint16_t)misSupportUnitPassenger->ammo
+								, (uint16_t)misSupportUnitPassenger->expa
+								, (uint16_t)misSupportUnitPassenger->lives);
 						}
 					}
 				}
 			}
 		}
-		//cout << "end" << '\n';
 		outputFileSupport << "end\n";
 	}
 
@@ -1694,29 +1655,19 @@ void Converter::convertMisWoofers(const std::string_view& mis_woofers) const
 		return;
 	}
 
-	const uint32_t numOfSounds = readFileUint32(mis_woofers, 0);
-	for (uint32_t i = 0, curOffset = sizeof(numOfSounds); i < numOfSounds; ++i)
+	const uint32_t count = readFileUint32(mis_woofers, 0);
+	const woofers* src = reinterpret_cast<const woofers*>(mis_woofers.data() + sizeof(count));
+
+	for (uint32_t curTry = 0; curTry < count; ++curTry, ++src)
 	{
-		const uint8_t* buffername = reinterpret_cast<const uint8_t*>(mis_woofers.data()) + curOffset;
-		curOffset += 64;
-		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_woofers.data()) + curOffset;
-		curOffset += 14;
-
-		uint16_t U = *(uint16_t*)(buffer + 0);
-		uint16_t V = *(uint16_t*)(buffer + 2);
-		uint16_t Radius = *(uint16_t*)(buffer + 4);
-		float Worse = *(float*)(buffer + 6);
-		uint16_t MinWait = *(uint16_t*)(buffer + 10);
-		uint16_t MaxWait = *(uint16_t*)(buffer + 12);
-
 		outputFileMisWoofers << std::format("Name=\"{}\"\nU={}\nV={}\nRadius={}\nWorse={}\nMinWait={}\nMaxWait={}\n\n"
-			, reinterpret_cast<const char*>(buffername)
-			, U
-			, V
-			, Radius
-			, Worse
-			, MinWait
-			, MaxWait);
+			, src->name
+			, src->pos.u
+			, src->pos.v
+			, src->radius
+			, src->worse
+			, src->minWait
+			, src->maxWait);
 	}
 	outputFileMisWoofers.close();
 }
@@ -1810,13 +1761,18 @@ void Converter::convertMisObjects(const std::string_view& mis_objects) const
 		return;
 	}
 
-	const size_t maxTries = mis_objects.size() / 2;
-	for (size_t i = 0; i < maxTries; ++i)
+	const coordinates16* src = reinterpret_cast<const coordinates16*>(mis_objects.data());
+	const size_t count = mis_objects.size() / sizeof(coordinates16);
+
+	std::vector<coordinates32> dst(count);
+
+	for (size_t i = 0; i < count; ++i)
 	{
-		uint8_t num1 = mis_objects[i * 2];
-		uint8_t num2 = mis_objects[i * 2 + 1];
-		outputFileMisObjects << num1 << num2 << GLOBALNULL << GLOBALNULL;
+		dst[i].u = src[i].u;
+		dst[i].v = src[i].v;
 	}
+
+	outputFileMisObjects.write(reinterpret_cast<const char*>(dst.data()), count * sizeof(coordinates32));
 	outputFileMisObjects.close();
 }
 
@@ -1829,91 +1785,56 @@ void Converter::convertMisPlayers(const std::string_view& mis_players) const
 		return;
 	}
 
-	const size_t maxTries = mis_players.size() / 353;
+	static constexpr const char* TYPEREINFORCEMENT[] = { "bomb", "spy", "transport", "boxer" };
+	const size_t maxTries = mis_players.size() / sizeof(players);
+	const uint8_t* dataPtr = reinterpret_cast<const uint8_t*>(mis_players.data());
+
 	for (size_t curTry = 0; curTry < maxTries; ++curTry)
 	{
-		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(mis_players.data()) + curTry * 353;
+		const players* buffer = reinterpret_cast<const players*>(dataPtr + curTry * sizeof(players));
 
 		{
-			const uint16_t RGB_Color = *(uint16_t*)(buffer + 33);
-			const uint16_t red = (RGB_Color >> 11) & 0x1F;
-			const uint16_t green = (RGB_Color >> 5) & 0x3F;
-			const uint16_t blue = RGB_Color & 0x1F;
+			const uint16_t red = (buffer->color >> 11) & 0x1F;
+			const uint16_t green = (buffer->color >> 5) & 0x3F;
+			const uint16_t blue = buffer->color & 0x1F;
 			outputMisPlayers << std::format("Player {}\n name=\"{}\"\n team={}\n nation={}\n color={} {} {}\n"
 				, curTry					// Player
-				, (const char*)buffer		// name
-				, *(uint8_t*)(buffer + 32)	// team
-				, *(uint8_t*)(buffer + 35)	// nation
-				, red * 8
-				, green * 4
-				, blue * 8);
+				, buffer->name
+				, buffer->team
+				, buffer->nation
+				, red	<< static_cast<uint8_t>(RGB565_SHIFT::R)
+				, green	<< static_cast<uint8_t>(RGB565_SHIFT::G)
+				, blue	<< static_cast<uint8_t>(RGB565_SHIFT::B));
 		}
 
-		const uint32_t Numberbomb = *(uint32_t*)(buffer + 69);
-		const uint32_t Bombsbomb = *(uint32_t*)(buffer + 73);
-		const uint32_t Reloadbomb = *(uint32_t*)(buffer + 77);
-		outputMisPlayers << std::format(" bomb\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 37
-			, Numberbomb
-			, Bombsbomb
-			, Reloadbomb);
+		for (uint32_t i = 0; i < VALUEREINFORCEMENT; ++i)
+		{
+			outputMisPlayers << std::format(" {}\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
+				, TYPEREINFORCEMENT[i]
+				, buffer->airReinforcement[i].name
+				, buffer->airReinforcement[i].number
+				, buffer->airReinforcement[i].bombs
+				, buffer->airReinforcement[i].reloads);
+		}
 
-		const uint32_t Numberspy = *(uint32_t*)(buffer + 113);
-		const uint32_t Bombsspy = *(uint32_t*)(buffer + 117);
-		const uint32_t Reloadspy = *(uint32_t*)(buffer + 121);
-		outputMisPlayers << std::format(" spy\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 81
-			, Numberspy
-			, Bombsspy
-			, Reloadspy);
+		for (uint32_t k = 0; k < VALUEDESCENT; k++)
+		{
+			outputMisPlayers << std::format(" descent {}\n  group={}\n  expa={}\n"
+				, k
+				, buffer->group[k].group
+				, buffer->group[k].expa);
 
-		const uint32_t Numbertransport = *(uint32_t*)(buffer + 157);
-		const uint32_t Bombstransport = *(uint32_t*)(buffer + 161);
-		const uint32_t Reloadtransport = *(uint32_t*)(buffer + 165);
-		outputMisPlayers << std::format(" transport\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 125
-			, Numbertransport
-			, Bombstransport
-			, Reloadtransport);
-
-		const uint32_t Numberboxer = *(uint32_t*)(buffer + 201);
-		const uint32_t Bombsboxer = *(uint32_t*)(buffer + 205);
-		const uint32_t Reloadboxer = *(uint32_t*)(buffer + 209);
-		outputMisPlayers << std::format(" boxer\n  ID={}\n  Number={}\n  Bombs={}\n  Reload={}\n"
-			, (const char*)buffer + 169
-			, Numberboxer
-			, Bombsboxer
-			, Reloadboxer);
-
-		outputMisPlayers << std::format(" descent 0\n  group={}\n  expa={}\n"
-			, *(uint8_t*)(buffer + 213)
-			, *(uint8_t*)(buffer + 214));
-
-		outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
-			, (const char*)buffer + 215
-			, *(uint8_t*)(buffer + 279)
-			, (const char*)buffer + 231
-			, *(uint8_t*)(buffer + 280)
-			, (const char*)buffer + 247
-			, *(uint8_t*)(buffer + 281)
-			, (const char*)buffer + 263
-			, *(uint8_t*)(buffer + 282));
-
-		outputMisPlayers << std::format(" descent 1\n  group={}\n  expa={}\n"
-			, *(uint8_t*)(buffer + 283)
-			, *(uint8_t*)(buffer + 284));
-
-		outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
-			, (const char*)buffer + 285
-			, *(uint8_t*)(buffer + 349)
-			, (const char*)buffer + 301
-			, *(uint8_t*)(buffer + 350)
-			, (const char*)buffer + 317
-			, *(uint8_t*)(buffer + 351)
-			, (const char*)buffer + 333
-			, *(uint8_t*)(buffer + 352));
-
-		outputMisPlayers << std::format(" planesdir={}\n", *(uint8_t*)(buffer + 36));	// planesdir
+			outputMisPlayers << std::format("  ID 0={}\n  number 0={}\n  ID 1={}\n  number 1={}\n  ID 2={}\n  number 2={}\n  ID 3={}\n  number 3={}\n"
+				, buffer->group[k].ID[0]
+				, buffer->group[k].number[0]
+				, buffer->group[k].ID[1]
+				, buffer->group[k].number[1]
+				, buffer->group[k].ID[2]
+				, buffer->group[k].number[2]
+				, buffer->group[k].ID[3]
+				, buffer->group[k].number[3]);
+		}
+		outputMisPlayers << std::format(" planesdir={}\n", buffer->planesdir);
 	}
 	outputMisPlayers.close();
 }

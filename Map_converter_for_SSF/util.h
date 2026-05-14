@@ -2,6 +2,29 @@
 
 #include <cstdint>
 
+enum class RGB565_SHIFT : uint8_t { R = 3, G = 2, B = 3 };
+
+constexpr uint32_t size_arr16 = 16;
+constexpr uint32_t size_arr32 = 32;
+constexpr uint32_t size_arr64 = 64;
+
+/**
+ * @param number of flags for support
+ */
+const uint32_t VALUEFLAG = 16;
+/**
+ * @param number of script for support
+ */
+const uint32_t VALUESUPPORT = 64;
+/**
+ * @param number of reinforcement for player
+ */
+const uint32_t VALUEREINFORCEMENT = 4;
+/**
+ * @param number of decent for player
+ */
+const uint32_t VALUEDESCENT = 2;
+
 const uint32_t FILE_TYPE_OFFSET = 0x0;
 const uint32_t MapHeaderSMM = 148;
 const uint32_t MapHeaderSSM = 52;
