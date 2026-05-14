@@ -10,6 +10,7 @@
 #include "RhombsParser.h"
 #include "util.h"
 #include "wire/types.h"
+#include "wire/bmp.h"
 
 #pragma region stack_operations
 
@@ -705,20 +706,6 @@ void Converter::convertMapInfo() const
 	outputMapInfo.write(reinterpret_cast<const char*>(&part1), sizeof(part1));
 	outputMapInfo.close();
 }
-
-// Three DWORD channel masks appended after BITMAPINFOHEADER when biCompression == BI_BITFIELDS.
-struct BMP_RGB565_MASKS
-{
-	uint32_t redMask;
-	uint32_t greenMask;
-	uint32_t blueMask;
-};
-static_assert(sizeof(BMP_RGB565_MASKS) == 12);
-
-constexpr uint16_t BMP_SIGNATURE       = 0x4d42;   // 'BM'
-constexpr uint32_t RGB565_MASK_RED     = 0xF800;   // bits 11..15
-constexpr uint32_t RGB565_MASK_GREEN   = 0x07E0;   // bits 5..10
-constexpr uint32_t RGB565_MASK_BLUE    = 0x001F;   // bits 0..4
 
 void Converter::convertMapMini(const std::string_view& map_mini) const
 {
