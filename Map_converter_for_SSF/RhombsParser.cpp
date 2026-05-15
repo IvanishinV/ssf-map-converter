@@ -961,13 +961,6 @@ const std::vector<uint8_t> RhombsParser::g_desert_420 =
 };
 
 
-uint32_t RhombsParser::get_rand()
-{
-	uint32_t res = 1;
-	res = 0x343FD * res + 0x269EC3;
-
-	return (res >> 16) & 0x7FFF;
-}
 
 void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstream& outputFile, const std::vector<uint16_t>& scheme_tiles, const std::vector<uint8_t>& v_B14, const std::vector<uint8_t>& v_B00, const std::vector<uint8_t>& v_420)
 {
@@ -1007,21 +1000,13 @@ void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstrea
 
 		uint32_t tile_value = static_cast<uint32_t>(first_two_bytes) | (static_cast<uint32_t>(Tile_bright) << 16);
 
-		const uint8_t v3 = v_B14[0x54 * ((tile_value >> 4) & 0xF) + ((tile_value >> 8) & 0xF)];
-		const uint32_t rand_value = get_rand();
+		// get_rand() returns the constant 41 (RNG never actually randomized — res = 1 each call).
+		// With uint8_t v3 in [0, 255] and rand_value = 41, `v3 * 41 / 0x8000` is always 0,
+		// so the original loop's outer while ran exactly one inner-for scan. Inlined below.
 		uint32_t v5 = v_B00[0x54 * ((tile_value >> 4) & 0xF)];
-		uint32_t v6 = v3 * rand_value / 0x8000;
 		const uint32_t v7 = (tile_value >> 8) & 0xF;
-		while (true)
-		{
-			for (; v_420[v5] != v7; ++v5);
-
-			if (!v6)
-				break;
-
-			--v6;
+		while (v_420[v5] != v7)
 			++v5;
-		}
 
 		tile_value = (v5 << 21) ^ (tile_value ^ (v5 << 21)) & 0x1FFFFF;
 

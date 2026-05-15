@@ -27,8 +27,6 @@ class RhombsParser
 	static const std::vector<uint8_t> g_desert_420;
 #pragma endregion consts
 
-	static uint32_t get_rand();
-
 	static void parse_scheme(const std::string_view& map_rhombs, std::ofstream& outputFile, const std::vector<uint16_t>& scheme_tiles, const std::vector<uint8_t>& v_B14, const std::vector<uint8_t>& v_B00, const std::vector<uint8_t>& v_420);
 
 public:
