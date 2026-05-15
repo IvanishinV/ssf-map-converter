@@ -2,11 +2,13 @@
 #include "Displayinfo.h"
 #include "Lang.h"
 #include "Parser.h"
+#include "io/wire_reader.h"
 #include "util.h"
 
 #include <algorithm>
 #include <fstream>
 #include <print>
+#include <span>
 #include <string>
 #include <vector>
 #include "parse/parse_smm.h"
@@ -45,7 +47,8 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 		return;
 	}
 
-	const std::string rawData = (*(uint16_t*)zipData.data() == 0x8b1f) ?
+	WireReader r_zip{std::as_bytes(std::span{zipData})};
+	const std::string rawData = (r_zip.peek_at<uint16_t>(0) == 0x8b1f) ?
 		gzip::decompress(zipData.data(), zipData.size()) :
 		std::string(zipData.cbegin(), zipData.cend());
 
@@ -55,7 +58,7 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	m_stemFileName = filepath_ex.string();
 	const std::filesystem::path fileFolder = filepath.parent_path();
 
-	m_mapType = *(uint32_t*)rawData.data();
+	m_mapType = WireReader{std::as_bytes(std::span{rawData})}.peek_at<uint32_t>(0);
 	switch (m_mapType)
 	{
 	case HEADER_SINGLE:
