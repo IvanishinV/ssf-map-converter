@@ -1,8 +1,10 @@
 #include "mis_phrases.h"
 #include "../Helper.h"
+#include "../io/wire_reader.h"
 
 #include <fstream>
 #include <print>
+#include <span>
 #include <vector>
 
 namespace convert {
@@ -18,33 +20,34 @@ void mis_phrases(const std::filesystem::path& mis_folder,
 		return;
 	}
 
+	WireReader r{std::as_bytes(std::span{data})};
 	std::vector<uint8_t> phrases(32000, 0);
 	size_t phrasesOffset = 0;
 	uint32_t accumulator = 0;
 	uint32_t sizeline;
 	while (accumulator < size_mis_phrases && phrasesOffset < 32000)
 	{
-		sizeline = readFileInt8(data, 1 + accumulator);
+		sizeline = r.peek_at<int8_t>(1 + accumulator);
 		position(data, phrases, 2 + accumulator, phrasesOffset, sizeline);
 		phrasesOffset += 64;
 		accumulator += sizeline;
 
-		sizeline = readFileInt8(data, 2 + accumulator);
+		sizeline = r.peek_at<int8_t>(2 + accumulator);
 		position(data, phrases, 3 + accumulator, phrasesOffset, sizeline);
 		phrasesOffset += 64;
 		accumulator += sizeline;
 
-		sizeline = readFileInt8(data, 3 + accumulator);
+		sizeline = r.peek_at<int8_t>(3 + accumulator);
 		position(data, phrases, 4 + accumulator, phrasesOffset, sizeline);
 		phrasesOffset += 64;
 		accumulator += sizeline;
 
-		sizeline = readFileInt8(data, 4 + accumulator);
+		sizeline = r.peek_at<int8_t>(4 + accumulator);
 		position(data, phrases, 5 + accumulator, phrasesOffset, sizeline);
 		phrasesOffset += 64;
 		accumulator += sizeline;
 
-		sizeline = readFileInt8(data, 5 + accumulator);
+		sizeline = r.peek_at<int8_t>(5 + accumulator);
 		position(data, phrases, 6 + accumulator, phrasesOffset, sizeline);
 		phrasesOffset += 64;
 		accumulator += sizeline;

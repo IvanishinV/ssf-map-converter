@@ -34,27 +34,6 @@ uint32_t position(const std::vector<uint8_t>& input, std::ostream& output, const
 }
 
 
-int8_t readFileInt8(const std::string_view& input, const uint32_t offset)
-{
-	return *reinterpret_cast<const int8_t*>(input.data() + offset);
-}
-
-int8_t readFileInt8(const std::vector<uint8_t>& input, const uint32_t offset)
-{
-	return *reinterpret_cast<const int8_t*>(input.data() + offset);
-}
-
-uint32_t readFileUint32(const std::vector<uint8_t>& input, const uint32_t offset)
-{
-	return *reinterpret_cast<const uint32_t*>(input.data() + offset);
-}
-
-uint32_t readFileUint32(const std::string_view& input, const uint32_t offset)
-{
-	return *reinterpret_cast<const uint32_t*>(input.data() + offset);
-}
-
-
 uint32_t minimapsize(const uint32_t mapSizeU, const uint32_t mapSizeV)
 {
 	// 0x100 0x100	32768

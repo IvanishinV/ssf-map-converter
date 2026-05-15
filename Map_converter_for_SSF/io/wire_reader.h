@@ -26,11 +26,14 @@ public:
 	}
 
 	template <typename T>
-	[[nodiscard]] const T* peek_at(std::size_t offset) const
+	[[nodiscard]] T peek_at(std::size_t offset) const
 	{
+		static_assert(std::is_trivially_copyable_v<T>);
 		if (offset + sizeof(T) > m_buf.size())
 			throw std::out_of_range("WireReader::peek_at");
-		return reinterpret_cast<const T*>(m_buf.data() + offset);
+		T value;
+		std::memcpy(&value, m_buf.data() + offset, sizeof(T));
+		return value;
 	}
 
 	[[nodiscard]] std::span<const std::byte> read_span(std::size_t n)
