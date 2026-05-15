@@ -29,8 +29,16 @@ You can specify the **relative or full path** to the file or folder when running
 #### Command Line Example
 
 ```bash
-MapConverterSSF.exe <file|campaign folder>
+map_converter <file|campaign folder>           # convert (default)
+map_converter -c <file|campaign folder>        # convert (explicit)
+map_converter -p <file|campaign folder>        # parse — split the packed binary
+                                               #   into per-section files for
+                                               #   inspection / reverse engineering
 ```
+
+`-c` (convert) produces the editor's working format (`map.<name>/...`) — the normal end-user mode.
+
+`-p` (parse) produces `parser_map.<input-path-string>/...` containing each raw on-disk section as its own file. Useful for debugging or reverse-engineering the wire format; not needed for ordinary use.
 
 ### Output Format
 
@@ -53,20 +61,28 @@ This project uses the following third-party libraries:
 
 ## Compilation
 
-To build the project from source:
+Cross-platform via CMake. Builds on Windows, macOS, and Linux.
 
 ### Requirements
 
-- Windows 10 or 11
-- Visual Studio 2022 or later
-- Visual C++ build tools
+- C++23 compiler: Apple Clang 18+, MSVC 19.40+, or GCC 14+
+- CMake 3.21+
+- zlib (system-provided on Linux/macOS; bundled `libs/zlib/` on Windows)
 
-### Steps
+### Build
 
-1. Clone or download this repository.
-2. Open the solution file: `MapConverterSSF.sln` in **Visual Studio 2022**.
-3. Set the build configuration to either `Release` or `Debug`.
-4. Build the solution.
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+```
+
+- **macOS:** install zlib via `brew install zlib`, then pass `-DZLIB_ROOT=/opt/homebrew/opt/zlib` to `cmake -S . -B build`.
+- **Linux:** system zlib is used automatically; no extra flag needed.
+- **Windows:** the bundled `libs/zlib/` is linked statically; no system zlib required.
+
+The output binary is `build/map_converter` (or `build/Release/map_converter.exe` on multi-config Windows generators).
+
+Release builds enable LTO (`CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE=ON`) for a smaller binary; no flag needed.
 
 ## License
 
