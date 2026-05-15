@@ -42,7 +42,8 @@ void errorOpenFile(const std::string_view& path)
 	own::printlnError(Dictionary::getValue(STRINGS::ERROR_OPEN), path);
 }
 
-void errorWriteFile()
+void errorWriteFile(std::string_view what)
 {
-	own::printlnError(Dictionary::getValue(STRINGS::ERROR_WRITE));
+	std::println(stderr, "\033[31m[Error]\033[0m {} ({})",
+	             Dictionary::getValue(STRINGS::ERROR_WRITE), what);
 }

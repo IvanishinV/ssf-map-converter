@@ -1,12 +1,13 @@
 #include "mis_groups.h"
+#include "../Displayinfo.h"
 #include "../io/wire_reader.h"
+#include "../Displayinfo.h"
 #include "../util.h"
 
 #include <array>
 #include <cstdint>
 #include <format>
 #include <fstream>
-#include <print>
 #include <span>
 #include <string_view>
 
@@ -74,7 +75,7 @@ void mis_groups(const std::filesystem::path& mis_folder,
 	std::ofstream f(mis_folder / "groups", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write groups");
+		errorWriteFile("groups");
 		return;
 	}
 

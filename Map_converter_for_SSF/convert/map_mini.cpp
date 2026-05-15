@@ -1,10 +1,11 @@
 #include "map_mini.h"
+#include "../Displayinfo.h"
 #include "../Helper.h"
+#include "../Displayinfo.h"
 #include "../wire/bmp.h"
 #include "../wire/headers.h"
 
 #include <fstream>
-#include <print>
 
 namespace convert {
 
@@ -17,7 +18,7 @@ void map_mini(const std::filesystem::path& map_folder,
 	std::ofstream f(map_folder / "map_mini.bmp", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write map_mini.bmp");
+		errorWriteFile("map_mini.bmp");
 		return;
 	}
 

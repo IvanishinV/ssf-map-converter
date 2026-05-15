@@ -8,4 +8,4 @@ void errorExistsFile(const std::string_view& path);
 
 void errorOpenFile(const std::string_view& path);
 
-void errorWriteFile();
+void errorWriteFile(std::string_view what);

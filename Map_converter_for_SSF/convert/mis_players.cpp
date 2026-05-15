@@ -1,11 +1,12 @@
 #include "mis_players.h"
+#include "../Displayinfo.h"
 #include "../io/wire_reader.h"
+#include "../Displayinfo.h"
 #include "../util.h"
 #include "../wire/types.h"
 
 #include <format>
 #include <fstream>
-#include <print>
 #include <span>
 
 namespace convert {
@@ -16,7 +17,7 @@ void mis_players(const std::filesystem::path& mis_folder,
 	std::ofstream f(mis_folder / "players", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write players");
+		errorWriteFile("players");
 		return;
 	}
 

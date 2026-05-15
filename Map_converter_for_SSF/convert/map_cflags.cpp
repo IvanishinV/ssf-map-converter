@@ -1,8 +1,9 @@
 #include "map_cflags.h"
+#include "../Displayinfo.h"
 #include "../util.h"
+#include "../Displayinfo.h"
 
 #include <fstream>
-#include <print>
 #include <vector>
 
 namespace convert {
@@ -13,7 +14,7 @@ void map_cflags(const std::filesystem::path& map_folder,
 	std::ofstream f(map_folder / "cflags", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write cflags");
+		errorWriteFile("cflags");
 		return;
 	}
 

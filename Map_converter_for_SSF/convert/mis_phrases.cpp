@@ -1,9 +1,10 @@
 #include "mis_phrases.h"
+#include "../Displayinfo.h"
 #include "../io/wire_reader.h"
+#include "../Displayinfo.h"
 
 #include <algorithm>
 #include <fstream>
-#include <print>
 #include <span>
 #include <vector>
 
@@ -16,7 +17,7 @@ void mis_phrases(const std::filesystem::path& mis_folder,
 	std::ofstream f(mis_folder / "phrases", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write phrases");
+		errorWriteFile("phrases");
 		return;
 	}
 

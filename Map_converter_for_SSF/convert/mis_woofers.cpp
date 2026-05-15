@@ -1,10 +1,11 @@
 #include "mis_woofers.h"
+#include "../Displayinfo.h"
 #include "../io/wire_reader.h"
+#include "../Displayinfo.h"
 #include "../wire/types.h"
 
 #include <format>
 #include <fstream>
-#include <print>
 #include <span>
 
 namespace convert {
@@ -15,7 +16,7 @@ void mis_woofers(const std::filesystem::path& mis_folder,
 	std::ofstream f(mis_folder / "sounds", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write sounds");
+		errorWriteFile("sounds");
 		return;
 	}
 

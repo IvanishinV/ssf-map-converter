@@ -1,8 +1,9 @@
 #include "map_desc.h"
+#include "../Displayinfo.h"
 #include "../wire/headers.h"
+#include "../Displayinfo.h"
 
 #include <fstream>
-#include <print>
 
 namespace convert {
 
@@ -13,7 +14,7 @@ void map_desc(const std::filesystem::path& map_folder,
 	std::ofstream f(map_folder / "desc", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write desc");
+		errorWriteFile("desc");
 		return;
 	}
 

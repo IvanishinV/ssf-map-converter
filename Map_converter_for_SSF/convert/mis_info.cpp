@@ -1,8 +1,9 @@
 #include "mis_info.h"
+#include "../Displayinfo.h"
 #include "../util.h"
+#include "../Displayinfo.h"
 
 #include <fstream>
-#include <print>
 
 namespace convert {
 
@@ -36,7 +37,7 @@ void mis_info(const std::filesystem::path& mis_folder,
 	std::ofstream f(mis_folder / "info", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write mis/info");
+		errorWriteFile("mis/info");
 		return;
 	}
 

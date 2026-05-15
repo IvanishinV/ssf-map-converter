@@ -251,7 +251,7 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile, const M
 		std::ofstream outputFileMisGroups(ctx.misFolder / "groups", std::ios::binary);
 		if (!outputFileMisGroups)
 		{
-			errorWriteFile();
+			errorWriteFile("groups");
 		}
 		else
 		{

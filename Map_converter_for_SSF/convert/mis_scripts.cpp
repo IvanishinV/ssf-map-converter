@@ -1,5 +1,7 @@
 #include "mis_scripts.h"
+#include "../Displayinfo.h"
 #include "../Helper.h"
+#include "../Displayinfo.h"
 #include "../wire/scripts.h"
 
 #include <array>
@@ -162,7 +164,7 @@ void mis_scripts(const std::filesystem::path& mis_folder,
 	std::ofstream f(mis_folder / "scripts2", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write scripts2");
+		errorWriteFile("scripts2");
 		return;
 	}
 

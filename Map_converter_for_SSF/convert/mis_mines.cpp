@@ -1,9 +1,10 @@
 #include "mis_mines.h"
+#include "../Displayinfo.h"
 #include "../util.h"
+#include "../Displayinfo.h"
 
 #include <algorithm>
 #include <fstream>
-#include <print>
 #include <vector>
 
 namespace convert {
@@ -15,7 +16,7 @@ void mis_mines(const std::filesystem::path& mis_folder,
 	std::ofstream f(mis_folder / "mines", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write mines");
+		errorWriteFile("mines");
 		return;
 	}
 

@@ -1,10 +1,11 @@
 #include "mis_units.h"
+#include "../Displayinfo.h"
 #include "../io/wire_reader.h"
+#include "../Displayinfo.h"
 #include "../wire/types.h"
 
 #include <format>
 #include <fstream>
-#include <print>
 #include <span>
 #include <vector>
 
@@ -19,7 +20,7 @@ void mis_units(const std::filesystem::path& mis_folder,
 	std::ofstream outputFileSupport(mis_folder / "support", std::ios::binary);
 	if (!outputFileMapUnits || !outputFileSupport)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write mapunits/support");
+		errorWriteFile("mapunits/support");
 		return;
 	}
 

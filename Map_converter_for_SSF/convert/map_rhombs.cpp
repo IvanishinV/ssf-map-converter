@@ -11,7 +11,7 @@ void map_rhombs(const std::filesystem::path& map_folder, std::string_view data, 
 	std::ofstream f(map_folder / "rhombs", std::ios::binary);
 	if (!f)
 	{
-		errorWriteFile();
+		errorWriteFile("rhombs");
 		return;
 	}
 	RhombsParser::parse_rhombs(data, f, static_cast<RhombsParser::SchemeType>(map_identifier));

@@ -1,8 +1,9 @@
 #include "map_info.h"
+#include "../Displayinfo.h"
 #include "../util.h"
+#include "../Displayinfo.h"
 
 #include <fstream>
-#include <print>
 
 namespace convert {
 
@@ -41,7 +42,7 @@ void map_info(const std::filesystem::path& map_folder,
 	std::ofstream f(map_folder / "info", std::ios::binary);
 	if (!f)
 	{
-		std::println(stderr, "\033[31m[Error]\033[0m cannot write info");
+		errorWriteFile("info");
 		return;
 	}
 
