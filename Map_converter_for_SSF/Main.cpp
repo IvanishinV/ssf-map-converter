@@ -5,7 +5,6 @@
 #include "Parser.h"
 #include "Displayinfo.h"
 #include "util.h"
-#include "Version.h"
 
 template <typename Fn>
 static size_t processPath(const std::filesystem::path& path, Fn&& process)

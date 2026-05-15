@@ -18,6 +18,10 @@ target_include_directories(map_converter PRIVATE
   ${CMAKE_SOURCE_DIR}/libs/gzip-hpp-master/include
 )
 
+target_compile_definitions(map_converter PRIVATE
+  MAP_CONVERTER_VERSION="${PROJECT_VERSION}"
+)
+
 if(WIN32)
   target_include_directories(map_converter PRIVATE ${CMAKE_SOURCE_DIR}/libs/zlib/include)
   target_link_directories(map_converter PRIVATE ${CMAKE_SOURCE_DIR}/libs/zlib/lib)
