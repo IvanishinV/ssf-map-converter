@@ -1,7 +1,8 @@
 
-#include "stdafx.h"
 #include "RhombsParser.h"
 
+#include <cstdint>
+#include <cstring>
 #include <map>
 #include <print>
 #include <string_view>
@@ -965,7 +966,7 @@ uint32_t RhombsParser::get_rand()
 	uint32_t res = 1;
 	res = 0x343FD * res + 0x269EC3;
 
-	return HIWORD(res) & 0x7FFF;
+	return (res >> 16) & 0x7FFF;
 }
 
 void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstream& outputFile, const std::vector<uint16_t>& scheme_tiles, const std::vector<uint8_t>& v_B14, const std::vector<uint8_t>& v_B00, const std::vector<uint8_t>& v_420)
@@ -986,7 +987,7 @@ void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstrea
 		const uint8_t num1 = map_rhombs[offset];
 		const uint8_t num2 = map_rhombs[offset + 1];
 
-		size_t tiles_offset = MAKEWORD(num1, num2) & 0x1FF;
+		size_t tiles_offset = (static_cast<uint16_t>(num1) | (static_cast<uint16_t>(num2) << 8)) & 0x1FF;
 		if (tiles_offset >= scheme_tiles.size())
 			tiles_offset = 0;
 		const uint16_t first_two_bytes = scheme_tiles[tiles_offset];
@@ -1004,7 +1005,7 @@ void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstrea
 		//v[vOffset + 1] = Tile_type;
 		//v[vOffset + 2] = Tile_bright;
 
-		uint32_t tile_value = MAKELONG(first_two_bytes, Tile_bright);
+		uint32_t tile_value = static_cast<uint32_t>(first_two_bytes) | (static_cast<uint32_t>(Tile_bright) << 16);
 
 		const uint8_t v3 = v_B14[0x54 * ((tile_value >> 4) & 0xF) + ((tile_value >> 8) & 0xF)];
 		const uint32_t rand_value = get_rand();
@@ -1024,7 +1025,7 @@ void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstrea
 
 		tile_value = (v5 << 21) ^ (tile_value ^ (v5 << 21)) & 0x1FFFFF;
 
-		*(uint32_t*)(v.data() + vOffset) = tile_value;
+		std::memcpy(v.data() + vOffset, &tile_value, sizeof(tile_value));
 	}
 
 	outputFile.write((char*)v.data(), v.size());
