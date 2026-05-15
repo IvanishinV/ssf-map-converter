@@ -76,66 +76,67 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 	std::wstring wfilepath = filepath.filename().wstring();
 	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) { return !((c >= 0 && c < 128) || (c >= 0x400 && c < 0x500)); }), wfilepath.cend());
 	const std::filesystem::path filepath_ex{ wfilepath };
-	m_stemFileName = filepath_ex.string();
 
 	const std::filesystem::path fileFolder = filepath.parent_path();
 
-	m_mapType = WireReader{std::as_bytes(std::span{rawData})}.peek_at<uint32_t>(0);
-	switch (m_mapType)
+	MapCtx ctx;
+	ctx.stemFileName = filepath_ex.string();
+	ctx.mapType = WireReader{std::as_bytes(std::span{rawData})}.peek_at<uint32_t>(0);
+	switch (ctx.mapType)
 	{
 	case HEADER_SINGLE:
 	case HEADER_MULTI:
 	{
-		m_mapFolder = fileFolder / ("map." + m_stemFileName);
-		m_misFolder = m_mapFolder / "mis.000";
+		ctx.mapFolder = fileFolder / ("map." + ctx.stemFileName);
+		ctx.misFolder = ctx.mapFolder / "mis.000";
 		break;
 	}
 	case HEADER_CAMP_MAP:
 	{
-		if (m_stemFileName.length() >= 3)
-			m_mapFolder = fileFolder / ("map." + m_stemFileName.substr(0, 3));
+		if (ctx.stemFileName.length() >= 3)
+			ctx.mapFolder = fileFolder / ("map." + ctx.stemFileName.substr(0, 3));
 		break;
 	}
 	case HEADER_CAMP_MIS:
 	{
-		if (m_stemFileName.length() >= 3)
-			m_mapFolder = fileFolder / ("map." + m_stemFileName.substr(0, 3));
-		if (m_stemFileName.length() >= 3)
-			m_misFolder = m_mapFolder / ("mis." + m_stemFileName.substr(3, 3));
-
+		if (ctx.stemFileName.length() >= 3)
+		{
+			ctx.mapFolder = fileFolder / ("map." + ctx.stemFileName.substr(0, 3));
+			ctx.misFolder = ctx.mapFolder / ("mis." + ctx.stemFileName.substr(3, 3));
+		}
 		break;
 	}
 	}
 
 	try
 	{
-		switch (m_mapType)
+		switch (ctx.mapType)
 		{
 		case HEADER_SINGLE:
 		{
-			own::print(Dictionary::getValue(STRINGS::MAP_SINGLE), m_stemFileName);
-			convertMapFileSSM(rawData);
+			own::print(Dictionary::getValue(STRINGS::MAP_SINGLE), ctx.stemFileName);
+			convertMapFileSSM(rawData, ctx);
 
 			break;
 		}
 		case HEADER_MULTI:
 		{
-			own::print(Dictionary::getValue(STRINGS::MAP_MULTI), m_stemFileName);
-			convertMapFileSMM(rawData);
+			own::print(Dictionary::getValue(STRINGS::MAP_MULTI), ctx.stemFileName);
+			convertMapFileSMM(rawData, ctx);
 
 			break;
 		}
 		case HEADER_CAMP_MAP:
 		{
-			own::print(Dictionary::getValue(STRINGS::CAMP_MAP), m_stemFileName);
-			convertMapFileSSC_map(rawData);
+			own::print(Dictionary::getValue(STRINGS::CAMP_MAP), ctx.stemFileName);
+			convertMapFileSSC_map(rawData, ctx);
 
 			break;
 		}
 		case HEADER_CAMP_MIS:
 		{
-			own::print(Dictionary::getValue(STRINGS::CAMP_MIS), m_stemFileName);
-			convertMapFileSCC_mission(rawData);
+			own::print(Dictionary::getValue(STRINGS::CAMP_MIS), ctx.stemFileName);
+			convertMapFileSCC_mission(rawData, ctx);
 
 			break;
 		}
@@ -147,7 +148,7 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 		}
 		}
 
-		own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filepath_ex.string(), m_mapFolder.string());
+		own::printlnSuccess(Dictionary::getValue(STRINGS::SUCCESS_CONVERTED), filepath_ex.string(), ctx.mapFolder.string());
 	}
 	catch (const std::out_of_range&)
 	{
@@ -163,7 +164,7 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 	}
 }
 
-uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
+uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile, const MapCtx& ctx)
 {
 	WireReader r{std::as_bytes(std::span{inputFile})};
 	//MAP
@@ -186,12 +187,12 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	std::string_view mis_phrases;
 	std::string_view mis_mapunits;
 
-	m_mapIdentifier = r.peek_at<uint32_t>(136);
-	m_mapSizeU = r.peek_at<uint32_t>(140);
-	m_mapSizeV = r.peek_at<uint32_t>(144);
+	const uint32_t mapIdentifier = r.peek_at<uint32_t>(136);
+	const uint32_t mapSizeU = r.peek_at<uint32_t>(140);
+	const uint32_t mapSizeV = r.peek_at<uint32_t>(144);
 
-	const uint32_t rhombsSize = tileArray(m_mapSizeU, m_mapSizeV, 2);
-	const uint32_t flagSize = tileArray(m_mapSizeU, m_mapSizeV, 4);
+	const uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
+	const uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
 
 	const uint32_t offsetMisObjects  = position(inputFile, map_info,      FILE_TYPE_OFFSET,          MapHeaderSMM);
 	const uint32_t offsetMisScripts  = position(inputFile, mis_objects,   offsetMisObjects,           MISOBJECTS);
@@ -200,7 +201,7 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	const uint32_t offsetMisDesc     = position(inputFile, mis_scripts,   offsetMisScripts,           accumulator + 4);
 	const uint32_t BriefingSize      = r.peek_at<uint32_t>(offsetMisDesc);
 	const uint32_t offsetMapMini     = position(inputFile, mis_desc,      offsetMisDesc + 4,          BriefingSize);
-	const uint32_t MapMiniSize       = minimapsize(m_mapSizeU, m_mapSizeV);
+	const uint32_t MapMiniSize       = minimapsize(mapSizeU, mapSizeV);
 	const uint32_t offsetRhombs      = position(inputFile, map_mini,      offsetMapMini,              MapMiniSize);
 	const uint32_t offsetFlags       = position(inputFile, map_rhombs,    offsetRhombs,               rhombsSize);
 	const uint32_t offsetLandnames   = position(inputFile, map_flags,     offsetFlags,                flagSize);
@@ -211,8 +212,8 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	const uint32_t offsetMisWoofers  = position(inputFile, mis_unitnames, offsetMisUnitNames + 4,     sizeMisUnitNames * 16);
 	const uint32_t sizeMisWoofers    = r.peek_at<uint32_t>(offsetMisWoofers);
 	const uint32_t offsetMisZones    = position(inputFile, mis_woofers,   offsetMisWoofers,           sizeMisWoofers * MISMUSICSIZE + 4);
-	const uint32_t offsetMapMines    = position(inputFile, mis_zones,     offsetMisZones,             m_mapSizeU * m_mapSizeV);
-	const uint32_t offsetMisSupport  = position(inputFile, map_mines,     offsetMapMines,             m_mapSizeU * m_mapSizeV);
+	const uint32_t offsetMapMines    = position(inputFile, mis_zones,     offsetMisZones,             mapSizeU * mapSizeV);
+	const uint32_t offsetMisSupport  = position(inputFile, map_mines,     offsetMapMines,             mapSizeU * mapSizeV);
 	const uint32_t sizeMisSupport    = r.peek_at<uint32_t>(offsetMisSupport);
 	const uint32_t offsetMisPlayers  = position(inputFile, mis_support,   offsetMisSupport,           sizeMisSupport + 4);
 	const uint32_t sizeMisPlayers    = r.peek_at<uint32_t>(offsetMisPlayers);
@@ -222,32 +223,32 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	const uint32_t sizeMisMapUnits   = r.peek_at<uint32_t>(offsetMisMapUnits);
 	const uint32_t mapEndPosition    = position(inputFile, mis_mapunits,  offsetMisMapUnits + 4,      sizeMisMapUnits);
 
-	std::filesystem::create_directories(m_misFolder);
+	std::filesystem::create_directories(ctx.misFolder);
 
 	//MAP
-	const auto resMapRhombs = std::async(std::launch::async, convert::map_rhombs, m_mapFolder, map_rhombs, m_mapIdentifier);
-	convert::map_desc(m_mapFolder, m_mapType, m_stemFileName);
-	convert::map_info(m_mapFolder, m_mapIdentifier, m_mapSizeU, m_mapSizeV);
-	convert::map_mini(m_mapFolder, m_mapType, m_mapSizeU, m_mapSizeV, map_mini);
-	convert::map_landname(m_mapFolder, map_landname);
-	convert::map_cflags(m_mapFolder, map_flags);
-	convert::map_objects(m_mapFolder, map_objects);
+	const auto resMapRhombs = std::async(std::launch::async, convert::map_rhombs, ctx.mapFolder, map_rhombs, mapIdentifier);
+	convert::map_desc(ctx.mapFolder, ctx.mapType, ctx.stemFileName);
+	convert::map_info(ctx.mapFolder, mapIdentifier, mapSizeU, mapSizeV);
+	convert::map_mini(ctx.mapFolder, ctx.mapType, mapSizeU, mapSizeV, map_mini);
+	convert::map_landname(ctx.mapFolder, map_landname);
+	convert::map_cflags(ctx.mapFolder, map_flags);
+	convert::map_objects(ctx.mapFolder, map_objects);
 	//MIS
-	convert::mis_objects(m_misFolder, mis_objects);
-	convert::mis_desc(m_misFolder);
-	convert::mis_mult(m_misFolder, map_info, 1);
-	convert::mis_info(m_misFolder, m_mapSizeU, m_mapSizeV);
-	convert::mis_scripts(m_misFolder, m_stemFileName, mis_scripts);
-	convert::mis_tree(m_misFolder, mis_desc);
-	convert::mis_woofers(m_misFolder, mis_woofers);
-	convert::mis_mines(m_misFolder, map_mines, m_mapSizeU);
-	convert::mis_zones(m_misFolder, mis_zones, m_mapSizeU);
-	convert::mis_players(m_misFolder, mis_players);
-	convert::mis_phrases(m_misFolder, mis_phrases, sizeMisPhrases);
-	convert::mis_units(m_misFolder, mis_unitnames, mis_mapunits, mis_support);
+	convert::mis_objects(ctx.misFolder, mis_objects);
+	convert::mis_desc(ctx.misFolder);
+	convert::mis_mult(ctx.misFolder, map_info, 1);
+	convert::mis_info(ctx.misFolder, mapSizeU, mapSizeV);
+	convert::mis_scripts(ctx.misFolder, ctx.stemFileName, mis_scripts);
+	convert::mis_tree(ctx.misFolder, mis_desc);
+	convert::mis_woofers(ctx.misFolder, mis_woofers);
+	convert::mis_mines(ctx.misFolder, map_mines, mapSizeU);
+	convert::mis_zones(ctx.misFolder, mis_zones, mapSizeU);
+	convert::mis_players(ctx.misFolder, mis_players);
+	convert::mis_phrases(ctx.misFolder, mis_phrases, sizeMisPhrases);
+	convert::mis_units(ctx.misFolder, mis_unitnames, mis_mapunits, mis_support);
 
 	{
-		std::ofstream outputFileMisGroups(m_misFolder / "groups", std::ios::binary);
+		std::ofstream outputFileMisGroups(ctx.misFolder / "groups", std::ios::binary);
 		if (!outputFileMisGroups)
 		{
 			errorWriteFile();
@@ -266,11 +267,11 @@ uint32_t Converter::convertMapFileSMM(const std::string_view& inputFile)
 	}
 
 	resMapRhombs.wait();
-	displayinfo(m_mapSizeU, m_mapSizeV, m_mapIdentifier, mapEndPosition);
+	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 
-uint32_t Converter::convertMapFileSSM(const std::string_view& inputFile)
+uint32_t Converter::convertMapFileSSM(const std::string_view& inputFile, const MapCtx& ctx)
 {
 	WireReader r{std::as_bytes(std::span{inputFile})};
 	//MAP
@@ -294,17 +295,17 @@ uint32_t Converter::convertMapFileSSM(const std::string_view& inputFile)
 	std::string_view mis_phrases;
 	std::string_view mis_objects;
 
-	m_mapIdentifier = r.peek_at<uint32_t>(40);
-	m_mapSizeU = r.peek_at<uint32_t>(44);
-	m_mapSizeV = r.peek_at<uint32_t>(48);
+	const uint32_t mapIdentifier = r.peek_at<uint32_t>(40);
+	const uint32_t mapSizeU = r.peek_at<uint32_t>(44);
+	const uint32_t mapSizeV = r.peek_at<uint32_t>(48);
 	uint32_t maskByte = r.peek_at<uint32_t>(MapHeaderSSM);
 
-	uint32_t rhombsSize = tileArray(m_mapSizeU, m_mapSizeV, 2);
-	uint32_t flagSize = tileArray(m_mapSizeU, m_mapSizeV, 4);
+	uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
+	uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
 
 	uint32_t startPositionMisDesc      = position(inputFile, map_info,      FILE_TYPE_OFFSET,              MapHeaderSSM);
 	uint32_t startPositionMapMini      = position(inputFile, mis_desc,      startPositionMisDesc + 4,      maskByte);
-	uint32_t MapMiniSize               = minimapsize(m_mapSizeU, m_mapSizeV);
+	uint32_t MapMiniSize               = minimapsize(mapSizeU, mapSizeV);
 	uint32_t startPositionRhombs       = position(inputFile, map_mini,      startPositionMapMini,          MapMiniSize);
 	uint32_t startPositionFlags        = position(inputFile, map_rhombs,    startPositionRhombs,           rhombsSize);
 	uint32_t startPositionLandname     = position(inputFile, map_flags,     startPositionFlags,            flagSize);
@@ -320,48 +321,48 @@ uint32_t Converter::convertMapFileSSM(const std::string_view& inputFile)
 	uint32_t startPositionMisWoofers   = position(inputFile, mis_players,   startPositionMisPlayers + 4,   MISPLAYERSSIZE * sizeMisPlayers);
 	uint32_t sizeMisWoofers            = r.peek_at<uint32_t>(startPositionMisWoofers);
 	uint32_t startPositionMisZones     = position(inputFile, mis_woofers,   startPositionMisWoofers,       sizeMisWoofers * MISMUSICSIZE + 4);
-	uint32_t startPositionMisScripts   = position(inputFile, mis_zones,     startPositionMisZones,         m_mapSizeU * m_mapSizeV);
+	uint32_t startPositionMisScripts   = position(inputFile, mis_zones,     startPositionMisZones,         mapSizeU * mapSizeV);
 	uint32_t sizeMisScripts            = r.peek_at<uint32_t>(startPositionMisScripts);
 	uint32_t accumulator               = misScripts(inputFile, sizeMisScripts, startPositionMisScripts);
 	uint32_t startPositionMapMines     = position(inputFile, mis_scripts,   startPositionMisScripts,       accumulator + 4);
-	uint32_t startPositionMisSupport   = position(inputFile, map_mines,     startPositionMapMines,         m_mapSizeU * m_mapSizeV);
+	uint32_t startPositionMisSupport   = position(inputFile, map_mines,     startPositionMapMines,         mapSizeU * mapSizeV);
 	uint32_t sizeMisSupport            = r.peek_at<uint32_t>(startPositionMisSupport);
 	uint32_t startPositionMisPhrases   = position(inputFile, mis_support,   startPositionMisSupport,       sizeMisSupport + 4);
 	uint32_t sizeMisPhrases            = r.peek_at<uint32_t>(startPositionMisPhrases);
 	uint32_t startPositionMisObjects   = position(inputFile, mis_phrases,   startPositionMisPhrases + 4,   sizeMisPhrases);
 	uint32_t mapEndPosition            = position(inputFile, mis_objects,   startPositionMisObjects,       MISOBJECTS);
 
-	std::filesystem::create_directories(m_misFolder);
+	std::filesystem::create_directories(ctx.misFolder);
 
 	//MAP
-	const auto resMapRhombs = std::async(std::launch::async, convert::map_rhombs, m_mapFolder, map_rhombs, m_mapIdentifier);
-	convert::map_desc(m_mapFolder, m_mapType, m_stemFileName);
-	convert::map_info(m_mapFolder, m_mapIdentifier, m_mapSizeU, m_mapSizeV);
-	convert::map_mini(m_mapFolder, m_mapType, m_mapSizeU, m_mapSizeV, map_mini);
-	convert::map_objects(m_mapFolder, map_objects);
-	convert::map_landname(m_mapFolder, map_landname);
-	convert::map_cflags(m_mapFolder, map_flags);
+	const auto resMapRhombs = std::async(std::launch::async, convert::map_rhombs, ctx.mapFolder, map_rhombs, mapIdentifier);
+	convert::map_desc(ctx.mapFolder, ctx.mapType, ctx.stemFileName);
+	convert::map_info(ctx.mapFolder, mapIdentifier, mapSizeU, mapSizeV);
+	convert::map_mini(ctx.mapFolder, ctx.mapType, mapSizeU, mapSizeV, map_mini);
+	convert::map_objects(ctx.mapFolder, map_objects);
+	convert::map_landname(ctx.mapFolder, map_landname);
+	convert::map_cflags(ctx.mapFolder, map_flags);
 	//MIS
-	convert::mis_desc(m_misFolder);
-	convert::mis_mult(m_misFolder, map_info, 0);
-	convert::mis_info(m_misFolder, m_mapSizeU, m_mapSizeV);
-	convert::mis_tree(m_misFolder, mis_desc);
-	convert::mis_zones(m_misFolder, mis_zones, m_mapSizeU);
-	convert::mis_mines(m_misFolder, map_mines, m_mapSizeU);
-	convert::mis_units(m_misFolder, mis_unitnames, mis_mapunits, mis_support);
-	convert::mis_scripts(m_misFolder, m_stemFileName, mis_scripts);
-	convert::mis_woofers(m_misFolder, mis_woofers);
-	convert::mis_phrases(m_misFolder, mis_phrases, sizeMisPhrases);
-	convert::mis_objects(m_misFolder, mis_objects);
-	convert::mis_groups(m_misFolder, mis_groups);
-	convert::mis_players(m_misFolder, mis_players);
+	convert::mis_desc(ctx.misFolder);
+	convert::mis_mult(ctx.misFolder, map_info, 0);
+	convert::mis_info(ctx.misFolder, mapSizeU, mapSizeV);
+	convert::mis_tree(ctx.misFolder, mis_desc);
+	convert::mis_zones(ctx.misFolder, mis_zones, mapSizeU);
+	convert::mis_mines(ctx.misFolder, map_mines, mapSizeU);
+	convert::mis_units(ctx.misFolder, mis_unitnames, mis_mapunits, mis_support);
+	convert::mis_scripts(ctx.misFolder, ctx.stemFileName, mis_scripts);
+	convert::mis_woofers(ctx.misFolder, mis_woofers);
+	convert::mis_phrases(ctx.misFolder, mis_phrases, sizeMisPhrases);
+	convert::mis_objects(ctx.misFolder, mis_objects);
+	convert::mis_groups(ctx.misFolder, mis_groups);
+	convert::mis_players(ctx.misFolder, mis_players);
 
 	resMapRhombs.wait();
-	displayinfo(m_mapSizeU, m_mapSizeV, m_mapIdentifier, mapEndPosition);
+	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 
-uint32_t Converter::convertMapFileSSC_map(const std::string_view& inputFile)
+uint32_t Converter::convertMapFileSSC_map(const std::string_view& inputFile, const MapCtx& ctx)
 {
 	WireReader r{std::as_bytes(std::span{inputFile})};
 	std::string_view map_info;
@@ -372,12 +373,12 @@ uint32_t Converter::convertMapFileSSC_map(const std::string_view& inputFile)
 	std::string_view map_flags;
 	std::string_view map_objects;
 
-	m_mapIdentifier = r.peek_at<uint32_t>(8);
-	m_mapSizeU = r.peek_at<uint32_t>(12);
-	m_mapSizeV = r.peek_at<uint32_t>(16);
+	const uint32_t mapIdentifier = r.peek_at<uint32_t>(8);
+	const uint32_t mapSizeU = r.peek_at<uint32_t>(12);
+	const uint32_t mapSizeV = r.peek_at<uint32_t>(16);
 
-	uint32_t rhombsSize = tileArray(m_mapSizeU, m_mapSizeV, 2);
-	uint32_t flagSize = tileArray(m_mapSizeU, m_mapSizeV, 4);
+	uint32_t rhombsSize = tileArray(mapSizeU, mapSizeV, 2);
+	uint32_t flagSize = tileArray(mapSizeU, mapSizeV, 4);
 
 	uint32_t startPositionLandname = position(inputFile, map_info,     FILE_TYPE_OFFSET,      MapHeaderSSC_map);
 	uint32_t startPositionRhombs   = position(inputFile, map_landname, startPositionLandname, LANDNAMESSIZE);
@@ -388,22 +389,22 @@ uint32_t Converter::convertMapFileSSC_map(const std::string_view& inputFile)
 	uint32_t mapSizeObjects        = r.peek_at<uint32_t>(startPositionObjects);
 	uint32_t mapEndPosition        = position(inputFile, map_objects,  startPositionObjects + 4, mapSizeObjects * 8);
 
-	std::filesystem::create_directories(m_mapFolder);
+	std::filesystem::create_directories(ctx.mapFolder);
 
-	const auto resMapRhombs = std::async(std::launch::async, convert::map_rhombs, m_mapFolder, map_rhombs, m_mapIdentifier);
-	convert::map_info(m_mapFolder, m_mapIdentifier, m_mapSizeU, m_mapSizeV);
-	convert::map_mini(m_mapFolder, m_mapType, m_mapSizeU, m_mapSizeV, map_mini);
-	convert::map_landname(m_mapFolder, map_landname);
-	convert::map_cflags(m_mapFolder, map_flags);
-	convert::map_objects(m_mapFolder, map_objects);
-	convert::map_desc(m_mapFolder, m_mapType, m_stemFileName);
+	const auto resMapRhombs = std::async(std::launch::async, convert::map_rhombs, ctx.mapFolder, map_rhombs, mapIdentifier);
+	convert::map_info(ctx.mapFolder, mapIdentifier, mapSizeU, mapSizeV);
+	convert::map_mini(ctx.mapFolder, ctx.mapType, mapSizeU, mapSizeV, map_mini);
+	convert::map_landname(ctx.mapFolder, map_landname);
+	convert::map_cflags(ctx.mapFolder, map_flags);
+	convert::map_objects(ctx.mapFolder, map_objects);
+	convert::map_desc(ctx.mapFolder, ctx.mapType, ctx.stemFileName);
 
 	resMapRhombs.wait();
-	displayinfo(m_mapSizeU, m_mapSizeV, m_mapIdentifier, mapEndPosition);
+	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }
 
-uint32_t Converter::convertMapFileSCC_mission(const std::string_view& inputFile)
+uint32_t Converter::convertMapFileSCC_mission(const std::string_view& inputFile, const MapCtx& ctx)
 {
 	WireReader r{std::as_bytes(std::span{inputFile})};
 	std::string_view mis_info;
@@ -420,9 +421,9 @@ uint32_t Converter::convertMapFileSCC_mission(const std::string_view& inputFile)
 	std::string_view mis_phrases;
 	std::string_view mis_objects;
 
-	m_mapIdentifier = 40;
-	m_mapSizeU = r.peek_at<uint32_t>(16);
-	m_mapSizeV = r.peek_at<uint32_t>(20);
+	const uint32_t mapIdentifier = 40;
+	const uint32_t mapSizeU = r.peek_at<uint32_t>(16);
+	const uint32_t mapSizeV = r.peek_at<uint32_t>(20);
 
 	uint32_t startPositionMisDesc      = position(inputFile, mis_info,      FILE_TYPE_OFFSET,              MapHeaderSSC_mission);
 	uint32_t sizeMisDesc               = r.peek_at<uint32_t>(MapHeaderSSC_mission);
@@ -436,32 +437,32 @@ uint32_t Converter::convertMapFileSCC_mission(const std::string_view& inputFile)
 	uint32_t startPositionMisWoofers   = position(inputFile, mis_players,   startPositionMisPlayers + 4,   MISPLAYERSSIZE * sizeMisPlayers);
 	uint32_t sizeMisWoofers            = r.peek_at<uint32_t>(startPositionMisWoofers);
 	uint32_t startPositionMisZones     = position(inputFile, mis_woofers,   startPositionMisWoofers,       sizeMisWoofers * MISMUSICSIZE + 4);
-	uint32_t startPositionMisScripts   = position(inputFile, mis_zones,     startPositionMisZones,         m_mapSizeU * m_mapSizeV);
+	uint32_t startPositionMisScripts   = position(inputFile, mis_zones,     startPositionMisZones,         mapSizeU * mapSizeV);
 	uint32_t sizeMisScripts            = r.peek_at<uint32_t>(startPositionMisScripts);
 	uint32_t accumulator               = misScripts(inputFile, sizeMisScripts, startPositionMisScripts);
 	uint32_t startPositionMapMines     = position(inputFile, mis_scripts,   startPositionMisScripts,       accumulator + 4);
-	uint32_t startPositionMisSupport   = position(inputFile, map_mines,     startPositionMapMines,         m_mapSizeU * m_mapSizeV);
+	uint32_t startPositionMisSupport   = position(inputFile, map_mines,     startPositionMapMines,         mapSizeU * mapSizeV);
 	uint32_t sizeMisSupport            = r.peek_at<uint32_t>(startPositionMisSupport);
 	uint32_t startPositionMisPhrases   = position(inputFile, mis_support,   startPositionMisSupport,       sizeMisSupport + 4);
 	uint32_t sizeMisPhrases            = r.peek_at<uint32_t>(startPositionMisPhrases);
 	uint32_t startPositionMisObjects   = position(inputFile, mis_phrases,   startPositionMisPhrases + 4,   sizeMisPhrases);
 	uint32_t mapEndPosition            = position(inputFile, mis_objects,   startPositionMisObjects,       MISOBJECTS);
 
-	std::filesystem::create_directories(m_misFolder);
-	convert::mis_desc(m_misFolder);
-	convert::mis_mult(m_misFolder, mis_info, 2);
-	convert::mis_info(m_misFolder, m_mapSizeU, m_mapSizeV);
-	convert::mis_zones(m_misFolder, mis_zones, m_mapSizeU);
-	convert::mis_units(m_misFolder, mis_unitnames, mis_mapunits, mis_support);
-	convert::mis_groups(m_misFolder, mis_groups);
-	convert::mis_scripts(m_misFolder, m_stemFileName, mis_scripts);
-	convert::mis_woofers(m_misFolder, mis_woofers);
-	convert::mis_mines(m_misFolder, map_mines, m_mapSizeU);
-	convert::mis_tree(m_misFolder, mis_desc);
-	convert::mis_phrases(m_misFolder, mis_phrases, sizeMisPhrases);
-	convert::mis_objects(m_misFolder, mis_objects);
-	convert::mis_players(m_misFolder, mis_players);
+	std::filesystem::create_directories(ctx.misFolder);
+	convert::mis_desc(ctx.misFolder);
+	convert::mis_mult(ctx.misFolder, mis_info, 2);
+	convert::mis_info(ctx.misFolder, mapSizeU, mapSizeV);
+	convert::mis_zones(ctx.misFolder, mis_zones, mapSizeU);
+	convert::mis_units(ctx.misFolder, mis_unitnames, mis_mapunits, mis_support);
+	convert::mis_groups(ctx.misFolder, mis_groups);
+	convert::mis_scripts(ctx.misFolder, ctx.stemFileName, mis_scripts);
+	convert::mis_woofers(ctx.misFolder, mis_woofers);
+	convert::mis_mines(ctx.misFolder, map_mines, mapSizeU);
+	convert::mis_tree(ctx.misFolder, mis_desc);
+	convert::mis_phrases(ctx.misFolder, mis_phrases, sizeMisPhrases);
+	convert::mis_objects(ctx.misFolder, mis_objects);
+	convert::mis_players(ctx.misFolder, mis_players);
 
-	displayinfo(m_mapSizeU, m_mapSizeV, m_mapIdentifier, mapEndPosition);
+	displayinfo(mapSizeU, mapSizeV, mapIdentifier, mapEndPosition);
 	return 0;
 }

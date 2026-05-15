@@ -55,61 +55,50 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 	std::wstring wfilepath = filepath.wstring();
 	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) { return !((c >= 0 && c < 128) || (c >= 0x400 && c < 0x500)); }), wfilepath.cend());
 	const std::filesystem::path filepath_ex{ wfilepath };
-	m_stemFileName = filepath_ex.string();
+	const std::string stemFileName = filepath_ex.string();
 	const std::filesystem::path fileFolder = filepath.parent_path();
 
-	m_mapType = WireReader{std::as_bytes(std::span{rawData})}.peek_at<uint32_t>(0);
-	switch (m_mapType)
+	const uint32_t mapType = WireReader{std::as_bytes(std::span{rawData})}.peek_at<uint32_t>(0);
+	std::filesystem::path mapFolder;
+	switch (mapType)
 	{
 	case HEADER_SINGLE:
 	case HEADER_MULTI:
-	{
-		m_mapFolder = fileFolder / ("parser_map." + m_stemFileName);
-		m_misFolder = m_mapFolder / "mis.000";
+		mapFolder = fileFolder / ("parser_map." + stemFileName);
 		break;
-	}
 	case HEADER_CAMP_MAP:
-	{
-		if (m_stemFileName.length() >= 3)
-			m_mapFolder = fileFolder / ("parser_map." + m_stemFileName.substr(0, 3));
-		break;
-	}
 	case HEADER_CAMP_MIS:
-	{
-		if (m_stemFileName.length() >= 3)
-			m_mapFolder = fileFolder / ("parser_map." + m_stemFileName.substr(0, 3));
-		if (m_stemFileName.length() >= 3)
-			m_misFolder = m_mapFolder / ("mis." + m_stemFileName.substr(3, 3));
+		if (stemFileName.length() >= 3)
+			mapFolder = fileFolder / ("parser_map." + stemFileName.substr(0, 3));
 		break;
-	}
 	}
 
 	try
 	{
-		switch (m_mapType)
+		switch (mapType)
 		{
 		case HEADER_SINGLE:
 		{
-			own::print(Dictionary::getValue(STRINGS::MAP_SINGLE), m_stemFileName);
-			parse::parse_ssm(m_mapFolder, rawData);
+			own::print(Dictionary::getValue(STRINGS::MAP_SINGLE), stemFileName);
+			parse::parse_ssm(mapFolder, rawData);
 			break;
 		}
 		case HEADER_MULTI:
 		{
-			own::print(Dictionary::getValue(STRINGS::MAP_MULTI), m_stemFileName);
-			parse::parse_smm(m_mapFolder, rawData);
+			own::print(Dictionary::getValue(STRINGS::MAP_MULTI), stemFileName);
+			parse::parse_smm(mapFolder, rawData);
 			break;
 		}
 		case HEADER_CAMP_MAP:
 		{
-			own::print(Dictionary::getValue(STRINGS::CAMP_MAP), m_stemFileName);
-			parse::parse_ssc_map(m_mapFolder, rawData);
+			own::print(Dictionary::getValue(STRINGS::CAMP_MAP), stemFileName);
+			parse::parse_ssc_map(mapFolder, rawData);
 			break;
 		}
 		case HEADER_CAMP_MIS:
 		{
-			own::print(Dictionary::getValue(STRINGS::CAMP_MIS), m_stemFileName);
-			parse::parse_scc_mission(m_mapFolder, rawData);
+			own::print(Dictionary::getValue(STRINGS::CAMP_MIS), stemFileName);
+			parse::parse_scc_mission(mapFolder, rawData);
 			break;
 		}
 		default:
