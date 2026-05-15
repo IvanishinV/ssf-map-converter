@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <print>
 #include <string_view>
 
@@ -971,7 +972,8 @@ uint32_t RhombsParser::get_rand()
 void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstream& outputFile, const std::vector<uint16_t>& scheme_tiles, const std::vector<uint8_t>& v_B14, const std::vector<uint8_t>& v_B00, const std::vector<uint8_t>& v_420)
 {
 	const size_t length = map_rhombs.size();
-	std::vector<uint8_t> v(length * 2, 0);
+	const size_t out_size = length * 2;
+	auto v = std::make_unique_for_overwrite<uint8_t[]>(out_size);
 
 	for (size_t offset = 0, vOffset = 0; offset < length; offset += 2, vOffset += 4)
 	{
@@ -1023,10 +1025,10 @@ void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstrea
 
 		tile_value = (v5 << 21) ^ (tile_value ^ (v5 << 21)) & 0x1FFFFF;
 
-		std::memcpy(v.data() + vOffset, &tile_value, sizeof(tile_value));
+		std::memcpy(v.get() + vOffset, &tile_value, sizeof(tile_value));
 	}
 
-	outputFile.write((char*)v.data(), v.size());
+	outputFile.write(reinterpret_cast<const char*>(v.get()), static_cast<std::streamsize>(out_size));
 }
 
 
