@@ -1,15 +1,32 @@
 #include "mis_groups.h"
+#include "../io/wire_reader.h"
 #include "../util.h"
 
 #include <array>
+#include <cstdint>
 #include <format>
 #include <fstream>
 #include <print>
+#include <span>
 #include <string_view>
 
 namespace convert {
 
 namespace {
+
+#pragma pack(push, 1)
+struct GroupRecord
+{
+	uint8_t  aitype[4];
+	uint8_t  zone1, zone2, group1, group2, flag, zone;
+	uint8_t  atime[4];
+	uint8_t  delay[4];
+	uint16_t min;
+	uint8_t  force[4];
+	uint8_t  hp, ammo, expa;
+};
+#pragma pack(pop)
+static_assert(sizeof(GroupRecord) == 27);
 
 void ai_flags_convert(std::ofstream& f,
                       uint8_t aitype1, uint8_t aitype2,
@@ -81,125 +98,100 @@ void mis_groups(const std::filesystem::path& mis_folder,
 		"\"ai_none\""
 	};
 
-	const size_t maxTries = data.size() / 27;
-	for (size_t accumulator = 0; accumulator < maxTries; ++accumulator)
+	WireReader r{std::as_bytes(std::span{data})};
+
+	for (size_t idx = 0; r.remaining() >= sizeof(GroupRecord); ++idx)
 	{
-		const uint8_t* buffer = reinterpret_cast<const uint8_t*>(data.data()) + accumulator * 27;
-		const uint8_t aitype1 = *(buffer + 0);
-		const uint8_t aitype2 = *(buffer + 1);
-		const uint8_t aitype3 = *(buffer + 2);
-		const uint8_t aitype4 = *(buffer + 3);
+		const auto rec = r.read<GroupRecord>();
 
-		const uint8_t zone1  = *(buffer + 4);
-		const uint8_t zone2  = *(buffer + 5);
-		const uint8_t group1 = *(buffer + 6);
-		const uint8_t group2 = *(buffer + 7);
-		const uint8_t flag   = *(buffer + 8);
-		const uint8_t zone   = *(buffer + 9);
-
-		const uint8_t atime1 = *(buffer + 10);
-		const uint8_t atime2 = *(buffer + 11);
-		const uint8_t atime3 = *(buffer + 12);
-		const uint8_t atime4 = *(buffer + 13);
-
-		const uint8_t  delay1 = *(buffer + 14);
-		const uint8_t  delay2 = *(buffer + 15);
-		const uint8_t  delay3 = *(buffer + 16);
-		const uint8_t  delay4 = *(buffer + 17);
-		const uint16_t min    = *(uint16_t*)(buffer + 18);
-
-		const uint8_t force1 = *(buffer + 20);
-		const uint8_t force2 = *(buffer + 21);
-		const uint8_t force3 = *(buffer + 22);
-		const uint8_t force4 = *(buffer + 23);
-
-		const uint8_t hp   = *(buffer + 24);
-		const uint8_t ammo = *(buffer + 25);
-		const uint8_t expa = *(buffer + 26);
+		const uint8_t aitype1 = rec.aitype[0];
+		const uint8_t aitype2 = rec.aitype[1];
+		const uint8_t aitype3 = rec.aitype[2];
+		const uint8_t aitype4 = rec.aitype[3];
 
 		const uint8_t AI_type = static_cast<uint8_t>(aitype1 & 0x0F);
 		f << std::format("Group {}\n ai type={} group1={} group2={} zone1={} zone2={}\n  aiflags="
-			, accumulator
+			, idx
 			, AI_type_array[AI_type]
-			, (uint16_t)group1
-			, (uint16_t)group2
-			, (uint16_t)zone1
-			, (uint16_t)zone2);
+			, (uint16_t)rec.group1
+			, (uint16_t)rec.group2
+			, (uint16_t)rec.zone1
+			, (uint16_t)rec.zone2);
 
 		if (AI_type != 0 && AI_type != 1)
 			ai_flags_convert(f, aitype1, aitype2, aitype3, aitype4);
 
 		f << '\n';
 
-		const bool delay_inf  = delay1 == 255 && delay2 == 255 && delay3 == 255 && delay4 == 127;
-		const bool force_inf  = force1 == 255 && force2 == 255 && force3 == 255 && force4 == 127;
-		const bool delay_timed = delay3 >= 1 && delay3 <= 13;
-		const bool force_timed = force3 >= 1 && force3 <= 13;
-		const bool min_set    = min >= 1 && min <= 98;
+		const bool delay_inf  = rec.delay[0] == 255 && rec.delay[1] == 255 && rec.delay[2] == 255 && rec.delay[3] == 127;
+		const bool force_inf  = rec.force[0] == 255 && rec.force[1] == 255 && rec.force[2] == 255 && rec.force[3] == 127;
+		const bool delay_timed = rec.delay[2] >= 1 && rec.delay[2] <= 13;
+		const bool force_timed = rec.force[2] >= 1 && rec.force[2] <= 13;
+		const bool min_set    = rec.min >= 1 && rec.min <= 98;
 
 		auto pack32 = [](uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4) -> uint32_t {
 			return ((b4 & 0xFF) << 24) | ((b3 & 0xFF) << 16) | ((b2 & 0xFF) << 8) | (b1 & 0xFF);
 		};
 
-		if (atime1 == 0 && delay_inf && min == 0 && force_inf)
+		if (rec.atime[0] == 0 && delay_inf && rec.min == 0 && force_inf)
 		{
 			f << " reserv auto=0 delay=0 min=0 force=0 atime=0";
 		}
-		else if (atime1 > 0 && delay_inf && min == 0 && force_inf)
+		else if (rec.atime[0] > 0 && delay_inf && rec.min == 0 && force_inf)
 		{
 			f << std::format(" reserv auto=1 delay=0 min={} force=0 atime={}",
-			    min, pack32(atime1, atime2, atime3, atime4) / timeconvertnum);
+			    rec.min, pack32(rec.atime[0], rec.atime[1], rec.atime[2], rec.atime[3]) / timeconvertnum);
 		}
-		else if (atime1 > 0 && delay_timed && min == 0 && force_inf)
+		else if (rec.atime[0] > 0 && delay_timed && rec.min == 0 && force_inf)
 		{
 			f << std::format(" reserv auto=3 delay={} min={} force=0 atime={}",
-			    pack32(delay1, delay2, delay3, delay4) / timeconvertnum,
-			    min,
-			    pack32(atime1, atime2, atime3, atime4) / timeconvertnum);
+			    pack32(rec.delay[0], rec.delay[1], rec.delay[2], rec.delay[3]) / timeconvertnum,
+			    rec.min,
+			    pack32(rec.atime[0], rec.atime[1], rec.atime[2], rec.atime[3]) / timeconvertnum);
 		}
-		else if (atime1 > 0 && delay_timed && min_set && force_inf)
+		else if (rec.atime[0] > 0 && delay_timed && min_set && force_inf)
 		{
 			f << std::format(" reserv auto=7 delay={} min={} force=0 atime={}",
-			    pack32(delay1, delay2, delay3, delay4) / timeconvertnum,
-			    min,
-			    pack32(atime1, atime2, atime3, atime4) / timeconvertnum);
+			    pack32(rec.delay[0], rec.delay[1], rec.delay[2], rec.delay[3]) / timeconvertnum,
+			    rec.min,
+			    pack32(rec.atime[0], rec.atime[1], rec.atime[2], rec.atime[3]) / timeconvertnum);
 		}
-		else if (atime1 > 0 && delay_timed && min == 0 && force_timed)
+		else if (rec.atime[0] > 0 && delay_timed && rec.min == 0 && force_timed)
 		{
 			f << std::format(" reserv auto=11 delay={} min={} force={} atime={}",
-			    pack32(delay1, delay2, delay3, delay4) / timeconvertnum,
-			    min,
-			    pack32(force1, force2, force3, force4) / timeconvertnum,
-			    pack32(atime1, atime2, atime3, atime4) / timeconvertnum);
+			    pack32(rec.delay[0], rec.delay[1], rec.delay[2], rec.delay[3]) / timeconvertnum,
+			    rec.min,
+			    pack32(rec.force[0], rec.force[1], rec.force[2], rec.force[3]) / timeconvertnum,
+			    pack32(rec.atime[0], rec.atime[1], rec.atime[2], rec.atime[3]) / timeconvertnum);
 		}
-		else if (atime1 > 0 && delay_inf && min == 0 && force_timed)
+		else if (rec.atime[0] > 0 && delay_inf && rec.min == 0 && force_timed)
 		{
 			f << std::format(" reserv auto=9 delay=0 min=0 force={} atime={}",
-			    pack32(force1, force2, force3, force4) / timeconvertnum,
-			    pack32(atime1, atime2, atime3, atime4) / timeconvertnum);
+			    pack32(rec.force[0], rec.force[1], rec.force[2], rec.force[3]) / timeconvertnum,
+			    pack32(rec.atime[0], rec.atime[1], rec.atime[2], rec.atime[3]) / timeconvertnum);
 		}
-		else if (atime1 > 0 && delay_inf && min_set && force_timed)
+		else if (rec.atime[0] > 0 && delay_inf && min_set && force_timed)
 		{
 			f << std::format(" reserv auto=13 delay=0 min={} force={} atime={}",
-			    min,
-			    pack32(force1, force2, force3, force4) / timeconvertnum,
-			    pack32(atime1, atime2, atime3, atime4) / timeconvertnum);
+			    rec.min,
+			    pack32(rec.force[0], rec.force[1], rec.force[2], rec.force[3]) / timeconvertnum,
+			    pack32(rec.atime[0], rec.atime[1], rec.atime[2], rec.atime[3]) / timeconvertnum);
 		}
 		else
 		{
 			f << std::format(" reserv auto=15 delay={} min={} force={} atime={}",
-			    pack32(delay1, delay2, delay3, delay4) / timeconvertnum,
-			    min,
-			    pack32(force1, force2, force3, force4) / timeconvertnum,
-			    pack32(atime1, atime2, atime3, atime4) / timeconvertnum);
+			    pack32(rec.delay[0], rec.delay[1], rec.delay[2], rec.delay[3]) / timeconvertnum,
+			    rec.min,
+			    pack32(rec.force[0], rec.force[1], rec.force[2], rec.force[3]) / timeconvertnum,
+			    pack32(rec.atime[0], rec.atime[1], rec.atime[2], rec.atime[3]) / timeconvertnum);
 		}
 
 		f << std::format(" flag={} zone={} hp={} ammo={} expa={}\n"
-			, (uint16_t)flag
-			, (uint16_t)zone
-			, (uint16_t)hp
-			, (uint16_t)ammo
-			, (uint16_t)expa);
+			, (uint16_t)rec.flag
+			, (uint16_t)rec.zone
+			, (uint16_t)rec.hp
+			, (uint16_t)rec.ammo
+			, (uint16_t)rec.expa);
 	}
 }
 

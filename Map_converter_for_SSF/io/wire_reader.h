@@ -33,6 +33,14 @@ public:
 		return reinterpret_cast<const T*>(m_buf.data() + offset);
 	}
 
+	[[nodiscard]] std::span<const std::byte> read_span(std::size_t n)
+	{
+		check(n);
+		auto s = m_buf.subspan(m_offset, n);
+		m_offset += n;
+		return s;
+	}
+
 	void skip(std::size_t n) { check(n); m_offset += n; }
 	void seek(std::size_t p) { if (p > m_buf.size()) throw std::out_of_range("WireReader::seek"); m_offset = p; }
 

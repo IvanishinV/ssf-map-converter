@@ -1,10 +1,11 @@
 #include "mis_woofers.h"
-#include "../Helper.h"
+#include "../io/wire_reader.h"
 #include "../wire/types.h"
 
 #include <format>
 #include <fstream>
 #include <print>
+#include <span>
 
 namespace convert {
 
@@ -18,19 +19,20 @@ void mis_woofers(const std::filesystem::path& mis_folder,
 		return;
 	}
 
-	const uint32_t count = readFileUint32(data, 0);
-	const woofers* src = reinterpret_cast<const woofers*>(data.data() + sizeof(count));
+	WireReader r{std::as_bytes(std::span{data})};
+	const uint32_t count = r.read<uint32_t>();
 
-	for (uint32_t i = 0; i < count; ++i, ++src)
+	for (uint32_t i = 0; i < count; ++i)
 	{
+		const auto src = r.read<woofers>();
 		f << std::format("Name=\"{}\"\nU={}\nV={}\nRadius={}\nWorse={}\nMinWait={}\nMaxWait={}\n\n"
-			, src->name
-			, src->pos.u
-			, src->pos.v
-			, src->radius
-			, src->worse
-			, src->minWait
-			, src->maxWait);
+			, src.name
+			, src.pos.u
+			, src.pos.v
+			, src.radius
+			, src.worse
+			, src.minWait
+			, src.maxWait);
 	}
 }
 

@@ -1,8 +1,10 @@
 #include "mis_objects.h"
+#include "../io/wire_reader.h"
 #include "../wire/types.h"
 
 #include <fstream>
 #include <print>
+#include <span>
 #include <vector>
 
 namespace convert {
@@ -17,14 +19,15 @@ void mis_objects(const std::filesystem::path& mis_folder,
 		return;
 	}
 
-	const coordinates16* src = reinterpret_cast<const coordinates16*>(data.data());
+	WireReader r{std::as_bytes(std::span{data})};
 	const size_t count = data.size() / sizeof(coordinates16);
 
 	std::vector<coordinates32> dst(count);
 	for (size_t i = 0; i < count; ++i)
 	{
-		dst[i].u = src[i].u;
-		dst[i].v = src[i].v;
+		const auto src = r.read<coordinates16>();
+		dst[i].u = src.u;
+		dst[i].v = src.v;
 	}
 
 	f.write(reinterpret_cast<const char*>(dst.data()),
