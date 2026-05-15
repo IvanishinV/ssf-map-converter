@@ -1,33 +1,17 @@
 #pragma once
 
-#include <vector>
+#include <cstdint>
 #include <fstream>
+#include <span>
+#include <string_view>
 
 class RhombsParser
 {
-#pragma region consts
-	static const std::vector<uint16_t> g_summer_tiles;
-	static const std::vector<uint8_t> g_summer_B14;
-	static const std::vector<uint8_t> g_summer_B00;
-	static const std::vector<uint8_t> g_summer_420;
-
-	static const std::vector<uint16_t> g_winter_tiles;
-	static const std::vector<uint8_t> g_winter_B14;
-	static const std::vector<uint8_t> g_winter_B00;
-	static const std::vector<uint8_t> g_winter_420;
-
-	static const std::vector<uint16_t> g_beach_tiles;
-	static const std::vector<uint8_t> g_beach_B14;
-	static const std::vector<uint8_t> g_beach_B00;
-	static const std::vector<uint8_t> g_beach_420;
-
-	static const std::vector<uint16_t> g_desert_tiles;
-	static const std::vector<uint8_t> g_desert_B14;
-	static const std::vector<uint8_t> g_desert_B00;
-	static const std::vector<uint8_t> g_desert_420;
-#pragma endregion consts
-
-	static void parse_scheme(const std::string_view& map_rhombs, std::ofstream& outputFile, const std::vector<uint16_t>& scheme_tiles, const std::vector<uint8_t>& v_B14, const std::vector<uint8_t>& v_B00, const std::vector<uint8_t>& v_420);
+	static void parse_scheme(const std::string_view& map_rhombs, std::ofstream& outputFile,
+	                         std::span<const uint16_t> scheme_tiles,
+	                         std::span<const uint8_t> v_B14,
+	                         std::span<const uint8_t> v_B00,
+	                         std::span<const uint8_t> v_420);
 
 public:
 	enum class SchemeType
