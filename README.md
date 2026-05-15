@@ -29,11 +29,13 @@ You can specify the **relative or full path** to the file or folder when running
 #### Command Line Example
 
 ```bash
-ss_map_converter <file|campaign folder>           # convert (default)
-ss_map_converter -c <file|campaign folder>        # convert (explicit)
-ss_map_converter -p <file|campaign folder>        # parse — split the packed binary
-                                               #   into per-section files for
-                                               #   inspection / reverse engineering
+ss_map_converter <file or folder>                 # convert (default)
+ss_map_converter -c <file or folder>              # convert (explicit)
+ss_map_converter -p <file or folder>              # parse — split the packed binary
+                                                  #   into per-section files for
+                                                  #   inspection / reverse engineering
+ss_map_converter -v | --version                   # print version and exit
+ss_map_converter -h | --help                      # print usage and exit
 ```
 
 `-c` (convert) produces the editor's working format (`map.<name>/...`) — the normal end-user mode.

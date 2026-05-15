@@ -84,7 +84,18 @@ void manualInput()
 
 void printUsage(std::string_view appName)
 {
-	std::println("Usage: {} <file|campaign folder>", appName);
+	std::println("Usage: {} [-c|-p] <file or folder>", appName);
+	std::println("       {} -h | --help", appName);
+	std::println("       {} -v | --version", appName);
+	std::println("");
+	std::println("Modes:");
+	std::println("  -c   Convert (default): produce editor working format under map.<name>/");
+	std::println("  -p   Parse: split packed binary into per-section files under parser_map.<name>/");
+}
+
+void printVersion()
+{
+	std::println("ss_map_converter \033[32m{}\033[0m", MAP_CONVERTER_VERSION);
 }
 
 static void setupConsole()
@@ -145,7 +156,7 @@ static void detectLanguage()
 
 struct CliArgs
 {
-	enum class Mode { Help, Manual, Process, BadUsage };
+	enum class Mode { Help, Version, Manual, Process, BadUsage };
 	Mode mode{ Mode::Manual };
 	Action action{ Action::Convert };
 	std::string_view path;
@@ -163,8 +174,10 @@ static CliArgs parseArgs(int argc, char** argv)
 	}
 	if (argc == 2)
 	{
-		if (argv[1] == "-h"sv)
+		if (argv[1] == "-h"sv || argv[1] == "--help"sv)
 			args.mode = CliArgs::Mode::Help;
+		else if (argv[1] == "-v"sv || argv[1] == "--version"sv)
+			args.mode = CliArgs::Mode::Version;
 		else if (argv[1] == "-c"sv || argv[1] == "-p"sv)
 			args.mode = CliArgs::Mode::BadUsage;
 		else
@@ -202,14 +215,25 @@ int main(int argc, char** argv)
 	setupConsole();
 	detectLanguage();
 
-	std::println("Map converter for SS1 & SSF, \033[32mv.{}\033[0m by NASHRIPPER and IVA", MAP_CONVERTER_VERSION);
-
 	const CliArgs args = parseArgs(argc, argv);
+
+	// Suppress the colored startup banner for info-only modes so that piping
+	// `--version` into another tool yields a single clean line.
+	if (args.mode != CliArgs::Mode::Help &&
+	    args.mode != CliArgs::Mode::Version &&
+	    args.mode != CliArgs::Mode::BadUsage)
+	{
+		std::println("Map converter for SS1 & SSF, \033[32mv{}\033[0m by IVA and NASHRIPPER", MAP_CONVERTER_VERSION);
+	}
+
 	switch (args.mode)
 	{
 	case CliArgs::Mode::Help:
 	case CliArgs::Mode::BadUsage:
 		printUsage(argv[0]);
+		break;
+	case CliArgs::Mode::Version:
+		printVersion();
 		break;
 	case CliArgs::Mode::Process:
 		openFileAndProcess(args.action, args.path);
@@ -218,5 +242,5 @@ int main(int argc, char** argv)
 		manualInput();
 		break;
 	}
-	return 0;
+	return args.mode == CliArgs::Mode::BadUsage ? 1 : 0;
 }
