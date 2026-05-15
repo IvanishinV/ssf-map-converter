@@ -7,33 +7,6 @@
 #include <string>
 
 
-uint32_t position(const std::string_view& input, std::vector<uint8_t>& output, const uint32_t srcOffset, const size_t dstOffset, const uint32_t size)
-{
-	std::copy(input.data() + srcOffset, input.data() + srcOffset + size, output.begin() + dstOffset);
-	return srcOffset + size;
-}
-
-uint32_t position(const std::string_view& input, std::string_view& output, const uint32_t offset, const uint32_t size)
-{
-	output = input.substr(offset, size);
-	return offset + size;
-}
-
-uint32_t position(const std::string_view& input, std::ostream& output, const uint32_t offset, const uint32_t size)
-{
-	output.write(input.data() + offset, size);
-
-	return offset + size;
-}
-
-uint32_t position(const std::vector<uint8_t>& input, std::ostream& output, const uint32_t offset, const uint32_t size)
-{
-	output.write((const char*)input.data() + offset, size);
-
-	return offset + size;
-}
-
-
 uint32_t minimapsize(const uint32_t mapSizeU, const uint32_t mapSizeV)
 {
 	// 0x100 0x100	32768

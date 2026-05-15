@@ -1,7 +1,7 @@
 #include "mis_phrases.h"
-#include "../Helper.h"
 #include "../io/wire_reader.h"
 
+#include <algorithm>
 #include <fstream>
 #include <print>
 #include <span>
@@ -27,30 +27,14 @@ void mis_phrases(const std::filesystem::path& mis_folder,
 	uint32_t sizeline;
 	while (accumulator < size_mis_phrases && phrasesOffset < 32000)
 	{
-		sizeline = r.peek_at<int8_t>(1 + accumulator);
-		position(data, phrases, 2 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = r.peek_at<int8_t>(2 + accumulator);
-		position(data, phrases, 3 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = r.peek_at<int8_t>(3 + accumulator);
-		position(data, phrases, 4 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = r.peek_at<int8_t>(4 + accumulator);
-		position(data, phrases, 5 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
-
-		sizeline = r.peek_at<int8_t>(5 + accumulator);
-		position(data, phrases, 6 + accumulator, phrasesOffset, sizeline);
-		phrasesOffset += 64;
-		accumulator += sizeline;
+		for (uint32_t field = 1; field <= 5; ++field)
+		{
+			sizeline = r.peek_at<int8_t>(field + accumulator);
+			std::copy_n(data.data() + field + 1 + accumulator, sizeline,
+			            phrases.data() + phrasesOffset);
+			phrasesOffset += 64;
+			accumulator += sizeline;
+		}
 		accumulator += 6;
 	}
 

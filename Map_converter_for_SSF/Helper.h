@@ -2,14 +2,23 @@
 
 #include <ostream>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 #include "util.h"
 
-uint32_t position(const std::string_view& input, std::vector<uint8_t>& output, const uint32_t srcOffset, const size_t dstOffset, const uint32_t size);
-uint32_t position(const std::string_view& input, std::string_view& output, const uint32_t offset, const uint32_t size);
-uint32_t position(const std::string_view& input, std::ostream& output, const uint32_t offset, const uint32_t size);
-uint32_t position(const std::vector<uint8_t>& input, std::ostream& output, const uint32_t offset, const uint32_t size);
+// Slice `size` bytes from `input` starting at `offset` into `output`.
+// `output` may be std::string_view (rebinds to a sub-view) or any std::ostream& (writes the bytes).
+// Returns offset + size for chaining.
+template <typename Output>
+uint32_t position(std::string_view input, Output& output, uint32_t offset, uint32_t size)
+{
+	if constexpr (std::is_same_v<std::remove_cvref_t<Output>, std::string_view>)
+		output = input.substr(offset, size);
+	else
+		output.write(input.data() + offset, size);
+	return offset + size;
+}
 
 uint32_t minimapsize(const uint32_t mapSizeU, const uint32_t mapSizeV);
 uint32_t tileArray(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_t number);
