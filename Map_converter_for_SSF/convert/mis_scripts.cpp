@@ -175,7 +175,7 @@ void mis_scripts(const std::filesystem::path& mis_folder,
 	std::array<std::string, MAX_NUM_OF_ARGS_IN_INSTRUCTION> instruction_args;
 	std::array<int, MAX_NUM_OF_ARGS_IN_INSTRUCTION> instr_args_num;
 
-	for (size_t curOffset = 4; curOffset + sizeof(scripts1) < data.size(); curOffset)
+	for (size_t curOffset = 4; curOffset + sizeof(scripts1) < data.size();)
 	{
 		std::string script_name;
 

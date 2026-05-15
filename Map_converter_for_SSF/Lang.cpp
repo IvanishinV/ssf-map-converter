@@ -8,29 +8,29 @@ LANGUAGE Dictionary::m_lang{ LANGUAGE::ENGLISH };
 // please fill this array in an orderly way for std::find to work correctly
 const std::array<DictionaryBlock, std::to_underlying(STRINGS::STRINGS_SIZE)> Dictionary::m_data{
 	{
-		{ STRINGS::ENTER_FILENAME, {{ { LANGUAGE::RUSSIAN, "Введите имя файла или папки с миссиями кампании:" }, { LANGUAGE::ENGLISH, "Enter file name or folder name with campaign missions:" } }} },
-		{ STRINGS::ENTER_PARSE_FILENAME, {{ { LANGUAGE::RUSSIAN, "Вы вошли в режим парсера. Введите имя файла или папки с миссиями кампании:" }, { LANGUAGE::ENGLISH, "You entered a parser mode. Enter file name or folder name with campaign missions: " } }} },
-		{ STRINGS::ERROR_FILE_NOT_EXIST, {{ { LANGUAGE::RUSSIAN, "Указанный файл не существует!" }, { LANGUAGE::ENGLISH, "The specified file doesn't exists!" } }} },
-		{ STRINGS::ERROR_OPEN, {{ { LANGUAGE::RUSSIAN, "Ошибка открытия файла {}!" }, { LANGUAGE::ENGLISH, "File {} opening error!" } }} },
-		{ STRINGS::ERROR_WRITE, {{ { LANGUAGE::RUSSIAN, "Ошибка создания файла для записи!" }, { LANGUAGE::ENGLISH, "File writing error!" } }} },
-		{ STRINGS::ERROR_FILE, {{ { LANGUAGE::RUSSIAN, "Файл {} не является картой" }, { LANGUAGE::ENGLISH, "The specified file {} is not a map\n" } }} },
-		{ STRINGS::CAMP_MAP, {{ { LANGUAGE::RUSSIAN, "\n{} - файл карты кампании, " }, { LANGUAGE::ENGLISH, "\n{} is a file of campaign map, " } }} },
-		{ STRINGS::CAMP_MIS, {{ { LANGUAGE::RUSSIAN, "\n{} - файл миссии кампании, " }, { LANGUAGE::ENGLISH, "\n{} is a file of campaign mission, " } }} },
-		{ STRINGS::MAP_SINGLE, {{ { LANGUAGE::RUSSIAN, "\n{} - одиночная " }, { LANGUAGE::ENGLISH, "\n{} is a singleplayer " } }} },
-		{ STRINGS::MAP_MULTI, {{ { LANGUAGE::RUSSIAN, "\n{} - мультиплеерная " }, { LANGUAGE::ENGLISH, "\n{} is a multiplayer " } }} },
-		{ STRINGS::SUCCESS_CONVERTED, {{ { LANGUAGE::RUSSIAN, "{} в \033[35m{}\033[0m конвертирован!" }, { LANGUAGE::ENGLISH, "Converted {} to \033[35m{}\033[0m!" } }} },
+		{ STRINGS::ENTER_FILENAME, {{ { LANGUAGE::RUSSIAN, "Р’РІРµРґРёС‚Рµ РёРјСЏ С„Р°Р№Р»Р° РёР»Рё РїР°РїРєРё СЃ РјРёСЃСЃРёСЏРјРё РєР°РјРїР°РЅРёРё:" }, { LANGUAGE::ENGLISH, "Enter file name or folder name with campaign missions:" } }} },
+		{ STRINGS::ENTER_PARSE_FILENAME, {{ { LANGUAGE::RUSSIAN, "Р’С‹ РІРѕС€Р»Рё РІ СЂРµР¶РёРј РїР°СЂСЃРµСЂР°. Р’РІРµРґРёС‚Рµ РёРјСЏ С„Р°Р№Р»Р° РёР»Рё РїР°РїРєРё СЃ РјРёСЃСЃРёСЏРјРё РєР°РјРїР°РЅРёРё:" }, { LANGUAGE::ENGLISH, "You entered a parser mode. Enter file name or folder name with campaign missions: " } }} },
+		{ STRINGS::ERROR_FILE_NOT_EXIST, {{ { LANGUAGE::RUSSIAN, "РЈРєР°Р·Р°РЅРЅС‹Р№ С„Р°Р№Р» РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚!" }, { LANGUAGE::ENGLISH, "The specified file doesn't exists!" } }} },
+		{ STRINGS::ERROR_OPEN, {{ { LANGUAGE::RUSSIAN, "РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р° {}!" }, { LANGUAGE::ENGLISH, "File {} opening error!" } }} },
+		{ STRINGS::ERROR_WRITE, {{ { LANGUAGE::RUSSIAN, "РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р° РґР»СЏ Р·Р°РїРёСЃРё!" }, { LANGUAGE::ENGLISH, "File writing error!" } }} },
+		{ STRINGS::ERROR_FILE, {{ { LANGUAGE::RUSSIAN, "Р¤Р°Р№Р» {} РЅРµ СЏРІР»СЏРµС‚СЃСЏ РєР°СЂС‚РѕР№" }, { LANGUAGE::ENGLISH, "The specified file {} is not a map\n" } }} },
+		{ STRINGS::CAMP_MAP, {{ { LANGUAGE::RUSSIAN, "\n{} - С„Р°Р№Р» РєР°СЂС‚С‹ РєР°РјРїР°РЅРёРё, " }, { LANGUAGE::ENGLISH, "\n{} is a file of campaign map, " } }} },
+		{ STRINGS::CAMP_MIS, {{ { LANGUAGE::RUSSIAN, "\n{} - С„Р°Р№Р» РјРёСЃСЃРёРё РєР°РјРїР°РЅРёРё, " }, { LANGUAGE::ENGLISH, "\n{} is a file of campaign mission, " } }} },
+		{ STRINGS::MAP_SINGLE, {{ { LANGUAGE::RUSSIAN, "\n{} - РѕРґРёРЅРѕС‡РЅР°СЏ " }, { LANGUAGE::ENGLISH, "\n{} is a singleplayer " } }} },
+		{ STRINGS::MAP_MULTI, {{ { LANGUAGE::RUSSIAN, "\n{} - РјСѓР»СЊС‚РёРїР»РµРµСЂРЅР°СЏ " }, { LANGUAGE::ENGLISH, "\n{} is a multiplayer " } }} },
+		{ STRINGS::SUCCESS_CONVERTED, {{ { LANGUAGE::RUSSIAN, "{} РІ \033[35m{}\033[0m РєРѕРЅРІРµСЂС‚РёСЂРѕРІР°РЅ!" }, { LANGUAGE::ENGLISH, "Converted {} to \033[35m{}\033[0m!" } }} },
 
-		{ STRINGS::MAP_SUMMER, {{ { LANGUAGE::RUSSIAN, "летняя карта" }, { LANGUAGE::ENGLISH, "summer map" } }} },
-		{ STRINGS::MAP_WINTER, {{ { LANGUAGE::RUSSIAN, "зимняя карта" }, { LANGUAGE::ENGLISH, "winter map" } }} },
-		{ STRINGS::MAP_SEA, {{ { LANGUAGE::RUSSIAN, "морская карта" }, { LANGUAGE::ENGLISH, "sea map" } }} },
-		{ STRINGS::MAP_DESERT, {{ { LANGUAGE::RUSSIAN, "пустынная карта" }, { LANGUAGE::ENGLISH, "desert map" } }} },
-		{ STRINGS::MAP_MISSION, {{ { LANGUAGE::RUSSIAN, "миссия" }, { LANGUAGE::ENGLISH, "mission" } }} },
-		{ STRINGS::MAP_UNKNOWN, {{ { LANGUAGE::RUSSIAN, "Неизвестный тип карты" }, { LANGUAGE::ENGLISH, "This is an unknown map type" } }} },
-		{ STRINGS::MAP_SIZE, {{ { LANGUAGE::RUSSIAN, " размером \033[35m{} x {}\033[0m." }, { LANGUAGE::ENGLISH, " of size \033[35m{} x {}\033[0m." } }} },
+		{ STRINGS::MAP_SUMMER, {{ { LANGUAGE::RUSSIAN, "Р»РµС‚РЅСЏСЏ РєР°СЂС‚Р°" }, { LANGUAGE::ENGLISH, "summer map" } }} },
+		{ STRINGS::MAP_WINTER, {{ { LANGUAGE::RUSSIAN, "Р·РёРјРЅСЏСЏ РєР°СЂС‚Р°" }, { LANGUAGE::ENGLISH, "winter map" } }} },
+		{ STRINGS::MAP_SEA, {{ { LANGUAGE::RUSSIAN, "РјРѕСЂСЃРєР°СЏ РєР°СЂС‚Р°" }, { LANGUAGE::ENGLISH, "sea map" } }} },
+		{ STRINGS::MAP_DESERT, {{ { LANGUAGE::RUSSIAN, "РїСѓСЃС‚С‹РЅРЅР°СЏ РєР°СЂС‚Р°" }, { LANGUAGE::ENGLISH, "desert map" } }} },
+		{ STRINGS::MAP_MISSION, {{ { LANGUAGE::RUSSIAN, "РјРёСЃСЃРёСЏ" }, { LANGUAGE::ENGLISH, "mission" } }} },
+		{ STRINGS::MAP_UNKNOWN, {{ { LANGUAGE::RUSSIAN, "РќРµРёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї РєР°СЂС‚С‹" }, { LANGUAGE::ENGLISH, "This is an unknown map type" } }} },
+		{ STRINGS::MAP_SIZE, {{ { LANGUAGE::RUSSIAN, " СЂР°Р·РјРµСЂРѕРј \033[35m{} x {}\033[0m." }, { LANGUAGE::ENGLISH, " of size \033[35m{} x {}\033[0m." } }} },
 
-		{ STRINGS::OUT_OF_RANGE_ERROR, {{ { LANGUAGE::RUSSIAN, "Получена ошибка 'out of range' во время обработки карты. Скорее всего файл битый." }, { LANGUAGE::ENGLISH, "Got an 'out of range' error during file processing. Most likely it's broken." } }} },
-		{ STRINGS::EXCEPTION_ERROR, {{ { LANGUAGE::RUSSIAN, "Получена ошибка '{}' во время обработки карты. Скорее всего файл битый." }, { LANGUAGE::ENGLISH, "Got an '{}' error during file processing. Most likely it's broken." } }} },
-		{ STRINGS::UNKNOWN_EXCEPTION_ERROR, {{ { LANGUAGE::RUSSIAN, "Получена неизвестная ошибка во время обработки карты. Скорее всего файл битый." }, { LANGUAGE::ENGLISH, "Got an unknown error during file processing. Most likely it's broken." } }} }
+		{ STRINGS::OUT_OF_RANGE_ERROR, {{ { LANGUAGE::RUSSIAN, "РџРѕР»СѓС‡РµРЅР° РѕС€РёР±РєР° 'out of range' РІРѕ РІСЂРµРјСЏ РѕР±СЂР°Р±РѕС‚РєРё РєР°СЂС‚С‹. РЎРєРѕСЂРµРµ РІСЃРµРіРѕ С„Р°Р№Р» Р±РёС‚С‹Р№." }, { LANGUAGE::ENGLISH, "Got an 'out of range' error during file processing. Most likely it's broken." } }} },
+		{ STRINGS::EXCEPTION_ERROR, {{ { LANGUAGE::RUSSIAN, "РџРѕР»СѓС‡РµРЅР° РѕС€РёР±РєР° '{}' РІРѕ РІСЂРµРјСЏ РѕР±СЂР°Р±РѕС‚РєРё РєР°СЂС‚С‹. РЎРєРѕСЂРµРµ РІСЃРµРіРѕ С„Р°Р№Р» Р±РёС‚С‹Р№." }, { LANGUAGE::ENGLISH, "Got an '{}' error during file processing. Most likely it's broken." } }} },
+		{ STRINGS::UNKNOWN_EXCEPTION_ERROR, {{ { LANGUAGE::RUSSIAN, "РџРѕР»СѓС‡РµРЅР° РЅРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° РІРѕ РІСЂРµРјСЏ РѕР±СЂР°Р±РѕС‚РєРё РєР°СЂС‚С‹. РЎРєРѕСЂРµРµ РІСЃРµРіРѕ С„Р°Р№Р» Р±РёС‚С‹Р№." }, { LANGUAGE::ENGLISH, "Got an unknown error during file processing. Most likely it's broken." } }} }
 	}
 };
 

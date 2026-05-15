@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/endian.h"
 #include <cstdint>
 
 constexpr uint32_t size_arr16 = 16;
