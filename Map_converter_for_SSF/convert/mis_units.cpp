@@ -1,5 +1,4 @@
 #include "mis_units.h"
-#include "../stdafx.h"
 #include "../wire/types.h"
 
 #include <format>

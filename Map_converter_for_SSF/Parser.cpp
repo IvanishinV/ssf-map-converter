@@ -1,9 +1,14 @@
 
-#include "stdafx.h"
-
+#include "Displayinfo.h"
+#include "Lang.h"
 #include "Parser.h"
 #include "util.h"
-#include "Displayinfo.h"
+
+#include <algorithm>
+#include <fstream>
+#include <print>
+#include <string>
+#include <vector>
 #include "parse/parse_smm.h"
 #include "parse/parse_ssm.h"
 #include "parse/parse_ssc_map.h"

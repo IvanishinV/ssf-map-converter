@@ -2,6 +2,10 @@
 #include "stdafx.h"
 #include "RhombsParser.h"
 
+#include <map>
+#include <print>
+#include <string_view>
+
 // 429 elements. Map tile has two bytes. Perform: g_summer_tiles[tile_val & 0x1FF] to get needed editor first two bytes
 // 0x0F mask is for landscape type
 // 0xF0 mask is for tile num

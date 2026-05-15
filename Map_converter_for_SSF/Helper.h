@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
+#include <ostream>
 #include <string_view>
+#include <vector>
 
 #include "util.h"
 

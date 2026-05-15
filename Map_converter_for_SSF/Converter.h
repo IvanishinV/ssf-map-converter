@@ -1,5 +1,8 @@
 #pragma once
 
+#include <filesystem>
+#include <string>
+
 #include "util.h"
 
 class Converter

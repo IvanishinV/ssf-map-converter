@@ -27,22 +27,3 @@
   #define MAKELONG(a, b)   ((uint32_t)(((WORD)((uint32_t)(a) & 0xFFFF)) | (((uint32_t)((WORD)((uint32_t)(b) & 0xFFFF))) << 16)))
 #endif
 
-#include <iostream>
-#include <fstream>
-#include <print>
-
-#include <array>
-#include <map>
-#include <vector>
-#include <stack>
-#include <string>
-
-#include <cmath>
-
-#include <filesystem>
-#include <random>
-#include <chrono>
-#include <future>
-#include <stdexcept>
-
-#include "Lang.h"

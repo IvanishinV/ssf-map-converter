@@ -1,13 +1,19 @@
 
-#include "stdafx.h"
-
 #include <gzip/decompress.hpp>
 #pragma comment(lib, "zlibstatic.lib")
 
-#include "Helper.h"
 #include "Converter.h"
 #include "Displayinfo.h"
+#include "Helper.h"
+#include "Lang.h"
 #include "util.h"
+
+#include <algorithm>
+#include <fstream>
+#include <future>
+#include <print>
+#include <string>
+#include <vector>
 #include "convert/map_desc.h"
 #include "convert/map_landname.h"
 #include "convert/map_cflags.h"

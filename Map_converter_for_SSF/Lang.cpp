@@ -1,6 +1,4 @@
 
-#include "stdafx.h"
-
 #include "Lang.h"
 
 LANGUAGE Dictionary::m_lang{ LANGUAGE::ENGLISH };

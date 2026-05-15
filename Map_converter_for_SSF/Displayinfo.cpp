@@ -1,7 +1,8 @@
 
-#include "stdafx.h"
-
 #include "Displayinfo.h"
+#include "Lang.h"
+
+#include <print>
 
 void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_t mapIdentifier, const uint32_t mapEndPosition)
 {

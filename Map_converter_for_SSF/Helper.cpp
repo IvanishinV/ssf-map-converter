@@ -1,8 +1,10 @@
 
-#include "stdafx.h"
-
 #include "Helper.h"
 #include "io/wire_reader.h"
+
+#include <algorithm>
+#include <span>
+#include <string>
 
 
 uint32_t position(const std::string_view& input, std::vector<uint8_t>& output, const uint32_t srcOffset, const size_t dstOffset, const uint32_t size)

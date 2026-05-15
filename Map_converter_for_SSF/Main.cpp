@@ -2,9 +2,17 @@
 #include "stdafx.h"
 
 #include "Converter.h"
-#include "Parser.h"
 #include "Displayinfo.h"
+#include "Lang.h"
+#include "Parser.h"
 #include "util.h"
+
+#include <chrono>
+#include <filesystem>
+#include <iostream>
+#include <print>
+#include <string>
+#include <vector>
 
 template <typename Fn>
 static size_t processPath(const std::filesystem::path& path, Fn&& process)

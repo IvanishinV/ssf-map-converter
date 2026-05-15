@@ -1,7 +1,11 @@
 #pragma once
 
 #include <array>
+#include <format>
+#include <print>
 #include <string>
+#include <string_view>
+#include <utility>
 
 namespace own
 {
