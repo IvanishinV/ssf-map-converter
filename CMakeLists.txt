@@ -18,27 +18,27 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/Map_converter_for_SSF)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS "${SRC_DIR}/*.cpp")
 
-add_executable(map_converter ${SRC})
+add_executable(ss_map_converter ${SRC})
 
-target_include_directories(map_converter PRIVATE
+target_include_directories(ss_map_converter PRIVATE
   ${SRC_DIR}
   ${CMAKE_SOURCE_DIR}/libs/gzip-hpp-master/include
 )
 
-target_compile_definitions(map_converter PRIVATE
+target_compile_definitions(ss_map_converter PRIVATE
   MAP_CONVERTER_VERSION="${PROJECT_VERSION}"
 )
 
 if(WIN32)
-  target_include_directories(map_converter PRIVATE ${CMAKE_SOURCE_DIR}/libs/zlib/include)
-  target_link_directories(map_converter PRIVATE ${CMAKE_SOURCE_DIR}/libs/zlib/lib)
-  target_link_libraries(map_converter PRIVATE zlibstatic)
+  target_include_directories(ss_map_converter PRIVATE ${CMAKE_SOURCE_DIR}/libs/zlib/include)
+  target_link_directories(ss_map_converter PRIVATE ${CMAKE_SOURCE_DIR}/libs/zlib/lib)
+  target_link_libraries(ss_map_converter PRIVATE zlibstatic)
 else()
   find_package(ZLIB REQUIRED)
-  target_link_libraries(map_converter PRIVATE ZLIB::ZLIB)
+  target_link_libraries(ss_map_converter PRIVATE ZLIB::ZLIB)
 endif()
 
 if(MSVC)
-  target_compile_options(map_converter PRIVATE /W4 /MP /Zc:__cplusplus /utf-8)
-  target_compile_definitions(map_converter PRIVATE _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
+  target_compile_options(ss_map_converter PRIVATE /W4 /MP /Zc:__cplusplus /utf-8)
+  target_compile_definitions(ss_map_converter PRIVATE _CRT_SECURE_NO_WARNINGS UNICODE _UNICODE)
 endif()

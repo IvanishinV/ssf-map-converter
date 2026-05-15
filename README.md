@@ -29,9 +29,9 @@ You can specify the **relative or full path** to the file or folder when running
 #### Command Line Example
 
 ```bash
-map_converter <file|campaign folder>           # convert (default)
-map_converter -c <file|campaign folder>        # convert (explicit)
-map_converter -p <file|campaign folder>        # parse — split the packed binary
+ss_map_converter <file|campaign folder>           # convert (default)
+ss_map_converter -c <file|campaign folder>        # convert (explicit)
+ss_map_converter -p <file|campaign folder>        # parse — split the packed binary
                                                #   into per-section files for
                                                #   inspection / reverse engineering
 ```
@@ -80,7 +80,7 @@ cmake --build build -j
 - **Linux:** system zlib is used automatically; no extra flag needed.
 - **Windows:** the bundled `libs/zlib/` is linked statically; no system zlib required.
 
-The output binary is `build/map_converter` (or `build/Release/map_converter.exe` on multi-config Windows generators).
+The output binary is `build/ss_map_converter` (or `build/Release/ss_map_converter.exe` on multi-config Windows generators).
 
 Release builds enable LTO (`CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE=ON`) for a smaller binary; no flag needed.
 
