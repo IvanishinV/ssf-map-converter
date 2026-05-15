@@ -1,0 +1,88 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  name: linux,   artifact: ss_map_converter,     artifact_path: build/ss_map_converter         }
+          - { os: macos-15,       name: macos,   artifact: ss_map_converter,     artifact_path: build/ss_map_converter         }
+          - { os: windows-latest, name: windows, artifact: ss_map_converter.exe, artifact_path: build/Release/ss_map_converter.exe }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps (Linux)
+        if: matrix.name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zlib1g-dev g++-14
+
+      - name: Install build deps (macOS)
+        if: matrix.name == 'macos'
+        run: brew install zlib
+
+      - name: Configure (Linux)
+        if: matrix.name == 'linux'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-14
+
+      - name: Configure (macOS)
+        if: matrix.name == 'macos'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DZLIB_ROOT=$(brew --prefix zlib)
+
+      - name: Configure (Windows)
+        if: matrix.name == 'windows'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release -j
+
+      - name: Smoke test (--version)
+        if: matrix.name != 'windows'
+        run: ./${{ matrix.artifact_path }} --version
+
+      - name: Smoke test (--version, Windows)
+        if: matrix.name == 'windows'
+        run: .\${{ matrix.artifact_path }} --version
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ss_map_converter-${{ matrix.name }}
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
+
+  release:
+    name: Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Rename binaries with OS suffix
+        run: |
+          set -e
+          mkdir release
+          cp "artifacts/ss_map_converter-linux/ss_map_converter"        "release/ss_map_converter-linux-x86_64"
+          cp "artifacts/ss_map_converter-macos/ss_map_converter"        "release/ss_map_converter-macos-arm64"
+          cp "artifacts/ss_map_converter-windows/ss_map_converter.exe"  "release/ss_map_converter-windows-x86_64.exe"
+          ls -la release
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
