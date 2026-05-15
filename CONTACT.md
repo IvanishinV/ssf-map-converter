@@ -1,7 +1,7 @@
 # Contact Information
 
 **Authors:**
-- **Vladislav Ivanishin** – project development, feature implementation, optimization, bug fixing, and in-depth file format analysis
+- **Vladislav Ivanishin** – project development, cross-platform port, optimization, bug fixing, and in-depth file format analysis
 - **NashRipper** – original file format research and raw algorithm documentation
 
 **Email:** ivanishin.vladislav@gmail.com
