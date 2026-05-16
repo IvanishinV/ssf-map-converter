@@ -109,7 +109,7 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 		}
 		}
 	}
-	catch (const std::out_of_range& e)
+	catch (const std::out_of_range&)
 	{
 		own::printlnError(Dictionary::getValue(STRINGS::OUT_OF_RANGE_ERROR));
 	}

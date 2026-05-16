@@ -4,7 +4,15 @@
 
 #include <cstdint>
 
-#ifndef _WIN32
+#ifdef _WIN32
+  #ifndef WIN32_LEAN_AND_MEAN
+  #define WIN32_LEAN_AND_MEAN
+  #endif
+  #ifndef NOMINMAX
+  #define NOMINMAX
+  #endif
+  #include <Windows.h>
+#else
 #pragma pack(push, 1)
 struct BITMAPFILEHEADER
 {

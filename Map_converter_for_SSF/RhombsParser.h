@@ -9,7 +9,6 @@ class RhombsParser
 {
 	static void parse_scheme(const std::string_view& map_rhombs, std::ofstream& outputFile,
 	                         std::span<const uint16_t> scheme_tiles,
-	                         std::span<const uint8_t> v_B14,
 	                         std::span<const uint8_t> v_B00,
 	                         std::span<const uint8_t> v_420);
 
