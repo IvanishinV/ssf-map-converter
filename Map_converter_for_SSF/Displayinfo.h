@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include <string_view>
 
 void displayinfo(const uint32_t mapSizeU, const uint32_t mapSizeV, const uint32_t mapIdentifier, const uint32_t mapEndPosition);
