@@ -425,11 +425,11 @@ void mis_scripts(const std::filesystem::path& mis_folder,
 					break;
 
 				case bufferPFF: std::format_to(std::back_inserter(bufferScripts), "$pff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$spc\n$PT\n#{}\n$\\\\n\n"
-					, instruction_args[0], instruction_args[1], instruction_args[2]);
+					, instruction_args[0], instruction_args[1], instruction_args[2] == "0" ? "" : instruction_args[2]);
 					break;
 
-				case bufferFPFF: std::format_to(std::back_inserter(bufferScripts), "$fpff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$fpff1\n$PT\n#{}\n$\\\\n\n"
-					, instruction_args[0], instruction_args[1], instruction_args[2]);
+				case bufferFPFF: std::format_to(std::back_inserter(bufferScripts), "$fpff\n$Fmask\n#{}\n$spc\n$I\n#{}\n$fpff1 \n$PT\n#{}\n$\\\\n\n"
+					, instruction_args[0], instruction_args[1], instruction_args[2] == "0" ? "" : instruction_args[2]);
 					break;
 
 				case bufferMFF: std::format_to(std::back_inserter(bufferScripts), "$mff\n$Fmask\n#{}\n$spc\n$phrs\n#{}\n$\\\\n\n"

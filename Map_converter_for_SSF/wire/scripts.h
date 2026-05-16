@@ -14,7 +14,6 @@ struct scripts2
 	int32_t num;
 };
 
-// If you need any documentation - there is a separate xlsx file with all the info
 enum scripts_num
 {
 	bufferNONE = 0x00,
@@ -69,11 +68,11 @@ enum scripts_num
 	bufferGWATA,
 	bufferVIC,
 	bufferMIST,
-	bufferSRES,
+	bufferSRES,		// initial reserve
 	bufferFRES,
-	bufferPFF,
-	bufferFPFF,
-	bufferMFF,
+	bufferPFF,		// planes for flags
+	bufferMFF,		// message for flags
+	bufferFPFF,		// send planes for flags
 	bufferSPPO,
 	bufferDGP,
 	bufferFVKGZ,
@@ -81,6 +80,11 @@ enum scripts_num
 	bufferstart = 0x464F4143,
 	bufferEND2	= 0x7fffffff,
 };
+
+static_assert(bufferSRES  == 52, "bufferSRES should be 52");
+static_assert(bufferPFF   == 54, "bufferPFF should be 54");
+static_assert(bufferMFF   == 55, "bufferMFF should be 55");
+static_assert(bufferFPFF  == 56, "bufferFPFF should be 56");
 
 constexpr size_t MAX_NUM_OF_ARGS_IN_INSTRUCTION = 7;
 
