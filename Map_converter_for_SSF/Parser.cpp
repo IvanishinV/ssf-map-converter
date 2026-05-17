@@ -17,7 +17,9 @@
 #include "parse/parse_scc_mission.h"
 
 #include <gzip/decompress.hpp>
+#ifdef _MSC_VER
 #pragma comment(lib, "zlibstatic.lib")
+#endif
 
 void Parser::parseMap(const std::filesystem::path& filepath)
 {
@@ -53,7 +55,10 @@ void Parser::parseMap(const std::filesystem::path& filepath)
 		std::string(zipData.cbegin(), zipData.cend());
 
 	std::wstring wfilepath = filepath.wstring();
-	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) { return !((c >= 0 && c < 128) || (c >= 0x400 && c < 0x500)); }), wfilepath.cend());
+	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) {
+		const auto u = static_cast<uint32_t>(c);
+		return !((u < 128) || (u >= 0x400 && u < 0x500));
+	}), wfilepath.cend());
 	const std::filesystem::path filepath_ex{ wfilepath };
 	const std::string stemFileName = filepath_ex.string();
 	const std::filesystem::path fileFolder = filepath.parent_path();

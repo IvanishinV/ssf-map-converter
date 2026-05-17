@@ -680,7 +680,7 @@ void RhombsParser::parse_scheme(const std::string_view& map_rhombs, std::ofstrea
 		while (v_420[v5] != v7)
 			++v5;
 
-		tile_value = (v5 << 21) ^ (tile_value ^ (v5 << 21)) & 0x1FFFFF;
+		tile_value = (v5 << 21) ^ ((tile_value ^ (v5 << 21)) & 0x1FFFFF);
 
 		std::memcpy(v.get() + vOffset, &tile_value, sizeof(tile_value));
 	}

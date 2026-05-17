@@ -1,6 +1,8 @@
 
 #include <gzip/decompress.hpp>
+#ifdef _MSC_VER
 #pragma comment(lib, "zlibstatic.lib")
+#endif
 
 #include "Converter.h"
 #include "Displayinfo.h"
@@ -74,7 +76,10 @@ void Converter::convertMap(const std::filesystem::path& filepath)
 
 	// trying to bypass germans umlauts in map file names (and other non-ascii symbols)
 	std::wstring wfilepath = filepath.filename().wstring();
-	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) { return !((c >= 0 && c < 128) || (c >= 0x400 && c < 0x500)); }), wfilepath.cend());
+	wfilepath.erase(std::remove_if(wfilepath.begin(), wfilepath.end(), [](wchar_t c) {
+		const auto u = static_cast<uint32_t>(c);
+		return !((u < 128) || (u >= 0x400 && u < 0x500));
+	}), wfilepath.cend());
 	const std::filesystem::path filepath_ex{ wfilepath };
 
 	const std::filesystem::path fileFolder = filepath.parent_path();

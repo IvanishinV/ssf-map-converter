@@ -467,7 +467,7 @@ void mis_scripts(const std::filesystem::path& mis_folder,
 			{
 				convert_opn(bufferScripts, operand1, operand2, stack_for_RPN, logicOperator, script_num_for_OPN);
 			}
-			catch (std::logic_error e)
+			catch (const std::logic_error& e)
 			{
 				std::println("\033[31m[Error]\033[0m Got exception for {}: {}", scripts.num, e.what());
 			}
